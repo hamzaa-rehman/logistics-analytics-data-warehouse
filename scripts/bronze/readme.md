@@ -20,36 +20,12 @@ It provides a foundation for subsequent processing in the Silver and Gold layers
 
 ## 2. Data Warehouse Architecture
 
-The project follows the Medallion Architecture, separating data ingestion, data transformation, and business-level modelling into three layers.
+The project is designed around the Medallion Architecture, separating data ingestion, data transformation, and business-level modelling into three layers. The Bronze layer has been implemented; the Silver and Gold layers represent the planned next stages.
 
 ```text
-Source CSV Files
-       |
-       v
-+------------------+
-|  BRONZE LAYER    |
-|  Raw data        |
-|  No transformations
-+------------------+
-       |
-       v
-+------------------+
-|  SILVER LAYER    |
-|  Cleaning        |
-|  Standardization |
-|  Data validation |
-+------------------+
-       |
-       v
-+------------------+
-|   GOLD LAYER     |
-|  Business logic  |
-|  Dimensional     |
-|  models and marts|
-+------------------+
-       |
-       v
-Reporting & Analytics
+![Logistics Analytics Data Warehouse Architecture](../../images/Logistics_Data_Warehouse_Architecture.png)
+
+*Figure 1: High-level architecture of the Logistics Analytics Data Warehouse.*
 ```
 
 Each layer has a clearly defined responsibility:
@@ -86,7 +62,7 @@ The Bronze layer contains 14 source tables.
 
 ### 4.1 Raw data preservation
 
-All Bronze columns are defined as `VARCHAR` to preserve source values in their original textual representation and avoid premature data type conversions.
+All Bronze columns are defined as VARCHAR to retain ingested source values in textual form and avoid premature data type conversions.
 
 For example:
 
@@ -156,8 +132,12 @@ Logistics-Analytics/
 │       ├── load_proc.sql
 │       └── profile_bronze.sql
 │
-└── tests/
-    └── validate_bronze.sql
+├── tests/
+│   └── validate_bronze.sql
+│
+└── docs/
+    └── bronze/
+        └── README.md
 ```
 
 | File | Responsibility |
@@ -235,7 +215,7 @@ The current Bronze implementation has the following limitations:
 
 2. **Column-order dependency:** `BULK INSERT` loads data by column position rather than matching CSV header names. A change in source column order can result in loading errors or incorrectly mapped values.
 
-3. **Partial loading risk:** The current procedure does not use one transaction across all 14 tables. If execution fails partway through, some tables may have been refreshed while others remain incomplete or unchanged.
+3. **Partial loading risk:** The current procedure does not use a single transaction across all 14 tables. If execution fails partway through, previously processed tables may already contain refreshed data, while the table being processed may be empty or partially loaded, depending on where the failure occurs. Subsequent tables may remain unchanged.
 
 4. **Full refresh strategy:** Existing table contents are removed before reloading. The process is not an incremental loading implementation.
 
