@@ -22,11 +22,9 @@ It provides a foundation for subsequent processing in the Silver and Gold layers
 
 The project is designed around the Medallion Architecture, separating data ingestion, data transformation, and business-level modelling into three layers. The Bronze layer has been implemented; the Silver and Gold layers represent the planned next stages.
 
-```text
 ![Logistics Analytics Data Warehouse Architecture](../../images/Logistics_Data_Warehouse_Architecture.png)
 
 *Figure 1: High-level architecture of the Logistics Analytics Data Warehouse.*
-```
 
 Each layer has a clearly defined responsibility:
 
