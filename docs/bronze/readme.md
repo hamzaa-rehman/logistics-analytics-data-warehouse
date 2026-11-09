@@ -127,15 +127,20 @@ Logistics-Analytics/
 ├── scripts/
 │   └── bronze/
 │       ├── ddl_bronze.sql
-│       ├── load_proc.sql
-│       └── profile_bronze.sql
+│       ├── load_bronze.sql
+│       ├── profiling_config.sql
+│       ├── profile_bronze.sql
+│       ├── profile_numeric.sql
+│       └── investigations/
+│           └── investigate_utilization_rate.sql
 │
 ├── tests/
 │   └── validate_bronze.sql
 │
 └── docs/
     └── bronze/
-        └── README.md
+        ├── readme.md
+        └── numeric_profiling.md
 ```
 
 | File | Responsibility |
@@ -271,7 +276,7 @@ Before running the Bronze ingestion process, ensure that:
 ### Recommended execution order
 
 1. Execute `ddl_bronze.sql`.
-2. Execute `load_proc.sql`.
+2. Execute `load_bronze.sql`.
 3. Place the CSV files in a SQL Server-accessible directory.
 4. Execute `bronze.load_bronze` with the appropriate directory path.
 5. Execute `validate_bronze.sql`.
