@@ -22,7 +22,7 @@
 */
 
 USE LogisticsAnalytics;
-GO
+
 
 /* 1. Frequency distribution of the source detention values.
       ORDER BY follows VARCHAR/text ordering. */
@@ -32,7 +32,7 @@ SELECT
 FROM bronze.delivery_events
 GROUP BY detention_minutes
 ORDER BY detention_minutes;
-GO
+
 
 /* 2. Detention distribution by event type.
       MIN/MAX are retained as executed; they sort VARCHAR text. */
@@ -47,7 +47,7 @@ SELECT
 FROM bronze.delivery_events
 GROUP BY event_type
 ORDER BY event_type;
-GO
+
 
 /* 3. Detention by facility and event type.
       MAX is retained as executed; it sorts VARCHAR text. */
@@ -65,7 +65,7 @@ GROUP BY
 ORDER BY
     facility_id,
     event_type;
-GO
+
 
 /* 4. Inspect delivery_events column names and data types. */
 SELECT
@@ -75,7 +75,7 @@ FROM INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_SCHEMA = 'bronze'
   AND TABLE_NAME = 'delivery_events'
 ORDER BY ORDINAL_POSITION;
-GO
+
 
 /* 5. Detention by event type and on-time flag. */
 SELECT
@@ -92,7 +92,7 @@ GROUP BY
 ORDER BY
     event_type,
     on_time_flag;
-GO
+
 
 /* 6. Inspect the first 20 delivery event records. */
 SELECT TOP 20
@@ -104,4 +104,4 @@ SELECT TOP 20
     detention_minutes
 FROM bronze.delivery_events
 ORDER BY event_id;
-GO
+
