@@ -21,7 +21,7 @@
 */
 
 USE LogisticsAnalytics;
-GO
+
 
 /* 1. Inspect timestamp conversion and flag values. */
 WITH EventTiming AS
@@ -236,4 +236,4 @@ SELECT
     SUM(CASE WHEN on_time_flag <> ExpectedFlag THEN 1 ELSE 0 END)
         AS MismatchingRows
 FROM RuleCheck;
-GO
+
