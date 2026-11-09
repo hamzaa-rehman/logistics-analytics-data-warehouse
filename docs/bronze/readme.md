@@ -132,7 +132,8 @@ Logistics-Analytics/
 │       ├── profile_bronze.sql
 │       ├── profile_numeric.sql
 │       └── investigations/
-│           └── investigate_utilization_rate.sql
+│           ├── investigate_utilization_rate.sql
+│           └── investigate_on_time_flag.sql
 │
 ├── tests/
 │   └── validate_bronze.sql
@@ -151,7 +152,9 @@ Logistics-Analytics/
 | `profile_bronze.sql` | Dynamically profiles Bronze columns for NULL, empty-string, and whitespace-only values. |
 | `profile_numeric.sql` | Uses the profiling configuration to dynamically calculate numeric profiling metrics across configured Bronze columns. |
 | `investigations/investigate_utilization_rate.sql` | Contains the investigation queries used to verify the business meaning of the source `utilization_rate` field. |
-| `numeric_profiling.md` | Documents the numeric profiling methodology, results, findings, and pending investigations. |
+| `investigations/investigate_on_time_flag.sql` | Contains the timestamp comparisons, mismatch analysis, boundary inspection, and full-record validation for the source `on_time_flag`. |
+| `numeric_profiling.md` | Documents the numeric profiling methodology, results, findings, and pending numeric investigations. |
+| `investigations/on_time_flag_investigation.md` | Documents the investigation methodology and the validated ±120-minute tolerance rule for `delivery_events.on_time_flag`. |
 | `validate_bronze.sql` | Checks Bronze table existence, expected row counts, column counts, and data types. |
 
 ## 7. Bronze Validation Results
