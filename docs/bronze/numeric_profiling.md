@@ -334,7 +334,7 @@ This section records decisions made from profiling and investigation findings. T
 | Table | `facilities` |
 | Relevant columns | `facility_name`, `city`, `state`, `latitude`, `longitude`, `facility_type`, `dock_doors`, `operating_hours` |
 | Decision | Do not classify facilities as duplicates solely because they share a name, city/state, or coordinate pair. |
-| Reason | The inspected records have distinct facility IDs and differing operational attributes. The dataset does not include street-level addresses to establish physical identity. |
+| Reason | The inspected records have distinct facility IDs and differing operational attributes. We do not have street-level addresses, so we cannot conclusively establish whether these records represent separate physical facilities. |
 | Analytical impact | Preserve the records unless stronger evidence establishes duplication. Treat city-level coordinates as insufficient for precise facility-level geographic analysis. |
 | Status | Accepted, subject to review if better source-location data becomes available |
 
