@@ -1,0 +1,334 @@
+# Bronze Layer – Numeric Data Profiling
+
+## 1. Overview
+
+Numeric data profiling was performed on the Bronze layer of the Logistics Analytics Data Warehouse to assess the quality, validity, distribution, and general characteristics of numeric source values before applying transformations in the Silver layer.
+
+The profiling covered **53 numeric columns across all 14 Bronze tables**. Since Bronze stores source data as `VARCHAR`, numeric values were temporarily converted during profiling to evaluate their convertibility and calculate numerical statistics. The original Bronze data was not modified.
+
+The objective was to identify:
+- NULL values and missing numeric data.
+- Values that cannot be converted into numeric types.
+- Minimum, maximum, and average values.
+- Negative and zero values.
+- Unusual distributions and patterns that may require business-context investigation.
+- Potential considerations for Silver-layer data types and transformations.
+
+## 2. Profiling Methodology
+
+### 2.1 Metadata-driven profiling
+
+Instead of writing separate profiling queries for every numeric column, a metadata-driven SQL approach was implemented.
+
+The profiling configuration was maintained in `bronze.profiling_config`, which identifies each column's profiling category.
+
+The numeric profiling process:
+1. Retrieves columns classified as `NUMERIC` from the profiling configuration.
+2. Generates a profiling query for each configured column.
+3. Uses `STRING_AGG()` to combine the generated queries with `UNION ALL`.
+4. Uses `TRY_CONVERT(DECIMAL(18,4), column)` to evaluate numeric convertibility without interrupting execution when an individual value cannot be converted.
+5. Executes the generated SQL using `sp_executesql`.
+6. Returns a consolidated result set containing the profiling metrics for all numeric columns.
+
+This approach allows the same profiling logic to be reused across multiple tables and columns without manually writing individual queries.
+
+### 2.2 Profiling metrics
+
+The following metrics were calculated for each numeric column:
+
+| Metric | Description |
+|---|---|
+| Total Rows | Total records in the source table. |
+| Non-NULL Values | Number of records containing a non-NULL value in the column. |
+| NULL Values | Number of records containing NULL. |
+| Invalid Numeric Values | Non-NULL source values that could not be converted to `DECIMAL(18,4)`. |
+| Minimum Value | Lowest successfully converted numeric value. |
+| Maximum Value | Highest successfully converted numeric value. |
+| Average Value | Average of successfully converted numeric values. |
+| Negative Values | Number of values below zero. |
+| Zero Values | Number of values equal to zero. |
+
+**Important:** `DECIMAL(18,4)` was used as a common profiling conversion type. It is a profiling mechanism, not an automatic decision that every Silver column should use this exact data type. Final Silver data types must reflect the precision, scale, and business meaning of individual columns.
+
+## 3. Overall Profiling Results
+
+A total of 53 numeric columns were profiled.
+
+| Metric | Result |
+|---|---:|
+| Numeric columns profiled | 53 |
+| Tables covered | 14 |
+| Column-value observations | 549,706 |
+| Columns containing NULL values | 0 |
+| Total NULL values | 0 |
+| Columns containing invalid numeric values | 0 |
+| Total invalid numeric values | 0 |
+| Columns containing negative values | 1 |
+| Total negative occurrences | 50 |
+| Columns containing zero values | 9 |
+| Total zero occurrences | 59,924 |
+
+**Interpretation:**
+
+- All 53 numeric columns successfully passed the numeric conversion check.
+- No NULL values were found in the profiled numeric columns.
+- No invalid numeric values were detected using the profiling conversion.
+- Negative values occurred in only one column: `facilities.longitude`.
+- Nine columns contained at least one zero value.
+
+The 549,706 observations represent the sum of the row counts across the 53 profiled columns. They do not represent 549,706 unique records.
+
+Similarly, 59,924 represents the total number of zero occurrences across the nine columns. It does not represent 59,924 unique records, because a single record can contain zero values in multiple columns.
+
+## 4. Detailed Numeric Profiling Results
+
+The following table contains the results returned by the profiling query.
+
+| Table | Column | Rows | Min | Max | Average | Negative | Zero |
+|---|---|---:|---:|---:|---:|---:|---:|
+| customers | annual_revenue_potential | 200 | 101641.0000 | 4990599.0000 | 2688236.745000 | 0 | 0 |
+| customers | credit_terms_days | 200 | 15.0000 | 60.0000 | 37.650000 | 0 | 0 |
+| delivery_events | detention_minutes | 170820 | 0.0000 | 239.0000 | 91.537460 | 0 | 22472 |
+| driver_monthly_metrics | average_idle_hours | 4464 | 4.4000 | 9.7000 | 7.011738 | 0 | 0 |
+| driver_monthly_metrics | average_mpg | 4464 | 6.0100 | 7.0700 | 6.501861 | 0 | 0 |
+| driver_monthly_metrics | on_time_delivery_rate | 4464 | 0.0000 | 0.8330 | 0.445995 | 0 | 1 |
+| driver_monthly_metrics | total_fuel_gallons | 4464 | 521.9000 | 9007.5000 | 4158.631698 | 0 | 0 |
+| driver_monthly_metrics | total_miles | 4464 | 3310.0000 | 57954.0000 | 26812.792338 | 0 | 0 |
+| driver_monthly_metrics | total_revenue | 4464 | 7096.5600 | 124579.5300 | 57630.947712 | 0 | 0 |
+| driver_monthly_metrics | trips_completed | 4464 | 5.0000 | 37.0000 | 18.749103 | 0 | 0 |
+| drivers | years_experience | 150 | 2.0000 | 25.0000 | 13.493333 | 0 | 0 |
+| facilities | dock_doors | 50 | 16.0000 | 150.0000 | 78.580000 | 0 | 0 |
+| facilities | latitude | 50 | 25.7617 | 45.5152 | 36.869320 | 0 | 0 |
+| facilities | longitude | 50 | -122.6784 | -74.0060 | -93.260216 | 50 | 0 |
+| fuel_purchases | gallons | 196442 | 50.0000 | 200.0000 | 124.815659 | 0 | 0 |
+| fuel_purchases | price_per_gallon | 196442 | 3.1500 | 5.0000 | 3.898418 | 0 | 0 |
+| fuel_purchases | total_cost | 196442 | 158.5000 | 997.9000 | 486.621964 | 0 | 0 |
+| loads | accessorial_charges | 85410 | 0.0000 | 200.0000 | 71.643835 | 0 | 32186 |
+| loads | fuel_surcharge | 85410 | 13.8000 | 891.8200 | 350.972118 | 0 | 0 |
+| loads | pieces | 85410 | 1.0000 | 28.0000 | 14.470530 | 0 | 0 |
+| loads | revenue | 85410 | 125.9300 | 8125.2200 | 3073.712683 | 0 | 0 |
+| loads | weight_lbs | 85410 | 10000.0000 | 45000.0000 | 27477.495304 | 0 | 0 |
+| maintenance_records | downtime_hours | 2920 | 2.0000 | 48.0000 | 24.736472 | 0 | 0 |
+| maintenance_records | labor_cost | 2920 | 43.2800 | 976.8700 | 438.529825 | 0 | 0 |
+| maintenance_records | labor_hours | 2920 | 0.5000 | 8.0000 | 4.178458 | 0 | 0 |
+| maintenance_records | odometer_reading | 2920 | 50156.0000 | 749875.0000 | 401534.787671 | 0 | 0 |
+| maintenance_records | parts_cost | 2920 | 0.1400 | 3498.6100 | 1523.995270 | 0 | 0 |
+| maintenance_records | total_cost | 2920 | 60.8200 | 4426.5700 | 1962.525095 | 0 | 0 |
+| routes | base_rate_per_mile | 58 | 1.5200 | 2.7900 | 2.196724 | 0 | 0 |
+| routes | fuel_surcharge_rate | 58 | 0.1500 | 0.3400 | 0.248793 | 0 | 0 |
+| routes | typical_distance_miles | 58 | 92.0000 | 3141.0000 | 1391.500000 | 0 | 0 |
+| routes | typical_transit_days | 58 | 1.0000 | 5.0000 | 2.120689 | 0 | 0 |
+| safety_incidents | cargo_damage_cost | 170 | 0.0000 | 49744.0700 | 6174.180647 | 0 | 122 |
+| safety_incidents | claim_amount | 170 | 0.0000 | 64245.7200 | 15606.893058 | 0 | 39 |
+| safety_incidents | vehicle_damage_cost | 170 | 0.0000 | 24614.1600 | 9432.712411 | 0 | 52 |
+| trailers | length_feet | 180 | 53.0000 | 53.0000 | 53.000000 | 0 | 0 |
+| trailers | model_year | 180 | 2015.0000 | 2024.0000 | 2019.144444 | 0 | 0 |
+| trips | actual_distance_miles | 85410 | 90.0000 | 3391.0000 | 1430.268130 | 0 | 0 |
+| trips | actual_duration_hours | 85410 | 1.4000 | 67.8000 | 25.014673 | 0 | 0 |
+| trips | average_mpg | 85410 | 5.5000 | 7.5000 | 6.501462 | 0 | 0 |
+| trips | fuel_gallons_used | 85410 | 12.0000 | 611.9000 | 221.827421 | 0 | 0 |
+| trips | idle_time_hours | 85410 | 2.0000 | 12.0000 | 7.010783 | 0 | 0 |
+| truck_utilization_metrics | average_mpg | 3312 | 6.0100 | 6.8600 | 6.500975 | 0 | 0 |
+| truck_utilization_metrics | downtime_hours | 3312 | 0.0000 | 152.2000 | 16.549577 | 0 | 1684 |
+| truck_utilization_metrics | maintenance_cost | 3312 | 0.0000 | 10414.6600 | 1307.187629 | 0 | 1684 |
+| truck_utilization_metrics | maintenance_events | 3312 | 0.0000 | 4.0000 | 0.673309 | 0 | 1684 |
+| truck_utilization_metrics | total_miles | 3312 | 12680.0000 | 71177.0000 | 36152.230072 | 0 | 0 |
+| truck_utilization_metrics | total_revenue | 3312 | 27876.1800 | 144891.1000 | 77700.561564 | 0 | 0 |
+| truck_utilization_metrics | trips_completed | 3312 | 11.0000 | 46.0000 | 25.283212 | 0 | 0 |
+| truck_utilization_metrics | utilization_rate | 3312 | 0.3870 | 1.4840 | 0.830447 | 0 | 0 |
+| trucks | acquisition_mileage | 120 | 227.0000 | 49556.0000 | 26058.216666 | 0 | 0 |
+| trucks | model_year | 120 | 2015.0000 | 2021.0000 | 2015.891666 | 0 | 0 |
+| trucks | tank_capacity_gallons | 120 | 150.0000 | 250.0000 | 201.666666 | 0 | 0 |
+
+All 53 columns had zero NULL values and zero invalid numeric conversions. These two metrics are summarized above rather than repeated in every row.
+
+## 5. Findings Requiring Further Investigation
+
+Profiling identified several patterns that require business-context validation. These are observations, not confirmed data-quality errors.
+
+### 5.1 Negative longitude values
+
+**Column:** `facilities.longitude`
+
+- Total values: 50
+- Negative values: 50
+- Minimum: -122.6784
+- Maximum: -74.0060
+
+Negative longitude values can be geographically valid. However, the facility coordinates should be checked together to establish whether they represent plausible locations.
+
+**Investigation status:** Pending geographic validation.
+
+### 5.2 Constant trailer length
+
+**Column:** `trailers.length_feet`
+
+- Total values: 180
+- Minimum: 53
+- Maximum: 53
+- Average: 53
+
+Every trailer has the same recorded length. This may represent a standardized fleet configuration, but it could also indicate a default or synthetic source-data value.
+
+**Investigation status:** Pending.
+
+### 5.3 Zero detention minutes
+
+**Column:** `delivery_events.detention_minutes`
+
+- Total values: 170,820
+- Zero values: 22,472
+- Minimum: 0
+- Maximum: 239
+
+Zero detention minutes may indicate that no detention occurred for the corresponding event. The meaning of zero should be verified against the source data and delivery-event process.
+
+**Investigation status:** Pending.
+
+### 5.4 Zero accessorial charges
+
+**Column:** `loads.accessorial_charges`
+
+- Total values: 85,410
+- Zero values: 32,186
+- Minimum: 0
+- Maximum: 200
+
+Zero accessorial charges may be legitimate where no additional service or charge applies. Further investigation is required to understand the business meaning and confirm that zero is not being used to represent missing information.
+
+**Investigation status:** Pending.
+
+### 5.5 Zero on-time delivery rate
+
+**Column:** `driver_monthly_metrics.on_time_delivery_rate`
+
+- Total values: 4,464
+- Zero values: 1
+- Minimum: 0
+- Maximum: 0.833
+
+A zero rate may represent a month in which a driver had no on-time deliveries. The corresponding driver and reporting month should be examined to confirm that this is a legitimate result.
+
+**Investigation status:** Pending.
+
+### 5.6 Zero incident-related financial values
+
+The following columns contain zero values:
+
+| Column | Zero occurrences |
+|---|---:|
+| `safety_incidents.cargo_damage_cost` | 122 |
+| `safety_incidents.claim_amount` | 39 |
+| `safety_incidents.vehicle_damage_cost` | 52 |
+
+These values may be valid. For example, an incident does not necessarily result in cargo damage, vehicle damage, or a financial claim.
+
+The relationship between the three cost-related fields should be investigated to understand whether zero values are consistent with the incident records.
+
+**Investigation status:** Pending.
+
+### 5.7 Zero truck downtime and maintenance metrics
+
+The following columns in `truck_utilization_metrics` each contain 1,684 zero values:
+
+| Column | Zero occurrences |
+|---|---:|
+| `downtime_hours` | 1,684 |
+| `maintenance_cost` | 1,684 |
+| `maintenance_events` | 1,684 |
+
+The identical zero counts suggest a possible relationship between these metrics. They may represent truck-months with no maintenance activity or downtime.
+
+These three columns should be investigated together, preferably by examining records where the values are zero and comparing them with the maintenance records.
+
+**Investigation status:** Pending.
+
+## 6. Confirmed Investigation: Utilization Rate Business Meaning
+
+**Column:** `truck_utilization_metrics.utilization_rate`
+
+The initial profiling results showed values ranging from 0.387 to 1.484, with an average of 0.830447.
+
+Values greater than 1.0 initially appeared unusual if the column represented a utilization percentage or ratio. Therefore, the source calculation was investigated.
+
+### 6.1 Investigation approach
+
+The recorded values were compared against the following calculation:
+
+`trips_completed / number_of_calendar_days_in_month`
+
+The calculation was performed for all 3,312 records.
+
+### 6.2 Investigation results
+
+| Metric | Result |
+|---|---:|
+| Total records tested | 3,312 |
+| Matching records | 3,312 |
+| Mismatching records | 0 |
+
+Every record matched the calculated result.
+
+### 6.3 Conclusion
+
+The source metric represents the average number of completed trips per calendar day, rather than a utilization percentage.
+
+Consequently, values greater than 1.0 are valid and do not indicate utilization exceeding 100%.
+
+### 6.4 Silver-layer consideration
+
+Consider renaming the Silver column to `trips_per_day` to make its meaning clearer.
+
+The original Bronze column name should remain unchanged to preserve source traceability.
+
+**Investigation status:** Completed and verified.
+
+## 7. Implications for the Silver Layer
+
+The profiling results provide useful information for designing Silver-layer transformations.
+
+The following principles will guide the next stage:
+
+1. **Data type conversion:** Numeric columns can be evaluated for conversion into appropriate SQL Server numeric types. Final precision and scale should be selected according to each column's meaning and observed range.
+
+2. **Preserve valid zero values:** Zero values must not automatically be converted into NULLs. Their business meaning must be established first.
+
+3. **Handle negative values according to context:** Negative longitude values are not inherently invalid. Geographic validation is required before making any transformation decisions.
+
+4. **Preserve source traceability:** Original Bronze column names should remain unchanged. Any improved business-facing names should be introduced in Silver where appropriate.
+
+5. **Document transformation rules:** Any cleaning, standardization, renaming, or handling of unusual values should be supported by an investigation and documented business rule.
+
+6. **Avoid premature assumptions:** Unusual patterns should be investigated before being classified as errors or corrected.
+
+## 8. Current Status and Next Steps
+
+### Completed
+
+- [x] Classified all 150 Bronze columns by profiling type.
+- [x] Configured the metadata-driven profiling setup.
+- [x] Profiled all 53 numeric columns.
+- [x] Checked NULL and non-NULL counts.
+- [x] Checked numeric conversion failures.
+- [x] Calculated minimum, maximum, and average values.
+- [x] Counted negative and zero values.
+- [x] Investigated the `utilization_rate` calculation across all 3,312 records.
+- [x] Confirmed that `utilization_rate` represents average trips per calendar day.
+
+### Pending investigations
+
+- [ ] Validate the geographic consistency of `facilities.latitude` and `facilities.longitude`.
+- [ ] Investigate the constant values in `trailers.length_feet`.
+- [ ] Investigate zero values in `truck_utilization_metrics` downtime and maintenance metrics.
+- [ ] Investigate zero values in the three `safety_incidents` financial columns.
+- [ ] Investigate zero values in `loads.accessorial_charges`.
+- [ ] Investigate zero values in `delivery_events.detention_minutes`.
+- [ ] Investigate the single zero value in `driver_monthly_metrics.on_time_delivery_rate`.
+
+After these investigations, this document will be updated with the findings, conclusions, and relevant Silver-layer decisions.
+
+The next profiling categories will then be addressed using the same metadata-driven approach, beginning with DATE and DATETIME columns.
+
+---
+
+**Note:** This document records the numeric profiling results and investigations completed to date. Pending observations are intentionally not classified as confirmed data-quality issues.
