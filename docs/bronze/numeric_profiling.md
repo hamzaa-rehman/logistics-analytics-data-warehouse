@@ -212,6 +212,8 @@ Zero detention minutes may indicate that no detention occurred for the correspon
 
 **Investigation status:** Pending.
 
+**Related completed investigation:** The separate `delivery_events.on_time_flag` investigation verified that the source flag follows a ±120-minute tolerance rule across all 170,820 events, with zero mismatches at microsecond precision. This does not establish the meaning of `detention_minutes`; its business definition remains under investigation. See [On-Time Flag Investigation](investigations/on_time_flag_investigation.md).
+
 ### 5.4 Zero accessorial charges
 
 **Column:** `loads.accessorial_charges`
