@@ -20,7 +20,7 @@
 */
 
 USE LogisticsAnalytics;
-GO
+
 
 /* 1. Initial comparison with a strict actual <= scheduled rule. */
 WITH EventTiming AS
@@ -44,7 +44,7 @@ SELECT
         THEN 1 ELSE 0
     END) AS flag_mismatches
 FROM EventTiming;
-GO
+
 
 /* 2. Check timestamp conversions and source flag values. */
 WITH EventTiming AS
@@ -68,7 +68,7 @@ SELECT
         ELSE 0
     END) AS InvalidOnTimeFlags
 FROM EventTiming;
-GO
+
 
 /* 3. Break down the two mismatch directions. */
 WITH EventTiming AS
@@ -90,7 +90,7 @@ SELECT
         THEN 1 ELSE 0
     END) AS FlaggedFalseButActuallyOnTime
 FROM EventTiming;
-GO
+
 
 /* 4. Measure lateness for events marked True but occurring after schedule. */
 WITH EventTiming AS
@@ -113,7 +113,7 @@ SELECT
 FROM EventTiming
 WHERE on_time_flag = 'True'
   AND actual_time > scheduled_time;
-GO
+
 
 /* 5. Group late events marked True into delay ranges. */
 WITH EventTiming AS
@@ -155,7 +155,7 @@ GROUP BY
         ELSE '06. Over 120 minutes'
     END
 ORDER BY DelayRange;
-GO
+
 
 /* 6. Measure earliness for events marked False but occurring early. */
 WITH EventTiming AS
@@ -178,7 +178,7 @@ SELECT
 FROM EventTiming
 WHERE on_time_flag = 'False'
   AND actual_time <= scheduled_time;
-GO
+
 
 /* 7. Compare True/False flags across signed time-difference ranges.
       Negative = early; zero = exactly on schedule; positive = late. */
@@ -218,7 +218,7 @@ GROUP BY
         ELSE 'Later than 180 min'
     END
 ORDER BY TimeDifferenceRange;
-GO
+
 
 /* 8. Inspect events inside the apparent +/- 120-minute window
       that were nevertheless marked False. This uses DATEDIFF(SECOND),
@@ -245,7 +245,7 @@ WHERE
         TimeDifferenceMinutes BETWEEN -120 AND 120
         AND on_time_flag = 'False'
     );
-GO
+
 
 /* 9. Final full-table validation at microsecond precision.
       7,200,000,000 microseconds = 120 minutes; BETWEEN is inclusive. */
@@ -281,4 +281,4 @@ SELECT
         ELSE 0
     END) AS MismatchingRows
 FROM EventTiming;
-GO
+
