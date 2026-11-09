@@ -141,8 +141,12 @@ Logistics-Analytics/
 | File | Responsibility |
 |---|---|
 | `ddl_bronze.sql` | Creates the Bronze schema and raw tables. |
-| `load_proc.sql` | Defines the stored procedure responsible for loading source CSV files. |
+| `load_bronze.sql` | Defines the stored procedure responsible for loading source CSV files. |
+| `profiling_config.sql` | Creates and validates the metadata table that assigns a profiling category to each Bronze column. The 150 configuration rows are imported separately. |
 | `profile_bronze.sql` | Dynamically profiles Bronze columns for NULL, empty-string, and whitespace-only values. |
+| `profile_numeric.sql` | Uses the profiling configuration to dynamically calculate numeric profiling metrics across configured Bronze columns. |
+| `investigations/investigate_utilization_rate.sql` | Contains the investigation queries used to verify the business meaning of the source `utilization_rate` field. |
+| `numeric_profiling.md` | Documents the numeric profiling methodology, results, findings, and pending investigations. |
 | `validate_bronze.sql` | Checks Bronze table existence, expected row counts, column counts, and data types. |
 
 ## 7. Bronze Validation Results
@@ -205,6 +209,38 @@ The Bronze layer preserves these values. Decisions about their treatment belong 
 
 **Profiling note:** The whitespace check used `LTRIM`, `RTRIM`, and `DATALENGTH` to detect ordinary space-only values. It does not guarantee detection of every possible Unicode whitespace character.
 
+### 7.4 Numeric profiling
+
+A second, metadata-driven profiling process was performed for the 53 columns classified as `NUMERIC` in `bronze.profiling_config`.
+
+The reusable `profile_numeric.sql` script generates a profiling query for each configured numeric column, combines the queries using `STRING_AGG()` and `UNION ALL`, and executes the consolidated SQL using `sp_executesql`. Numeric conversion is attempted with `TRY_CONVERT(DECIMAL(18,4), ...)`; this is used for profiling and does not modify the original VARCHAR values in Bronze.
+
+**Summary of numeric profiling results**
+
+| Finding | Result |
+|---|---:|
+| Numeric columns profiled | 53 |
+| NULL values across numeric columns | 0 |
+| Values not convertible to DECIMAL(18,4) | 0 |
+| Columns containing negative values | 1 |
+| Negative value occurrences | 50 |
+| Columns containing zero values | 9 |
+| Total zero occurrences | 59,924 |
+
+The 59,924 figure counts zero occurrences across columns, not distinct records. One record may contain zero values in more than one profiled column.
+
+**Important observations**
+
+- All 53 configured numeric columns were convertible to the selected profiling type, with no NULLs or conversion failures found.
+- All 50 longitude values in `facilities.longitude` were negative. Negative longitude can be geographically valid; coordinate consistency still requires investigation.
+- `trailers.length_feet` was 53 for all 180 trailers. This constant value requires business-context review.
+- Several operational and financial columns contain zero values. These are observations to investigate, not automatic data-quality errors.
+- The source `truck_utilization_metrics.utilization_rate` was checked against `trips_completed / calendar days in the month`. The previously completed validation matched all 3,312 records with zero mismatches. The field therefore represents average trips per calendar day, not a utilization percentage.
+
+The full column-level results, methodology, findings, and remaining investigations are documented in [Numeric Data Profiling](numeric_profiling.md).
+
+The profiling configuration setup is documented in `profiling_config.sql`. Its table definition is created by the script; the 150 column-classification rows are imported separately from the project configuration CSV.
+
 ## 8. Known Limitations
 
 The current Bronze implementation has the following limitations:
@@ -229,7 +265,7 @@ Before running the Bronze ingestion process, ensure that:
 - The Bronze schema and all 14 raw tables have been created using `ddl_bronze.sql`.
 - All required source CSV files are available.
 - SQL Server can access the source-file directory and has the necessary permissions.
-- The loading procedure has been created using `load_proc.sql`.
+- The loading procedure has been created using `load_bronze.sql`.
 - CSV column names and column order match the corresponding Bronze table definitions.
 
 ### Recommended execution order
