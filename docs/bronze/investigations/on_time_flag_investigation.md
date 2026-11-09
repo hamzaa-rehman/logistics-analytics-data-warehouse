@@ -109,7 +109,19 @@ For events marked False but occurring before or on schedule, the early-time calc
 | Maximum earliness | 180 minutes |
 | Average earliness | 150.138641 minutes |
 
-A signed time-difference breakdown showed that events within approximately 120 minutes before or after schedule were overwhelmingly marked True, while events more than 120 minutes early or late were marked False.
+The signed time-difference breakdown, using the query's whole-second resolution, was:
+
+| Signed time-difference range | Total events | True flags | False flags |
+|---|---:|---:|---:|
+| 0 to 120 minutes early | 47,611 | 47,609 | 2 |
+| 0 to 120 minutes late | 47,482 | 47,478 | 4 |
+| 120 to 180 minutes early | 9,380 | 0 | 9,380 |
+| 120 to 180 minutes late | 23,598 | 0 | 23,598 |
+| Exactly on schedule | 8 | 8 | 0 |
+| Later than 180 minutes | 42,741 | 0 | 42,741 |
+| **Total** | **170,820** | **95,095** | **75,725** |
+
+The two False flags in the early range and four in the late range were the six apparent boundary exceptions inspected below. They appeared to fall at exactly 120 minutes when calculated with DATEDIFF(SECOND), because that calculation does not retain fractional-second detail. The microsecond-level inspection showed that each was fractionally beyond the 120-minute limit.
 
 ### 4.4 Boundary exceptions
 
@@ -124,11 +136,11 @@ Six records initially appeared to be exceptions when differences were displayed 
 | EVT00146935 | Pickup | +120.005228 | False |
 | EVT00163154 | Delivery | -120.007790 | False |
 
-These examples demonstrate why the final boundary check must use timestamp precision rather than a rounded whole-minute value.
+These examples demonstrate why the final boundary check must use timestamp precision rather than a whole-second or whole-minute difference. The signed-difference buckets and the earlier lateness/earliness summaries are diagnostic views; they are not the precision used for the final validation.
 
 ## 5. Final validation
 
-The candidate rule was tested against all 170,820 records using `DATEDIFF_BIG(MICROSECOND, ...)`.
+The candidate rule was tested against all 170,820 records using `DATEDIFF_BIG(MICROSECOND, ...)`, after the separate validity check established that all scheduled and actual timestamps converted successfully and all source flags were valid.
 
 The candidate rule is:
 
