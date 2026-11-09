@@ -100,7 +100,7 @@ Six records initially appeared to be exceptions when differences were displayed 
 | EVT00068233 | Pickup | +120.013702 | False |
 | EVT00137856 | Delivery | -120.000741 | False |
 | EVT00146935 | Pickup | +120.005228 | False |
-| EVT00163154 | Delivery | -120.000008 | False |
+| EVT00163154 | Delivery | -120.007790 | False |
 
 These examples demonstrate why the final boundary check must use timestamp precision rather than a rounded whole-minute value.
 
@@ -148,7 +148,7 @@ The separate investigation of `delivery_events.detention_minutes` remains in pro
 
 The investigation queries are available in:
 
-[`scripts/bronze/investigations/investigate_on_time_flag.sql`](../../scripts/bronze/investigations/investigate_on_time_flag.sql)
+[`scripts/bronze/investigations/investigate_on_time_flag.sql`](../../../scripts/bronze/investigations/investigate_on_time_flag.sql)
 
 The script contains the diagnostic comparisons, mismatch breakdown, time-difference analysis, boundary inspection, and final full-record validation.
 
