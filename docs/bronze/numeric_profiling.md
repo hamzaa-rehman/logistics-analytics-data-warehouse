@@ -146,18 +146,45 @@ All 53 columns had zero NULL values and zero invalid numeric conversions. These 
 
 Profiling identified several patterns that require business-context validation. These are observations, not confirmed data-quality errors.
 
-### 5.1 Negative longitude values
+### 5.1 Facility coordinate validation and geographic precision
 
-**Column:** `facilities.longitude`
+**Columns:** `facilities.latitude`, `facilities.longitude`
 
-- Total values: 50
-- Negative values: 50
-- Minimum: -122.6784
-- Maximum: -74.0060
+#### 5.1.1 Numeric and range validation
 
-Negative longitude values can be geographically valid. However, the facility coordinates should be checked together to establish whether they represent plausible locations.
+- Facility records inspected: 50
+- Latitude range: 25.7617 to 45.5152
+- Longitude range: -122.6784 to -74.0060
+- Negative longitude values: 50
 
-**Investigation status:** Pending geographic validation.
+The inspected records had latitude and longitude values within the valid numeric coordinate ranges (latitude: -90 to +90; longitude: -180 to +180). Negative longitude values are geographically valid and indicate locations west of the Prime Meridian; they are not, by themselves, a data-quality error.
+
+#### 5.1.2 Repeated city-level coordinate pairs
+
+Coordinates were grouped by city, state, latitude, and longitude. The 50 facility records produced 21 distinct city/state/coordinate combinations. Facilities within the same city and state shared the same coordinate pair.
+
+A further grouping by latitude and longitude showed that multiple facilities shared coordinate pairs. This pattern suggests that the source uses city-level reference coordinates rather than precise coordinates for each physical facility.
+
+#### 5.1.3 Repeated facility names and operational attributes
+
+Repeated facility names within the same city and state were inspected. The inspected records had different `facility_id` values and differing operational attributes, including facility type, dock-door count, and operating hours.
+
+Examples included:
+- `Nashville Distribution Center`: four records with three distinct facility types.
+- `Atlanta Warehouse`: three records with two distinct facility types.
+- `Detroit Hub`: three records with two distinct facility types.
+- `Houston` coordinate group: three facilities with three distinct names and three distinct facility types.
+
+These patterns do not establish that the records are duplicates. They may represent separate facilities that share a generic city-based name. The source does not provide street-level addresses, so the physical uniqueness and exact location of each facility cannot be independently verified from the available columns.
+
+#### 5.1.4 Analytical implications
+
+- Use `facility_id` as the facility identifier for facility counts, relationships, and facility-level aggregations.
+- Do not treat `facility_name` as a unique identifier.
+- Do not classify records as duplicates solely because they share a name, city, state, or coordinate pair.
+- Treat the coordinates as city-level reference points unless more precise location data becomes available. Facility-level distance calculations and map placement may therefore be imprecise.
+
+**Investigation status:** Numeric range and within-dataset pattern checks completed. Exact physical-location accuracy remains unverified because street-level addresses or an authoritative facility-location reference are not available.
 
 ### 5.2 Constant trailer length
 
@@ -283,7 +310,37 @@ The original Bronze column name should remain unchanged to preserve source trace
 
 **Investigation status:** Completed and verified.
 
-## 7. Implications for the Silver Layer
+## 7. Analytical Decisions
+
+This section records decisions made from profiling and investigation findings. These decisions are distinct from raw observations: profiling records what was found, while this section records how the project will use or interpret that information.
+
+### AD-001 — Use `facility_id` as the facility identifier
+
+| Field | Decision record |
+|---|---|
+| Decision ID | AD-001 |
+| Table | `facilities` |
+| Relevant columns | `facility_id`, `facility_name` |
+| Decision | Use `facility_id` to identify and count facilities. Do not use `facility_name` as a unique identifier. |
+| Reason | Facility names are reused within the same city and state. The inspected records have different IDs and differing operational attributes, so repeated names alone do not prove duplicate facilities. |
+| Analytical impact | Use `facility_id` for facility counts, joins/relationships, and facility-level aggregations. Treat `facility_name` as a descriptive attribute. |
+| Status | Accepted |
+
+### AD-002 — Do not infer duplicate facilities from shared names or coordinates alone
+
+| Field | Decision record |
+|---|---|
+| Decision ID | AD-002 |
+| Table | `facilities` |
+| Relevant columns | `facility_name`, `city`, `state`, `latitude`, `longitude`, `facility_type`, `dock_doors`, `operating_hours` |
+| Decision | Do not classify facilities as duplicates solely because they share a name, city/state, or coordinate pair. |
+| Reason | The inspected records have distinct facility IDs and differing operational attributes. The dataset does not include street-level addresses to establish physical identity. |
+| Analytical impact | Preserve the records unless stronger evidence establishes duplication. Treat city-level coordinates as insufficient for precise facility-level geographic analysis. |
+| Status | Accepted, subject to review if better source-location data becomes available |
+
+These are project-level analytical decisions based on the available source data. They do not assert that the physical locations have been independently verified.
+
+## 8. Implications for the Silver Layer
 
 The profiling results provide useful information for designing Silver-layer transformations.
 
@@ -301,7 +358,7 @@ The following principles will guide the next stage:
 
 6. **Avoid premature assumptions:** Unusual patterns should be investigated before being classified as errors or corrected.
 
-## 8. Current Status and Next Steps
+## 9. Current Status and Next Steps
 
 ### Completed
 
@@ -314,10 +371,14 @@ The following principles will guide the next stage:
 - [x] Counted negative and zero values.
 - [x] Investigated the `utilization_rate` calculation across all 3,312 records.
 - [x] Confirmed that `utilization_rate` represents average trips per calendar day.
+- [x] Checked all 50 facility coordinate values against valid latitude and longitude ranges.
+- [x] Compared facility coordinates by city/state and identified shared city-level coordinate pairs.
+- [x] Investigated repeated facility names and compared facility IDs and operational attributes.
+- [x] Recorded the facility identifier and duplicate-assessment decisions (AD-001 and AD-002).
 
 ### Pending investigations
 
-- [ ] Validate the geographic consistency of `facilities.latitude` and `facilities.longitude`.
+- [ ] Independently verify physical facility locations using street addresses or an authoritative geospatial reference, if such data becomes available.
 - [ ] Investigate the constant values in `trailers.length_feet`.
 - [ ] Investigate zero values in `truck_utilization_metrics` downtime and maintenance metrics.
 - [ ] Investigate zero values in the three `safety_incidents` financial columns.
