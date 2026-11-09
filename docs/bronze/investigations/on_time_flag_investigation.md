@@ -6,15 +6,37 @@ Determine how the source `on_time_flag` relates to the scheduled and actual even
 
 The investigation compares the stored flag with the signed difference between `actual_datetime` and `scheduled_datetime`.
 
-## 2. Source columns
+## 2. Source table and columns
 
-| Table | Column | Purpose |
-|---|---|---|
-| `delivery_events` | `event_id` | Event identifier |
-| `delivery_events` | `event_type` | Pickup or delivery event |
-| `delivery_events` | `scheduled_datetime` | Scheduled event timestamp |
-| `delivery_events` | `actual_datetime` | Actual event timestamp |
-| `delivery_events` | `on_time_flag` | Source on-time indicator |
+The source table `bronze.delivery_events` contains 11 columns:
+
+| Column | Role in source table |
+|---|---|
+| `event_id` | Event identifier |
+| `load_id` | Related load identifier |
+| `trip_id` | Related trip identifier |
+| `event_type` | Pickup or delivery event |
+| `facility_id` | Related facility identifier |
+| `scheduled_datetime` | Scheduled event timestamp |
+| `actual_datetime` | Actual event timestamp |
+| `detention_minutes` | Source detention measure; not interpreted by this investigation |
+| `on_time_flag` | Source on-time indicator |
+| `location_city` | Event location city |
+| `location_state` | Event location state |
+
+### Columns used for this investigation
+
+Only the following columns were needed to investigate the calculation rule behind `on_time_flag`:
+
+| Column | Purpose |
+|---|---|
+| `event_id` | Identify individual records, including boundary exceptions |
+| `event_type` | Provide pickup/delivery context when inspecting exceptions |
+| `scheduled_datetime` | Scheduled timestamp used in the comparison |
+| `actual_datetime` | Actual timestamp used in the comparison |
+| `on_time_flag` | Source flag compared with the derived tolerance rule |
+
+The remaining columns are part of the source table but were not required to validate this particular rule. In particular, `detention_minutes` is being investigated separately and its meaning is not established by this report.
 
 Bronze stores source fields as `VARCHAR`. Timestamp values were temporarily converted with `TRY_CONVERT(DATETIME2(6), ...)` for this investigation; the Bronze source values were not modified.
 
