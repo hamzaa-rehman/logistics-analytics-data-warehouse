@@ -271,6 +271,7 @@ Before running the Bronze ingestion process, ensure that:
 - All required source CSV files are available.
 - SQL Server can access the source-file directory and has the necessary permissions.
 - The loading procedure has been created using `load_bronze.sql`.
+- The profiling configuration table has been created using `profiling_config.sql`, and the 150 column-classification rows have been imported.
 - CSV column names and column order match the corresponding Bronze table definitions.
 
 ### Recommended execution order
@@ -280,8 +281,11 @@ Before running the Bronze ingestion process, ensure that:
 3. Place the CSV files in a SQL Server-accessible directory.
 4. Execute `bronze.load_bronze` with the appropriate directory path.
 5. Execute `validate_bronze.sql`.
-6. Execute `profile_bronze.sql`.
-7. Review and document any validation or profiling findings.
+6. Execute `profile_bronze.sql` for NULL, empty-string, and whitespace-only profiling.
+7. Execute `profiling_config.sql` to create and validate the profiling configuration table, then import the 150 configuration rows from the project CSV if they have not already been imported.
+8. Execute `profile_numeric.sql` for metadata-driven numeric profiling.
+9. Use the relevant scripts under `scripts/bronze/investigations/` to investigate flagged findings.
+10. Review and document validation and profiling findings in the corresponding project documentation.
 
 ## 10. Next Stage
 
