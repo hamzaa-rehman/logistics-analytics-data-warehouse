@@ -176,7 +176,7 @@ No transformation or renaming decision is made by this investigation alone.
 
 **Status: Completed — dataset rule validated.**
 
-The separate investigation of `delivery_events.detention_minutes` remains in progress. This report does not establish the business definition of detention or its relationship to the on-time flag.
+The descriptive investigation of `delivery_events.detention_minutes` has been completed and is documented separately in [Detention Minutes Investigation](detention_minutes_investigation.md). That investigation did not establish the field's precise operational definition or prove a statistical relationship with the on-time flag.
 
 ## 9. Reproducibility
 
