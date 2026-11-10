@@ -280,11 +280,19 @@ The following columns in `truck_utilization_metrics` each contain 1,684 zero val
 | `maintenance_cost` | 1,684 |
 | `maintenance_events` | 1,684 |
 
-The identical zero counts suggest a possible relationship between these metrics. They may represent truck-months with no maintenance activity or downtime.
+The three columns shared the same zero/non-zero pattern: 1,684 truck-months had zero across all three metrics, while 1,628 truck-months had positive values across all three.
 
-These three columns should be investigated together, preferably by examining records where the values are zero and comparing them with the maintenance records.
+The investigation compared the monthly metrics with detailed records in `bronze.maintenance_records`, aggregated by truck and calendar month. All 3,312 truck-months reconciled exactly:
 
-**Investigation status:** Pending.
+- Maintenance event counts matched the number of detailed maintenance records.
+- Maintenance costs matched the sum of detailed `total_cost`.
+- Downtime hours matched the sum of detailed `downtime_hours`.
+
+The 1,684 zero-value truck-months had no corresponding detailed maintenance records. The remaining 1,628 truck-months matched the detailed records for all three metrics.
+
+**Conclusion:** The zero values are internally consistent with the detailed maintenance records. This does not independently establish that every real-world maintenance activity was captured in the source system.
+
+**Investigation status:** Completed. See [Truck Utilization Maintenance Investigation](investigations/truck_utilization_maintenance_investigation.md) for the methodology, reconciliation results, limitations, and Silver-layer considerations.
 
 ## 6. Confirmed Investigation: Utilization Rate Business Meaning
 
@@ -393,10 +401,10 @@ The following principles will guide the next stage:
 - [x] Recorded the facility identifier and duplicate-assessment decisions (AD-001 and AD-002).
 - [x] Investigated the constant `trailers.length_feet` value across trailer types and model years; all 180 records contain 53 feet.
 - [x] Completed descriptive investigation of `delivery_events.detention_minutes` by event type, facility, on-time flag, and schedule-deviation band.
+- [x] Investigated zero values in `truck_utilization_metrics.maintenance_events`, `maintenance_cost`, and `downtime_hours`; all 3,312 truck-months reconciled with detailed maintenance records.
 
 ### Remaining investigations
 
-- [ ] Investigate zero values in `truck_utilization_metrics` downtime and maintenance metrics.
 - [ ] Investigate zero values in the three `safety_incidents` financial columns.
 - [ ] Investigate zero values in `loads.accessorial_charges`.
 - [ ] Investigate the single zero value in `driver_monthly_metrics.on_time_delivery_rate`.
