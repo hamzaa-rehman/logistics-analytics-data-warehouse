@@ -108,11 +108,11 @@ Example execution:
 
 ```sql
 USE LogisticsAnalytics;
-GO
+
 
 EXEC bronze.load_bronze
     @DataFolder = N'<SQL Server accessible CSV directory>';
-GO
+
 ```
 
 The directory must be accessible to the SQL Server environment, and the SQL Server service must have the required file-access permissions.
