@@ -1,4 +1,4 @@
-# Investigation: `truck_utilization_metrics` maintenance metrics
+# Investigation: `truck_utilization_metrics.maintenance_events`, `truck_utilization_metrics.maintenance_cost`, and `truck_utilization_metrics.downtime_hours`
 
 ## 1. Objective
 
