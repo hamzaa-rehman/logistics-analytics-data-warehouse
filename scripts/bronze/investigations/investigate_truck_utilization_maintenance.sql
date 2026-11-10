@@ -32,7 +32,7 @@
 */
 
 USE LogisticsAnalytics;
-GO
+
 
 /*=====================================================================
   1. Check whether the three maintenance metrics share the same
@@ -56,7 +56,7 @@ ORDER BY
     ZeroMaintenanceEvents,
     ZeroMaintenanceCost,
     ZeroDowntime;
-GO
+
 
 /*=====================================================================
   2. Examine zero-maintenance records across reporting months.
@@ -78,7 +78,7 @@ SELECT
 FROM bronze.truck_utilization_metrics
 GROUP BY CONVERT(CHAR(7), TRY_CONVERT(DATE, [month]), 120)
 ORDER BY ReportingMonth;
-GO
+
 
 /*=====================================================================
   3. Examine zero-maintenance months by truck.
@@ -100,7 +100,7 @@ SELECT
 FROM bronze.truck_utilization_metrics
 GROUP BY truck_id
 ORDER BY ZeroMaintenancePercentage DESC, truck_id;
-GO
+
 
 /*=====================================================================
   4. Inspect the ranges of the three metrics when maintenance events
@@ -117,7 +117,7 @@ SELECT
     MAX(TRY_CONVERT(DECIMAL(18,4), downtime_hours)) AS MaximumDowntimeHours
 FROM bronze.truck_utilization_metrics
 WHERE TRY_CONVERT(INT, maintenance_events) > 0;
-GO
+
 
 /*=====================================================================
   5. Validate the detailed maintenance records used for comparison.
@@ -134,7 +134,7 @@ SELECT
     SUM(CASE WHEN truck_id IS NULL OR LTRIM(RTRIM(truck_id)) = '' THEN 1 ELSE 0 END)
         AS MissingTruckIDs
 FROM bronze.maintenance_records;
-GO
+
 
 /*=====================================================================
   6. Summarize detailed maintenance records by truck and calendar month.
@@ -164,7 +164,7 @@ SELECT
     MIN(MaintenanceRecordCount) AS MinimumRecordsPerTruckMonth,
     MAX(MaintenanceRecordCount) AS MaximumRecordsPerTruckMonth
 FROM MaintenanceMonthly;
-GO
+
 
 /*=====================================================================
   7. Reconcile maintenance record counts against maintenance_events.
@@ -225,7 +225,7 @@ GROUP BY
         ELSE 'Event counts differ'
     END
 ORDER BY TruckMonthCount DESC;
-GO
+
 
 /*=====================================================================
   8. Reconcile event counts, maintenance costs, and downtime hours
@@ -283,4 +283,4 @@ SELECT
         END
     ) AS FullyMatchingTruckMonths
 FROM Reconciliation;
-GO
+
