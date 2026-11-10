@@ -117,52 +117,33 @@ EXEC bronze.load_bronze
 
 The directory must be accessible to the SQL Server environment, and the SQL Server service must have the required file-access permissions.
 
-## 6. Repository Structure
+## 6. Bronze Repository Structure
 
-The following tree reflects the repository structure currently present on the `main` branch. Silver and Gold entries show existing folders/files only; they do not imply that those layers have been implemented.
+The following tree contains only the files associated with the Bronze layer.
 
 ```text
-logistics-analytics-data-warehouse/
-├── datasets/
-│   └── README.md
-├── docs/
-│   ├── architecture/
-│   │   └── placeholder.txt
-│   ├── bronze/
-│   │   ├── readme.md
-│   │   ├── numeric_profiling.md
-│   │   └── investigations/
-│   │       ├── detention_minutes_investigation.md
-│   │       └── on_time_flag_investigation.md
-│   ├── data_dictionary/
-│   │   └── placeholder.txt
-│   ├── data_inventory/
-│   │   └── placeholder.txt
-│   └── diagrams/
-│       ├── Logistics_Data_Warehouse_Architecture.drawio
-│       └── Logistics_Data_Warehouse_Architecture.png
+Bronze Layer
 ├── scripts/
-│   ├── bronze/
-│   │   ├── ddl_bronze.sql
-│   │   ├── load_bronze.sql
-│   │   ├── profile_bronze.sql
-│   │   ├── profiling_config.sql
-│   │   ├── profile_numeric.sql
-│   │   └── investigations/
-│   │       ├── investigate_detention_minutes.sql
-│   │       ├── investigate_on_time_flag.sql
-│   │       └── investigate_utilization_rate.sql
-│   ├── gold/
-│   │   └── readme.md
-│   └── silver/
-│       ├── ddl_silver.sql
-│       └── readme.txt
-├── tests/
-│   └── validate_bronze.sql
-├── LICENSE
-└── README.md
+│   └── bronze/
+│       ├── ddl_bronze.sql
+│       ├── load_bronze.sql
+│       ├── profile_bronze.sql
+│       ├── profiling_config.sql
+│       ├── profile_numeric.sql
+│       └── investigations/
+│           ├── investigate_detention_minutes.sql
+│           ├── investigate_on_time_flag.sql
+│           └── investigate_utilization_rate.sql
+├── docs/
+│   └── bronze/
+│       ├── readme.md
+│       ├── numeric_profiling.md
+│       └── investigations/
+│           ├── detention_minutes_investigation.md
+│           └── on_time_flag_investigation.md
+└── tests/
+    └── validate_bronze.sql
 ```
-
 | File | Responsibility |
 |---|---|
 | `ddl_bronze.sql` | Creates the Bronze schema and raw tables. |
