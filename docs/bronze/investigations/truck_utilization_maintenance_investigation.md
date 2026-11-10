@@ -1,4 +1,4 @@
-# Investigation: Truck Utilization Maintenance Metrics
+# Investigation: `truck_utilization_metrics` maintenance metrics
 
 ## 1. Objective
 
