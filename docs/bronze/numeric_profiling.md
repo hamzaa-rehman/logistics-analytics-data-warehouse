@@ -195,24 +195,38 @@ These patterns do not establish that the records are duplicates. They may repres
 - Maximum: 53
 - Average: 53
 
-Every trailer has the same recorded length. This may represent a standardized fleet configuration, but it could also indicate a default or synthetic source-data value.
+Every trailer has the same recorded length. The value was examined by trailer type and model year:
 
-**Investigation status:** Pending.
+| Grouping | Records | Distinct lengths | Minimum | Maximum |
+|---|---:|---:|---:|---:|
+| Dry Van | 94 | 1 | 53 | 53 |
+| Refrigerated | 86 | 1 | 53 | 53 |
+| All trailers | 180 | 1 | 53 | 53 |
+
+The same value was observed across all model years represented in the source (2015–2024). This confirms that the source attribute is constant in the available dataset. It does not independently verify the physical length of each trailer or establish whether the value is a standardized fleet assumption or a default source-data value.
+
+**Investigation status:** Descriptive investigation completed. Physical correctness remains unverified.
 
 ### 5.3 Zero detention minutes
 
 **Column:** `delivery_events.detention_minutes`
 
 - Total values: 170,820
-- Zero values: 22,472
+- Zero values: 22,472 (approximately 13.15%)
+- Positive values: 148,348
 - Minimum: 0
 - Maximum: 239
+- Average: 91.537460
 
-Zero detention minutes may indicate that no detention occurred for the corresponding event. The meaning of zero should be verified against the source data and delivery-event process.
+The descriptive investigation examined detention by event type, facility, `on_time_flag`, and schedule-deviation band.
 
-**Investigation status:** Pending.
+Delivery events had consistently higher average detention (approximately 105–107 minutes) than Pickup events (approximately 76–77 minutes). Within each event type, average and median detention were relatively stable across populated schedule-deviation bands. Zero-detention proportions were also relatively consistent across those bands. The exactly-on-schedule groups were very small (five Delivery events and three Pickup events) and were not used for broad comparisons.
 
-**Related completed investigation:** The separate `delivery_events.on_time_flag` investigation verified that the source flag follows a ±120-minute tolerance rule across all 170,820 events, with zero mismatches at microsecond precision. This does not establish the meaning of `detention_minutes`; its business definition remains under investigation. See [On-Time Flag Investigation](investigations/on_time_flag_investigation.md).
+No strong observable association between schedule deviation and detention was identified in this descriptive analysis. This is not proof of statistical independence or causation.
+
+**Investigation status:** Descriptive investigation completed. The precise operational definition of `detention_minutes` remains unresolved; the available source data does not establish whether it represents total waiting time, time beyond an allowed free period, or another measure. See [Detention Minutes Investigation](investigations/detention_minutes_investigation.md) for methodology, detailed results, limitations, and Silver-layer considerations.
+
+**Related completed investigation:** The separate `delivery_events.on_time_flag` investigation verified that the source flag follows an inclusive ±120-minute tolerance rule across all 170,820 events, with zero mismatches at microsecond precision. This does not establish the business definition of `detention_minutes`. See [On-Time Flag Investigation](investigations/on_time_flag_investigation.md).
 
 ### 5.4 Zero accessorial charges
 
@@ -377,20 +391,23 @@ The following principles will guide the next stage:
 - [x] Compared facility coordinates by city/state and identified shared city-level coordinate pairs.
 - [x] Investigated repeated facility names and compared facility IDs and operational attributes.
 - [x] Recorded the facility identifier and duplicate-assessment decisions (AD-001 and AD-002).
+- [x] Investigated the constant `trailers.length_feet` value across trailer types and model years; all 180 records contain 53 feet.
+- [x] Completed descriptive investigation of `delivery_events.detention_minutes` by event type, facility, on-time flag, and schedule-deviation band.
 
-### Pending investigations
+### Remaining investigations
 
-- [ ] Independently verify physical facility locations using street addresses or an authoritative geospatial reference, if such data becomes available.
-- [ ] Investigate the constant values in `trailers.length_feet`.
 - [ ] Investigate zero values in `truck_utilization_metrics` downtime and maintenance metrics.
 - [ ] Investigate zero values in the three `safety_incidents` financial columns.
 - [ ] Investigate zero values in `loads.accessorial_charges`.
-- [ ] Investigate zero values in `delivery_events.detention_minutes`.
 - [ ] Investigate the single zero value in `driver_monthly_metrics.on_time_delivery_rate`.
 
-After these investigations, this document will be updated with the findings, conclusions, and relevant Silver-layer decisions.
+**Unresolved source-context limitations (not outstanding profiling tasks):**
 
-The next profiling categories will then be addressed using the same metadata-driven approach, beginning with DATE and DATETIME columns.
+- Exact physical facility locations cannot be verified without street-level addresses or an authoritative geospatial reference.
+- The precise operational definition of `delivery_events.detention_minutes` remains unverified. The descriptive investigation is complete, but clarification would require reliable source documentation or business-owner confirmation.
+- The physical correctness of the constant 53-foot trailer length cannot be independently confirmed from this dataset alone.
+
+Remaining profiling investigations will be documented here as they are completed. Any Silver-layer decisions will be recorded when the relevant transformation rules are designed and agreed.
 
 ---
 
