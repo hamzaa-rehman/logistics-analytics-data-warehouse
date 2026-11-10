@@ -119,30 +119,48 @@ The directory must be accessible to the SQL Server environment, and the SQL Serv
 
 ## 6. Repository Structure
 
-The Bronze implementation is organized into SQL scripts and validation tests.
+The following tree reflects the repository structure currently present on the `main` branch. Silver and Gold entries show existing folders/files only; they do not imply that those layers have been implemented.
 
 ```text
-Logistics-Analytics/
-│
+logistics-analytics-data-warehouse/
+├── datasets/
+│   └── README.md
+├── docs/
+│   ├── architecture/
+│   │   └── placeholder.txt
+│   ├── bronze/
+│   │   ├── readme.md
+│   │   ├── numeric_profiling.md
+│   │   └── investigations/
+│   │       ├── detention_minutes_investigation.md
+│   │       └── on_time_flag_investigation.md
+│   ├── data_dictionary/
+│   │   └── placeholder.txt
+│   ├── data_inventory/
+│   │   └── placeholder.txt
+│   └── diagrams/
+│       ├── Logistics_Data_Warehouse_Architecture.drawio
+│       └── Logistics_Data_Warehouse_Architecture.png
 ├── scripts/
-│   └── bronze/
-│       ├── ddl_bronze.sql
-│       ├── load_bronze.sql
-│       ├── profiling_config.sql
-│       ├── profile_bronze.sql
-│       ├── profile_numeric.sql
-│       └── investigations/
-│           ├── investigate_utilization_rate.sql
-│           ├── investigate_detention_minutes.sql
-│           └── investigate_on_time_flag.sql
-│
+│   ├── bronze/
+│   │   ├── ddl_bronze.sql
+│   │   ├── load_bronze.sql
+│   │   ├── profile_bronze.sql
+│   │   ├── profiling_config.sql
+│   │   ├── profile_numeric.sql
+│   │   └── investigations/
+│   │       ├── investigate_detention_minutes.sql
+│   │       ├── investigate_on_time_flag.sql
+│   │       └── investigate_utilization_rate.sql
+│   ├── gold/
+│   │   └── readme.md
+│   └── silver/
+│       ├── ddl_silver.sql
+│       └── readme.txt
 ├── tests/
 │   └── validate_bronze.sql
-│
-└── docs/
-    └── bronze/
-        ├── readme.md
-        └── numeric_profiling.md
+├── LICENSE
+└── README.md
 ```
 
 | File | Responsibility |
@@ -155,8 +173,9 @@ Logistics-Analytics/
 | `investigations/investigate_utilization_rate.sql` | Contains the investigation queries used to verify the business meaning of the source `utilization_rate` field. |
 | `investigations/investigate_detention_minutes.sql` | Contains the exploratory queries used to examine `detention_minutes` by value, event type, facility, on-time flag, and schedule-deviation band. |
 | `investigations/investigate_on_time_flag.sql` | Contains the executed timestamp comparisons, mismatch analysis, boundary inspection, and full-record validation for the source `on_time_flag`. |
-| `numeric_profiling.md` | Documents the numeric profiling methodology, results, findings, and pending numeric investigations. |
-| `investigations/on_time_flag_investigation.md` | Documents the investigation methodology and the validated ±120-minute tolerance rule for `delivery_events.on_time_flag`. |\n| `investigations/detention_minutes_investigation.md` | Documents detention distribution, Pickup/Delivery comparisons, schedule-deviation analysis, findings, and the unresolved business definition. |
+| `numeric_profiling.md` | Documents the numeric profiling methodology, results, completed investigations, and remaining investigations. |
+| `investigations/on_time_flag_investigation.md` | Documents the investigation methodology and the validated ±120-minute tolerance rule for `delivery_events.on_time_flag`. |
+| `investigations/detention_minutes_investigation.md` | Documents detention distribution, Pickup/Delivery comparisons, schedule-deviation analysis, findings, and the unresolved business definition. |
 | `validate_bronze.sql` | Checks Bronze table existence, expected row counts, column counts, and data types. |
 
 ## 7. Bronze Validation Results
