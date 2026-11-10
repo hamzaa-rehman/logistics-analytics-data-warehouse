@@ -17,7 +17,9 @@ logistics-analytics-data-warehouse/
 │   │   ├── numeric_profiling.md
 │   │   └── investigations/
 │   │       ├── detention_minutes_investigation.md
-│   │       └── on_time_flag_investigation.md
+│   │       ├── on_time_flag_investigation.md
+│   │       ├── safety_incident_financials_investigation.md
+│   │       └── truck_utilization_maintenance_investigation.md
 │   ├── data_dictionary/
 │   │   └── placeholder.txt
 │   ├── data_inventory/
@@ -35,6 +37,8 @@ logistics-analytics-data-warehouse/
 │   │   └── investigations/
 │   │       ├── investigate_detention_minutes.sql
 │   │       ├── investigate_on_time_flag.sql
+│   │       ├── investigate_safety_incident_financials.sql
+│   │       ├── investigate_truck_utilization_maintenance.sql
 │   │       └── investigate_utilization_rate.sql
 │   ├── gold/
 │   │   └── readme.md
