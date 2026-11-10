@@ -254,21 +254,39 @@ A zero rate may represent a month in which a driver had no on-time deliveries. T
 
 **Investigation status:** Pending.
 
-### 5.6 Zero incident-related financial values
+### 5.6 Incident-related financial values
 
-The following columns contain zero values:
+**Columns:** `safety_incidents.cargo_damage_cost`, `safety_incidents.claim_amount`, `safety_incidents.vehicle_damage_cost`
 
 | Column | Zero occurrences |
 |---|---:|
-| `safety_incidents.cargo_damage_cost` | 122 |
-| `safety_incidents.claim_amount` | 39 |
-| `safety_incidents.vehicle_damage_cost` | 52 |
+| `cargo_damage_cost` | 122 |
+| `claim_amount` | 39 |
+| `vehicle_damage_cost` | 52 |
 
-These values may be valid. For example, an incident does not necessarily result in cargo damage, vehicle damage, or a financial claim.
+The investigation examined zero-value combinations, incident categories and flags, positive damage amounts, and the row-level relationship between the three financial fields.
 
-The relationship between the three cost-related fields should be investigated to understand whether zero values are consistent with the incident records.
+#### Zero-value patterns
 
-**Investigation status:** Pending.
+| Cargo damage is zero | Claim amount is zero | Vehicle damage is zero | Incidents |
+|---:|---:|---:|---:|
+| Yes | No | No | 83 |
+| Yes | Yes | Yes | 39 |
+| No | No | No | 35 |
+| No | No | Yes | 13 |
+
+All 39 incidents with a zero claim amount also had zero cargo and vehicle damage costs. No incident had a zero claim amount alongside positive damage costs.
+
+#### Additional findings
+
+- Zero values occurred across all five incident types and across the `at_fault_flag`, `injury_flag`, and `preventable_flag` categories. No single category explained the zero-value pattern.
+- Across all 170 incidents, `claim_amount` equalled `vehicle_damage_cost + cargo_damage_cost`; there were 170 matches and no mismatches.
+- The arithmetic relationship confirms internal consistency in the dataset. It does not independently establish the business definition of `claim_amount`.
+- The currency unit and commercial correctness of the recorded amounts could not be verified from the available source data.
+
+**Conclusion and Silver-layer consideration:** Preserve the three financial fields and their zero values. Do not convert zeros to NULL or impute replacement values. Do not remove or redefine `claim_amount` until its business definition is confirmed.
+
+**Investigation status:** Completed. See [Safety Incident Financials Investigation](investigations/safety_incident_financials_investigation.md) for the detailed methodology, results, limitations, and Silver-layer considerations.
 
 ### 5.7 Zero truck downtime and maintenance metrics
 
@@ -402,10 +420,10 @@ The following principles will guide the next stage:
 - [x] Investigated the constant `trailers.length_feet` value across trailer types and model years; all 180 records contain 53 feet.
 - [x] Completed descriptive investigation of `delivery_events.detention_minutes` by event type, facility, on-time flag, and schedule-deviation band.
 - [x] Investigated zero values in `truck_utilization_metrics.maintenance_events`, `maintenance_cost`, and `downtime_hours`; all 3,312 truck-months reconciled with detailed maintenance records.
+- [x] Investigated zero values and relationships across the three `safety_incidents` financial columns; `claim_amount` matched the sum of cargo and vehicle damage costs for all 170 incidents.
 
 ### Remaining investigations
 
-- [ ] Investigate zero values in the three `safety_incidents` financial columns.
 - [ ] Investigate zero values in `loads.accessorial_charges`.
 - [ ] Investigate the single zero value in `driver_monthly_metrics.on_time_delivery_rate`.
 
