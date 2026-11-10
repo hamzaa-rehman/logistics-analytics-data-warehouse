@@ -164,7 +164,7 @@ This investigation does not identify a reason to remove or alter valid source va
 ## 8. Reproducibility and related files
 
 **Investigation SQL:**  
-`scripts/bronze/investigations/investigate_detention_minutes.sql`
+[`investigate_detention_minutes.sql`](../../../scripts/bronze/investigations/investigate_detention_minutes.sql)
 
 **Related investigation:**  
 [On-Time Flag Investigation](on_time_flag_investigation.md)
