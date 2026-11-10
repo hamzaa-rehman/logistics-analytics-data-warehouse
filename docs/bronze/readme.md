@@ -140,7 +140,8 @@ Bronze Layer
 │       ├── numeric_profiling.md
 │       └── investigations/
 │           ├── detention_minutes_investigation.md
-│           └── on_time_flag_investigation.md
+│           ├── on_time_flag_investigation.md
+│           └── truck_utilization_maintenance_investigation.md
 └── tests/
     └── validate_bronze.sql
 ```
@@ -154,8 +155,10 @@ Bronze Layer
 | `investigations/investigate_utilization_rate.sql` | Contains the investigation queries used to verify the business meaning of the source `utilization_rate` field. |
 | `investigations/investigate_detention_minutes.sql` | Contains the exploratory queries used to examine `detention_minutes` by value, event type, facility, on-time flag, and schedule-deviation band. |
 | `investigations/investigate_on_time_flag.sql` | Contains the executed timestamp comparisons, mismatch analysis, boundary inspection, and full-record validation for the source `on_time_flag`. |
+| `investigations/investigate_truck_utilization_maintenance.sql` | Contains the truck-month analysis and reconciliation of maintenance event counts, costs, and downtime against detailed maintenance records. |
 | `numeric_profiling.md` | Documents the numeric profiling methodology, results, completed investigations, and remaining investigations. |
 | `investigations/on_time_flag_investigation.md` | Documents the investigation methodology and the validated ±120-minute tolerance rule for `delivery_events.on_time_flag`. |
+| `investigations/truck_utilization_maintenance_investigation.md` | Documents the zero-value investigation and full truck-month reconciliation of maintenance metrics against detailed maintenance records. |
 | `investigations/detention_minutes_investigation.md` | Documents detention distribution, Pickup/Delivery comparisons, schedule-deviation analysis, findings, and the unresolved business definition. |
 | `validate_bronze.sql` | Checks Bronze table existence, expected row counts, column counts, and data types. |
 
