@@ -1,63 +1,63 @@
-# Investigation: \`driver_monthly_metrics\` on-time delivery rate
+# Investigation: `driver_monthly_metrics` on-time delivery rate
 
 ## 1. Objective
 
-Investigate the single zero value identified in \`bronze.driver_monthly_metrics.on_time_delivery_rate\` and determine whether it is supported by the underlying delivery-event records.
+Investigate the single zero value identified in `bronze.driver_monthly_metrics.on_time_delivery_rate` and determine whether it is supported by the underlying delivery-event records.
 
 The investigation also validates the monthly source metric against delivery events across the complete set of 4,464 driver-month records.
 
 ## 2. Source tables and grain
 
-### \`bronze.driver_monthly_metrics\`
+### `bronze.driver_monthly_metrics`
 
 The monthly source table contains one record per driver and reporting month. Relevant columns:
 
-- \`driver_id\`
-- \`month\`
-- \`trips_completed\`
-- \`on_time_delivery_rate\`
+- `driver_id`
+- `month`
+- `trips_completed`
+- `on_time_delivery_rate`
 
-### \`bronze.trips\`
-
-Relevant columns:
-
-- \`trip_id\`
-- \`driver_id\`
-- \`dispatch_date\`
-
-### \`bronze.delivery_events\`
+### `bronze.trips`
 
 Relevant columns:
 
-- \`trip_id\`
-- \`event_type\`
-- \`on_time_flag\`
+- `trip_id`
+- `driver_id`
+- `dispatch_date`
 
-Bronze columns are stored as \`VARCHAR\`. The investigation used \`TRY_CONVERT\` to interpret dates and numeric values for analysis without changing the Bronze source data.
+### `bronze.delivery_events`
+
+Relevant columns:
+
+- `trip_id`
+- `event_type`
+- `on_time_flag`
+
+Bronze columns are stored as `VARCHAR`. The investigation used `TRY_CONVERT` to interpret dates and numeric values for analysis without changing the Bronze source data.
 
 ## 3. Initial profiling finding
 
-Numeric profiling identified one zero value in \`driver_monthly_metrics.on_time_delivery_rate\`.
+Numeric profiling identified one zero value in `driver_monthly_metrics.on_time_delivery_rate`.
 
 | Field | Value |
 |---|---|
-| \`driver_id\` | DRV00074 |
-| \`month\` | 2024-09-01 |
-| \`trips_completed\` | 10 |
-| \`on_time_delivery_rate\` | 0.0 |
+| `driver_id` | DRV00074 |
+| `month` | 2024-09-01 |
+| `trips_completed` | 10 |
+| `on_time_delivery_rate` | 0.0 |
 
 The driver had 10 completed trips in the monthly record. The zero could not be explained simply by an absence of trips, so the underlying delivery events were inspected.
 
 ## 4. Driver-level investigation
 
-The driver's September 2024 trips were joined to \`bronze.delivery_events\` using \`trip_id\`. The results were grouped by event type and source on-time flag.
+The driver's September 2024 trips were joined to `bronze.delivery_events` using `trip_id`. The results were grouped by event type and source on-time flag.
 
 | Event type | Total events | False flags | True flags |
 |---|---:|---:|---:|
 | Delivery | 10 | 10 | 0 |
 | Pickup | 10 | 3 | 7 |
 
-All 10 Delivery events were marked \`False\`. Pickup events were not included in the on-time delivery rate calculation.
+All 10 Delivery events were marked `False`. Pickup events were not included in the on-time delivery rate calculation.
 
 The resulting rate was:
 
@@ -86,20 +86,20 @@ The monthly rate was independently recalculated from the event-level records:
 
 The validation process:
 
-1. Joined \`bronze.trips\` to \`bronze.delivery_events\` using \`trip_id\`.
-2. Included only rows where \`event_type = 'Delivery'\`.
-3. Assigned each event to the month derived from the trip's \`dispatch_date\`.
-4. Grouped by \`driver_id\` and dispatch month.
-5. Counted total Delivery events and events marked \`True\`.
+1. Joined `bronze.trips` to `bronze.delivery_events` using `trip_id`.
+2. Included only rows where `event_type = 'Delivery'`.
+3. Assigned each event to the month derived from the trip's `dispatch_date`.
+4. Grouped by `driver_id` and dispatch month.
+5. Counted total Delivery events and events marked `True`.
 6. Calculated the rate and compared it with the stored monthly metric.
 
-The source metric's month was also converted directly from its complete date value (for example, \`2024-09-01\`) for the comparison.
+The source metric's month was also converted directly from its complete date value (for example, `2024-09-01`) for the comparison.
 
-A \`LEFT JOIN\` from the monthly source table to the calculated results retained every source monthly record. This allowed the validation to identify monthly records without matching delivery-event data rather than silently excluding them.
+A `LEFT JOIN` from the monthly source table to the calculated results retained every source monthly record. This allowed the validation to identify monthly records without matching delivery-event data rather than silently excluding them.
 
 ### 5.2 Standard rounding comparison
 
-The first complete comparison used SQL Server \`ROUND(CalculatedRate, 3)\` and compared the result with the source value.
+The first complete comparison used SQL Server `ROUND(CalculatedRate, 3)` and compared the result with the source value.
 
 | Validation status | Records | Percentage |
 |---|---:|---:|
@@ -148,7 +148,7 @@ This does **not** prove that the source-generation process universally uses trun
 
 1. The zero value for DRV00074 in September 2024 is supported by the underlying event records: the driver had 10 Delivery events and none were marked on time.
 2. Pickup events were excluded from the delivery-rate calculation.
-3. All 4,464 monthly source records had corresponding Delivery-event summaries when grouped by driver and the month derived from \`trips.dispatch_date\`.
+3. All 4,464 monthly source records had corresponding Delivery-event summaries when grouped by driver and the month derived from `trips.dispatch_date`.
 4. Standard rounding to three decimal places reproduced 4,383 source values.
 5. The remaining 81 values matched the truncated calculated rate; no other differences remained.
 6. Truncation applied to the entire dataset was not a suitable universal comparison rule: it matched 2,741 records and differed from 1,723.
@@ -158,8 +158,8 @@ This does **not** prove that the source-generation process universally uses trun
 
 The investigation supports the following considerations for future Silver-layer design:
 
-- Preserve \`on_time_delivery_rate\` as a numeric decimal value.
-- Preserve the observed zero as zero; do not convert it to \`NULL\` or impute a replacement value.
+- Preserve `on_time_delivery_rate` as a numeric decimal value.
+- Preserve the observed zero as zero; do not convert it to `NULL` or impute a replacement value.
 - Retain the original Bronze source value for traceability.
 - Document the calculation basis and the observed three-decimal precision behavior.
 - Do not impose a universal truncation rule or claim a specific rounding implementation until the source-generation convention is confirmed.
@@ -168,24 +168,24 @@ These are recommendations for future implementation. No Silver transformation is
 
 ## 8. Limitations
 
-- The original code or business documentation that generates \`on_time_delivery_rate\` was not available.
+- The original code or business documentation that generates `on_time_delivery_rate` was not available.
 - The results establish that the source values reconcile with the tested event-based calculation and the observed precision comparisons. They do not establish the exact rounding implementation used by the source system.
 - The reconciliation checks consistency with the available delivery-event records. It does not independently establish that every real-world delivery event was captured.
-- The month assignment was tested using \`trips.dispatch_date\`; this is the month basis that reproduced the complete set of monthly source records.
+- The month assignment was tested using `trips.dispatch_date`; this is the month basis that reproduced the complete set of monthly source records.
 
 ## 9. Reproducibility and related files
 
 **Investigation SQL:**  
-[\`investigate_on_time_delivery_rate.sql\`](../../../scripts/bronze/investigations/investigate_on_time_delivery_rate.sql)
+[`investigate_on_time_delivery_rate.sql`](../../../scripts/bronze/investigations/investigate_on_time_delivery_rate.sql)
 
 **Numeric profiling record:**  
-[\`driver_monthly_metrics.on_time_delivery_rate\`](../numeric_profiling.md#55-zero-on-time-delivery-rate)
+[`driver_monthly_metrics.on_time_delivery_rate`](../numeric_profiling.md#55-zero-on-time-delivery-rate)
 
 **Execution note:** The query logic was executed by the project author in SQL Server, and the outputs were supplied and reviewed during the investigation. The consolidated GitHub script has not been independently re-executed end-to-end after formatting. Re-run it against the project database to reproduce the results in your environment.
 
 ## 10. Conclusion
 
-The single zero value in \`driver_monthly_metrics.on_time_delivery_rate\` is supported by the underlying delivery-event records. The driver had 10 Delivery events in September 2024, with none marked on time.
+The single zero value in `driver_monthly_metrics.on_time_delivery_rate` is supported by the underlying delivery-event records. The driver had 10 Delivery events in September 2024, with none marked on time.
 
 The complete validation covered all 4,464 monthly records. Standard rounding matched 4,383 records; the remaining 81 matched the truncated calculated rate, with no other differences or unmatched monthly records.
 
