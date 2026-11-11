@@ -233,13 +233,25 @@ No strong observable association between schedule deviation and detention was id
 **Column:** `loads.accessorial_charges`
 
 - Total values: 85,410
-- Zero values: 32,186
+- Zero values: 32,186 (37.69%)
+- Positive values: 53,224 (62.31%)
+- Negative values: 0
 - Minimum: 0
 - Maximum: 200
+- Average: 71.643835
 
-Zero accessorial charges may be legitimate where no additional service or charge applies. Further investigation is required to understand the business meaning and confirm that zero is not being used to represent missing information.
+The investigation compared zero and positive accessorial-charge records across load type, booking type, customer, route, shipment weight, piece count, revenue, and fuel surcharge.
 
-**Investigation status:** Pending.
+Key observations:
+
+- All six load-type/booking-type combinations contained both zero and positive charges. Zero proportions were similar across the groups (approximately 37.0%–38.1%).
+- All 200 customers and all 58 routes had both zero-charge and positive-charge loads.
+- Shipment weight, piece count, revenue, and fuel surcharge were broadly similar between zero-charge and positive-charge groups.
+- No obvious data-quality anomaly or strong operational concentration explained the zero values.
+
+**Conclusion and Silver-layer consideration:** Preserve zero values as zero. Do not convert them to `NULL`, impute replacement charges, or infer that a zero is commercially correct without supporting charge definitions or contracts. The available dataset does not establish the commercial correctness of each charge.
+
+**Investigation status:** Analytical investigation completed. The business definition and commercial correctness remain unverified.
 
 ### 5.5 Zero on-time delivery rate
 
@@ -250,9 +262,25 @@ Zero accessorial charges may be legitimate where no additional service or charge
 - Minimum: 0
 - Maximum: 0.833
 
-A zero rate may represent a month in which a driver had no on-time deliveries. The corresponding driver and reporting month should be examined to confirm that this is a legitimate result.
+The zero occurred for driver `DRV00074` in September 2024. The monthly record showed 10 completed trips. The underlying event review found 10 Delivery events, all marked `False`, and 10 Pickup events. Since Pickup events are excluded from the delivery-rate calculation:
 
-**Investigation status:** Pending.
+`0 on-time Delivery events / 10 total Delivery events = 0.000`
+
+The full dataset was reconciled using Delivery events grouped by driver and the month derived from `trips.dispatch_date`.
+
+| Validation result | Records |
+|---|---:|
+| Match after standard rounding to three decimal places | 4,383 |
+| Remaining standard-rounding mismatches reproduced by truncation | 81 |
+| Other differences | 0 |
+| Monthly records without matching Delivery events | 0 |
+| **Total monthly records** | **4,464** |
+
+Applying truncation to every record was not an appropriate universal comparison rule: it matched 2,741 records and differed from 1,723. The 81 exceptions to standard rounding matched the truncated calculated values. The original source-generation code was not available, so the exact precision-handling convention remains unverified.
+
+**Conclusion and Silver-layer consideration:** The single zero is supported by the underlying delivery records. Preserve zero as a numeric value; do not convert it to `NULL` or impute a replacement. Retain the source value and do not impose a universal truncation or rounding rule in Silver until the source precision convention is confirmed.
+
+**Investigation status:** Completed. See [On-Time Delivery Rate Investigation](investigations/on_time_delivery_rate_investigation.md) for the detailed methodology, validation results, limitations, and Silver-layer considerations.
 
 ### 5.6 Incident-related financial values
 
@@ -424,8 +452,8 @@ The following principles will guide the next stage:
 
 ### Remaining investigations
 
-- [ ] Investigate zero values in `loads.accessorial_charges`.
-- [ ] Investigate the single zero value in `driver_monthly_metrics.on_time_delivery_rate`.
+- [x] Investigated zero values in `loads.accessorial_charges`; zeros occurred across load types, booking types, customers, and routes, with commercial correctness remaining unverified.
+- [x] Investigated the single zero value in `driver_monthly_metrics.on_time_delivery_rate` and reconciled all 4,464 monthly records against underlying Delivery events.
 
 **Unresolved source-context limitations (not outstanding profiling tasks):**
 
@@ -433,7 +461,7 @@ The following principles will guide the next stage:
 - The precise operational definition of `delivery_events.detention_minutes` remains unverified. The descriptive investigation is complete, but clarification would require reliable source documentation or business-owner confirmation.
 - The physical correctness of the constant 53-foot trailer length cannot be independently confirmed from this dataset alone.
 
-Remaining profiling investigations will be documented here as they are completed. Any Silver-layer decisions will be recorded when the relevant transformation rules are designed and agreed.
+All currently identified numeric zero-value investigations have been completed. Some source business definitions and commercial/physical attributes remain unverified; these are documented limitations rather than outstanding profiling tasks. Any Silver-layer decisions will be recorded when the relevant transformation rules are designed and agreed.
 
 ---
 
