@@ -18,6 +18,7 @@ logistics-analytics-data-warehouse/
 │   │   ├── date_datetime_profiling.md
 │   │   ├── category_profiling.md
 │   │   └── investigations/
+│   │       ├── geographic_consistency_investigation.md
 │   │       ├── detention_minutes_investigation.md
 │   │       ├── on_time_delivery_rate_investigation.md
 │   │       ├── on_time_flag_investigation.md
@@ -66,4 +67,5 @@ CATEGORY profiling covers all 39 columns configured as CATEGORY in the Bronze pr
 
 - [CATEGORY Profiling Report](docs/bronze/category_profiling.md)
 - [CATEGORY Profiling SQL](scripts/bronze/profile_category.sql)
+- [Geographic Consistency Investigation Report](docs/bronze/investigations/geographic_consistency_investigation.md)
 - [Geographic Consistency Investigation SQL](scripts/bronze/investigations/investigate_geographic_consistency.sql)
