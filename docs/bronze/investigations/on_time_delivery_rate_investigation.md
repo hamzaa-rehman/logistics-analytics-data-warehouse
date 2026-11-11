@@ -61,13 +61,11 @@ All 10 Delivery events were marked `False`. Pickup events were not included in t
 
 The resulting rate was:
 
-\[
-\frac{\text{On-time Delivery events}}{\text{Total Delivery events}}
-=
-\frac{0}{10}
-=
-0.000
-\]
+**On-time delivery rate = On-time Delivery events / Total Delivery events**
+
+**For DRV00074 (September 2024):**
+
+On-time delivery rate = 0 / 10 = 0.000 (0%)
 
 This agrees with the stored monthly value of zero.
 
@@ -77,12 +75,7 @@ This agrees with the stored monthly value of zero.
 
 The monthly rate was independently recalculated from the event-level records:
 
-\[
-\text{On-time delivery rate}
-=
-\frac{\text{Delivery events with on\_time\_flag = True}}
-{\text{All Delivery events}}
-\]
+**On-time delivery rate = Delivery events with `on_time_flag = True` / All Delivery events**
 
 The validation process:
 
