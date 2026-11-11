@@ -1,38 +1,38 @@
-# Bronze Layer — CATEGORY Data Profiling
+# Bronze Layer — CATEGORY Profiling
 
-## 1. Overview
+## 1. Purpose and scope
 
-CATEGORY profiling examines columns whose values represent labels, statuses, types, flags, locations, and other descriptive groupings. The purpose is to understand the raw values, their distributions, and inconsistencies that may require validation or standardization in Silver.
+CATEGORY profiling examines columns whose values represent labels or groupings, including statuses, types, flags, city names, and state codes. It describes the values present in the Bronze extract; it does not by itself establish business correctness.
 
-**Scope:** 39 columns classified as CATEGORY in bronze.profiling_config.
+The profiling covered all **39 columns classified as `CATEGORY`** in `bronze.profiling_config`, across the 14 Bronze tables. Bronze values were not modified.
 
-The profiling reads Bronze VARCHAR values and does not modify source data.
+Reusable SQL: [`profile_category.sql`](../../scripts/bronze/profile_category.sql).
 
 ## 2. Methodology
 
-Metadata-driven SQL generated profiling statements for every configured CATEGORY column using STRING_AGG, UNION ALL, QUOTENAME, and sp_executesql.
+The script reads CATEGORY entries from the profiling configuration, validates configured schema/table/column names against SQL Server metadata, and generates one statement per column. `STRING_AGG` combines statements with `UNION ALL`; `QUOTENAME` delimits object identifiers; and `sys.sp_executesql` executes the generated batch.
 
-Three checks were performed:
+Three outputs are produced:
 
-1. Distinct category counts and NULL counts.
-2. Category frequencies and percentages within each column.
-3. Case-sensitive distinct-count comparison using binary collation and leading/trailing ordinary-space checks using LTRIM, RTRIM, and DATALENGTH.
+1. **Summary:** total rows, distinct non-NULL values, and NULL count for each configured column.
+2. **Frequency distribution:** each non-NULL category value, its row count, and its percentage of non-NULL values within that column.
+3. **Text checks:** distinct counts under the database's normal collation and `Latin1_General_100_BIN2` binary collation, plus a check for leading/trailing ordinary spaces using `LTRIM`, `RTRIM`, and `DATALENGTH`.
 
-The reusable script is [profile_category.sql](../../scripts/bronze/profile_category.sql).
+The frequency percentages are calculated separately for each table/column. The binary-collation comparison can reveal distinctions (such as case variants) that the normal collation treats as equal. The whitespace check is limited to ordinary boundary spaces; it is not a universal Unicode-whitespace test.
 
-The whitespace check does not cover every Unicode whitespace character. Frequency distributions are descriptive and do not by themselves establish business validity.
+## 3. Overall results
 
-## 3. Profiling Summary
-
-| Metric | Result |
+| Check | Result |
 |---|---:|
-| CATEGORY columns profiled | 39 |
-| NULL values | 0 |
-| Columns with NULL values | 0 |
-| Case-sensitive distinct-count differences | 0 |
-| Leading/trailing ordinary spaces | 0 |
+| Configured CATEGORY columns | 39 |
+| Columns included in profiling | 39 |
+| NULL values across CATEGORY columns | 0 |
+| Columns with normal/binary distinct-count differences | 0 |
+| Columns with leading/trailing ordinary spaces | 0 |
 
-## 4. Distinct Category Counts
+No NULL values, detected case-sensitive distinct-count differences, or leading/trailing ordinary spaces were reported within the checks' stated scope.
+
+## 4. Distinct-value profile
 
 | Table | Column | Distinct values |
 |---|---|---:|
@@ -76,129 +76,78 @@ The whitespace check does not cover every Unicode whitespace character. Frequenc
 | trucks | make | 6 |
 | trucks | status | 3 |
 
-## 5. Distribution Observations
+## 5. Selected frequency observations
 
-Selected distributions from the completed frequency output:
+The frequency output was reviewed for all 39 columns. Selected distributions are summarized below; the complete category-level output can be reproduced by running the frequency section of the SQL script.
 
 | Column | Observed distribution |
 |---|---|
-| customers.account_status | Active 168 (84%); Inactive 32 (16%) |
-| customers.customer_type | Contract 75 (37.50%); Spot 63 (31.50%); Dedicated 62 (31.00%) |
-| delivery_events.event_type | Delivery 85,410 (50%); Pickup 85,410 (50%) |
-| delivery_events.on_time_flag | True 95,095 (55.67%); False 75,725 (44.33%) |
-| drivers.employment_status | Active 124 (82.67%); Terminated 26 (17.33%) |
-| facilities.facility_type | Cross-Dock 20 (40%); Distribution Center 13 (26%); Terminal 10 (20%); Warehouse 7 (14%) |
-| loads.booking_type | Dedicated 42,337 (49.57%); Contract 21,545 (25.23%); Spot 21,528 (25.21%) |
-| loads.load_status | Completed 85,410 (100%) |
-| loads.load_type | Refrigerated 42,946 (50.28%); Dry Van 42,464 (49.72%) |
-| maintenance_records.maintenance_type | Seven categories, each approximately 13.77%–14.79% |
-| safety_incidents.at_fault_flag | False 116 (68.24%); True 54 (31.76%) |
-| safety_incidents.injury_flag | False 137 (80.59%); True 33 (19.41%) |
-| safety_incidents.preventable_flag | False 106 (62.35%); True 64 (37.65%) |
-| trailers.status | Active 180 (100%) |
-| trailers.trailer_type | Dry Van 94 (52.22%); Refrigerated 86 (47.78%) |
-| trips.trip_status | Completed 85,410 (100%) |
-| trucks.fuel_type | Diesel 120 (100%) |
-| trucks.status | Active 92 (76.67%); Maintenance 15 (12.50%); Inactive 13 (10.83%) |
-| trucks.make | Six manufacturers, ranging from 12.50% to 20.00% |
+| `customers.account_status` | Active 168 (84%); Inactive 32 (16%) |
+| `customers.customer_type` | Contract 75 (37.50%); Spot 63 (31.50%); Dedicated 62 (31.00%) |
+| `delivery_events.event_type` | Delivery 85,410 (50%); Pickup 85,410 (50%) |
+| `delivery_events.on_time_flag` | True 95,095 (55.67%); False 75,725 (44.33%) |
+| `drivers.employment_status` | Active 124 (82.67%); Terminated 26 (17.33%) |
+| `facilities.facility_type` | Cross-Dock 20 (40%); Distribution Center 13 (26%); Terminal 10 (20%); Warehouse 7 (14%) |
+| `loads.booking_type` | Dedicated 42,337 (49.57%); Contract 21,545 (25.23%); Spot 21,528 (25.21%) |
+| `loads.load_status` | Completed 85,410 (100%) |
+| `loads.load_type` | Refrigerated 42,946 (50.28%); Dry Van 42,464 (49.72%) |
+| `safety_incidents.at_fault_flag` | False 116 (68.24%); True 54 (31.76%) |
+| `safety_incidents.injury_flag` | False 137 (80.59%); True 33 (19.41%) |
+| `safety_incidents.preventable_flag` | False 106 (62.35%); True 64 (37.65%) |
+| `trailers.trailer_type` | Dry Van 94 (52.22%); Refrigerated 86 (47.78%) |
+| `trucks.status` | Active 92 (76.67%); Maintenance 15 (12.50%); Inactive 13 (10.83%) |
+| `trucks.make` | Six manufacturers; individual shares range from 12.50% to 20.00% |
 
-### 5.1 Single-value columns
+### 5.1 Columns with one distinct value
 
-Five columns contained only one distinct value:
+Five columns contained a single distinct value in the current extract:
 
-| Column | Value | Rows |
+| Column | Observed value | Rows |
 |---|---|---:|
-| drivers.cdl_class | A | 150 |
-| loads.load_status | Completed | 85,410 |
-| trailers.status | Active | 180 |
-| trips.trip_status | Completed | 85,410 |
-| trucks.fuel_type | Diesel | 120 |
+| `drivers.cdl_class` | A | 150 |
+| `loads.load_status` | Completed | 85,410 |
+| `trailers.status` | Active | 180 |
+| `trips.trip_status` | Completed | 85,410 |
+| `trucks.fuel_type` | Diesel | 120 |
 
-These are dataset observations, not automatically data-quality defects. They may reflect the source dataset's scope or snapshot and provide limited category variation in the current data.
+These are observations, not confirmed defects. They may reflect the dataset's scope, generation process, or snapshot. They provide no category variation in this extract, but that alone does not establish that the values are incorrect.
 
 ### 5.2 Related-column observations
 
-- drivers.employment_status contains 124 Active and 26 Terminated drivers. These counts align with the 124 NULL and 26 populated values previously observed in drivers.termination_date. Count-level alignment does not prove row-level consistency.
-- delivery_events.event_type is evenly split between Pickup and Delivery, consistent with the event counts reviewed during earlier investigations.
+- The 124 Active and 26 Terminated drivers align at aggregate level with 124 NULL and 26 populated `termination_date` values. This does not prove row-level agreement between each driver's status and termination date.
+- `delivery_events.event_type` is evenly split between Pickup and Delivery.
 - Load and trailer type distributions are broadly balanced between Dry Van and Refrigerated.
-- delivery_events.on_time_flag had already been investigated separately; that investigation is not duplicated here.
+- `delivery_events.on_time_flag` was investigated separately; see the [on-time flag investigation](investigations/on_time_flag_investigation.md).
 
-## 6. Geographic Consistency Investigation
+## 6. Findings and follow-up
 
-Frequency distributions alone cannot establish whether each city is consistently associated with the same state. Internal city/state checks and a cross-table comparison were therefore performed.
-
-The SQL is [investigate_geographic_consistency.sql](../../scripts/bronze/investigations/investigate_geographic_consistency.sql).
-
-### 6.1 Internal city/state mapping results
-
-| Source | Distinct cities | Distinct city/state pairs | Internal result |
-|---|---:|---:|---|
-| delivery_events | 20 | 20 | No city mapped to multiple states |
-| fuel_purchases | 25 | 575 | Each city paired with all 23 states |
-| facilities | 21 | 21 | No city mapped to multiple states |
-| safety_incidents | 25 | 145 | Cities mapped to multiple states |
-| routes — origin | 18 | 18 | No city mapped to multiple states |
-| routes — destination | 19 | 19 | No city mapped to multiple states |
-
-fuel_purchases contains 25 cities and 23 states, producing all 575 possible city/state combinations. safety_incidents contains 145 distinct city/state pairs across 25 cities and 23 states.
-
-### 6.2 Cross-table comparison
-
-Internally consistent mappings from delivery_events, facilities, and routes (origin and destination) were combined into an internal reference mapping. Distinct pairs from fuel_purchases and safety_incidents were compared against it.
-
-| Source table | Matches reference | Mismatches | Total distinct pairs |
-|---|---:|---:|---:|
-| fuel_purchases | 25 | 550 | 575 |
-| safety_incidents | 7 | 138 | 145 |
-
-These are distinct city/state-pair counts, not affected purchase or incident row counts.
-
-The results establish substantial disagreement with the internal reference mappings. They do not establish the root cause or independently prove which source contains geographically correct values. The reference mappings have not been validated against an authoritative external geographic source.
-
-### 6.3 Downstream handling
-
-- Preserve the original Bronze values.
-- Obtain an approved geographic reference source or documented business rule.
-- Validate city/state pairs against that reference.
-- Standardize or correct values in Silver only through traceable, documented rules.
-- Retain lineage between original and standardized values.
-
-No source values were changed during this investigation.
-
-## 7. Findings and Decisions
-
-| Finding | Assessment | Downstream consideration |
+| Finding | Assessment | Follow-up |
 |---|---|---|
-| No NULLs in CATEGORY columns | No NULL issue detected in this profiling scope | Continue with other quality checks |
-| No case variants detected by binary comparison | No case inconsistency detected by this check | Standardize only if required |
-| No leading/trailing ordinary spaces detected | No ordinary boundary-space issue detected | Unicode whitespace is outside this check's coverage |
-| Five single-value columns | Dataset observation, not automatically an error | Consider analytical usefulness and source scope |
-| fuel_purchases city/state mappings | Substantial disagreement with internal reference mappings | Validate against approved geographic reference |
-| safety_incidents city/state mappings | Substantial disagreement with internal reference mappings | Validate against approved geographic reference |
+| No NULLs in the 39 CATEGORY columns | No NULLs detected in this profiling scope | No NULL-specific action identified by this check |
+| No normal/binary distinct-count differences | No case variants detected by this comparison | Retain values unless a business rule requires standardization |
+| No leading/trailing ordinary spaces | No ordinary boundary spaces detected | Broader Unicode whitespace validation was not performed |
+| Five single-value columns | Dataset observations, not automatically defects | Consider limited category variation when designing Gold metrics |
+| City/state relationships disagree in two sources | Requires relationship-level validation | See the [geographic consistency investigation](investigations/geographic_consistency_investigation.md) |
 
-## 8. Limitations
+## 7. Limitations
 
-- Internal reference mappings are based on consistency among available source tables, not an authoritative geographic database.
-- Comparison is at distinct city/state-pair level, not transaction or incident row level.
-- The checks do not establish the root cause of geographic inconsistencies.
-- Case and whitespace checks do not cover every Unicode normalization or whitespace issue.
-- Category frequency distributions do not establish business correctness.
-- Results describe the current loaded dataset and may change after a source refresh.
+1. **Descriptive profiling:** Distinct counts and frequencies do not establish business validity.
+2. **Collation scope:** The selected binary comparison is not a complete Unicode normalization audit.
+3. **Whitespace scope:** Tabs, line breaks, non-breaking spaces, and all Unicode whitespace were not comprehensively tested.
+4. **Current extract:** Results describe the Bronze data at the time of profiling and may change after a refresh.
+5. **Relationship validation:** Category frequencies do not validate relationships between columns or across tables; city/state relationships were assessed separately.
 
-## 9. Conclusion
+## 8. Conclusion
 
-CATEGORY profiling covered all 39 configured columns. No NULL values, case-sensitive distinct-count differences, or leading/trailing ordinary spaces were detected by the checks performed.
+All 39 configured CATEGORY columns were profiled. The checks reported zero NULLs, no normal/binary distinct-count differences, and no leading/trailing ordinary spaces within their detection scope. Five columns contained one distinct value; these were documented as observations rather than presumed defects.
 
-Five columns contained only one distinct value; these were recorded as observations rather than defects.
+The geographic attributes required a separate relationship-level investigation. Core CATEGORY profiling is complete for the current Bronze extract; authoritative geographic validation remains a downstream follow-up.
 
-The geographic investigation identified substantial cross-table disagreement in fuel_purchases and safety_incidents. These findings are documented for downstream Silver-layer validation. External authoritative geographic validation remains outstanding.
-
-The core CATEGORY profiling and internal cross-table comparison are complete. Authoritative geographic verification remains a follow-up validation task.
-
-## 10. Related Documentation and Scripts
+## 9. Related resources
 
 - [Bronze Layer README](readme.md)
-- [Numeric Profiling](numeric_profiling.md)
-- [DATE and DATETIME Profiling](date_datetime_profiling.md)
+- [Numeric profiling](numeric_profiling.md)
+- [DATE and DATETIME profiling](date_datetime_profiling.md)
 - [CATEGORY profiling SQL](../../scripts/bronze/profile_category.sql)
+- [Geographic consistency investigation report](investigations/geographic_consistency_investigation.md)
 - [Geographic consistency investigation SQL](../../scripts/bronze/investigations/investigate_geographic_consistency.sql)
