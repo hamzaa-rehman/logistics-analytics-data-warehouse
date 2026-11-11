@@ -33,7 +33,7 @@ Notes:
 */
 
 USE LogisticsAnalytics;
-GO
+
 
 /*=============================================================================
   1. CONFIGURATION CHECKS
@@ -52,16 +52,16 @@ ORDER BY
     SchemaName,
     TableName,
     ColumnName;
-GO
 
--- Review the number of configured columns in each profiling category.
+
+-- Review the number of configured columns in each profiling catery.
 SELECT
     ProfilingType,
     COUNT(*) AS ColumnCount
 FROM bronze.profiling_config
 GROUP BY ProfilingType
 ORDER BY ProfilingType;
-GO
+
 
 /*
 Expected configuration:
@@ -162,7 +162,7 @@ SELECT TOP (10)
     N'acquisition_date',
     acquisition_date
 FROM bronze.trucks;
-GO
+
 
 /*
 Observed source format:
@@ -231,7 +231,7 @@ END;
 SET @DateSQL += N' ORDER BY TableName, ColumnName;';
 
 EXEC sys.sp_executesql @DateSQL;
-GO
+
 
 /*
 DATE profiling results:
@@ -269,7 +269,7 @@ SELECT TOP (5)
     incident_date AS RawValue
 FROM bronze.safety_incidents
 WHERE incident_date IS NOT NULL;
-GO
+
 
 -- Compare original text with its DATETIME2 conversion.
 -- The VARCHAR output makes fractional-second precision visible.
@@ -283,7 +283,7 @@ SELECT TOP (5)
     ) AS ConvertedValue
 FROM bronze.delivery_events
 WHERE actual_datetime IS NOT NULL;
-GO
+
 
 /*
 The source sample contained six fractional-second digits for delivery
@@ -355,7 +355,7 @@ END;
 SET @DateTimeSQL += N' ORDER BY TableName, ColumnName;';
 
 EXEC sys.sp_executesql @DateTimeSQL;
-GO
+
 
 /*
 DATETIME profiling results:
@@ -418,7 +418,7 @@ SELECT
     CONVERT(VARCHAR(30), MIN(TRY_CONVERT(DATETIME2(7), incident_date)), 121),
     CONVERT(VARCHAR(30), MAX(TRY_CONVERT(DATETIME2(7), incident_date)), 121)
 FROM bronze.safety_incidents;
-GO
+
 
 /*
 ===============================================================================
