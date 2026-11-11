@@ -152,24 +152,24 @@ Bronze Layer
 ```
 | File | Responsibility |
 |---|---|
-| `ddl_bronze.sql` | Creates the Bronze schema and raw tables. |
-| `load_bronze.sql` | Defines the stored procedure responsible for loading source CSV files. |
-| `profiling_config.sql` | Creates and validates the metadata table that assigns a profiling category to each Bronze column. The 150 configuration rows are imported separately. |
-| `profile_bronze.sql` | Dynamically profiles Bronze columns for NULL, empty-string, and whitespace-only values. |
-| `profile_numeric.sql` | Uses the profiling configuration to dynamically calculate numeric profiling metrics across configured Bronze columns. |
-| `investigations/investigate_utilization_rate.sql` | Contains the investigation queries used to verify the business meaning of the source `utilization_rate` field. |
-| `investigations/investigate_detention_minutes.sql` | Contains the exploratory queries used to examine `detention_minutes` by value, event type, facility, on-time flag, and schedule-deviation band. |
-| `investigations/investigate_on_time_flag.sql` | Contains the executed timestamp comparisons, mismatch analysis, boundary inspection, and full-record validation for the source `on_time_flag`. |
-| `investigations/investigate_safety_incident_financials.sql` | Contains the investigation queries for zero-value patterns, incident categories and flags, positive damage amounts, and the relationship among the three financial fields. |
-| `investigations/investigate_truck_utilization_maintenance.sql` | Contains the truck-month analysis and reconciliation of maintenance event counts, costs, and downtime against detailed maintenance records. |
+| [`ddl_bronze.sql`](../../scripts/bronze/ddl_bronze.sql) | Creates the Bronze schema and raw tables. |
+| [`load_bronze.sql`](../../scripts/bronze/load_bronze.sql) | Defines the stored procedure responsible for loading source CSV files. |
+| [`profiling_config.sql`](../../scripts/bronze/profiling_config.sql) | Creates and validates the metadata table that assigns a profiling category to each Bronze column. The 150 configuration rows are imported separately. |
+| [`profile_bronze.sql`](../../scripts/bronze/profile_bronze.sql) | Dynamically profiles Bronze columns for NULL, empty-string, and whitespace-only values. |
+| [`profile_numeric.sql`](../../scripts/bronze/profile_numeric.sql) | Uses the profiling configuration to dynamically calculate numeric profiling metrics across configured Bronze columns. |
+| [`investigations/investigate_utilization_rate.sql`](../../scripts/bronze/investigations/investigate_utilization_rate.sql) | Contains the investigation queries used to verify the business meaning of the source `utilization_rate` field. |
+| [`investigations/investigate_detention_minutes.sql`](../../scripts/bronze/investigations/investigate_detention_minutes.sql) | Contains the exploratory queries used to examine `detention_minutes` by value, event type, facility, on-time flag, and schedule-deviation band. |
+| [`investigations/investigate_on_time_flag.sql`](../../scripts/bronze/investigations/investigate_on_time_flag.sql) | Contains the executed timestamp comparisons, mismatch analysis, boundary inspection, and full-record validation for the source `on_time_flag`. |
+| [`investigations/investigate_safety_incident_financials.sql`](../../scripts/bronze/investigations/investigate_safety_incident_financials.sql) | Contains the investigation queries for zero-value patterns, incident categories and flags, positive damage amounts, and the relationship among the three financial fields. |
+| [`investigations/investigate_truck_utilization_maintenance.sql`](../../scripts/bronze/investigations/investigate_truck_utilization_maintenance.sql) | Contains the truck-month analysis and reconciliation of maintenance event counts, costs, and downtime against detailed maintenance records. |
 | [`investigate_on_time_delivery_rate.sql`](../../scripts/bronze/investigations/investigate_on_time_delivery_rate.sql) | Contains the driver-level zero-value investigation, monthly event-based rate recalculation, rounding/truncation comparisons, and full-dataset reconciliation. |
-| `numeric_profiling.md` | Documents the numeric profiling methodology, results, completed investigations, and remaining investigations. |
-| `investigations/on_time_flag_investigation.md` | Documents the investigation methodology and the validated ±120-minute tolerance rule for `delivery_events.on_time_flag`. |
-| `investigations/safety_incident_financials_investigation.md` | Documents the zero-value patterns, incident-level comparisons, financial-field reconciliation, findings, and limitations for safety incident costs and claims. |
-| `investigations/truck_utilization_maintenance_investigation.md` | Documents the zero-value investigation and full truck-month reconciliation of maintenance metrics against detailed maintenance records. |
+| [`numeric_profiling.md`](numeric_profiling.md) | Documents the numeric profiling methodology, results, completed investigations, and remaining investigations. |
+| [`investigations/on_time_flag_investigation.md`](investigations/on_time_flag_investigation.md) | Documents the investigation methodology and the validated ±120-minute tolerance rule for `delivery_events.on_time_flag`. |
+| [`investigations/safety_incident_financials_investigation.md`](investigations/safety_incident_financials_investigation.md) | Documents the zero-value patterns, incident-level comparisons, financial-field reconciliation, findings, and limitations for safety incident costs and claims. |
+| [`investigations/truck_utilization_maintenance_investigation.md`](investigations/truck_utilization_maintenance_investigation.md) | Documents the zero-value investigation and full truck-month reconciliation of maintenance metrics against detailed maintenance records. |
 | [`on_time_delivery_rate_investigation.md`](investigations/on_time_delivery_rate_investigation.md) | Documents the zero-rate investigation and reconciliation of all 4,464 monthly driver metrics against underlying Delivery events. |
-| `investigations/detention_minutes_investigation.md` | Documents detention distribution, Pickup/Delivery comparisons, schedule-deviation analysis, findings, and the unresolved business definition. |
-| `validate_bronze.sql` | Checks Bronze table existence, expected row counts, column counts, and data types. |
+| [`investigations/detention_minutes_investigation.md`](investigations/detention_minutes_investigation.md) | Documents detention distribution, Pickup/Delivery comparisons, schedule-deviation analysis, findings, and the unresolved business definition. |
+| [`validate_bronze.sql`](../../tests/validate_bronze.sql) | Checks Bronze table existence, expected row counts, column counts, and data types. |
 
 ## 7. Bronze Validation Results
 
@@ -235,7 +235,7 @@ The Bronze layer preserves these values. Decisions about their treatment belong 
 
 A second, metadata-driven profiling process was performed for the 53 columns classified as `NUMERIC` in `bronze.profiling_config`.
 
-The reusable `profile_numeric.sql` script generates a profiling query for each configured numeric column, combines the queries using `STRING_AGG()` and `UNION ALL`, and executes the consolidated SQL using `sp_executesql`. Numeric conversion is attempted with `TRY_CONVERT(DECIMAL(18,4), ...)`; this is used for profiling and does not modify the original VARCHAR values in Bronze.
+The reusable [`profile_numeric.sql`](../../scripts/bronze/profile_numeric.sql) script generates a profiling query for each configured numeric column, combines the queries using `STRING_AGG()` and `UNION ALL`, and executes the consolidated SQL using `sp_executesql`. Numeric conversion is attempted with `TRY_CONVERT(DECIMAL(18,4), ...)`; this is used for profiling and does not modify the original VARCHAR values in Bronze.
 
 **Summary of numeric profiling results**
 
@@ -261,7 +261,7 @@ The 59,924 figure counts zero occurrences across columns, not distinct records. 
 
 The full column-level results, methodology, findings, and remaining investigations are documented in [Numeric Data Profiling](numeric_profiling.md).
 
-The profiling configuration setup is documented in `profiling_config.sql`. Its table definition is created by the script; the 150 column-classification rows are imported separately from the project configuration CSV.
+The profiling configuration setup is documented in [`profiling_config.sql`](../../scripts/bronze/profiling_config.sql). Its table definition is created by the script; the 150 column-classification rows are imported separately from the project configuration CSV.
 
 ## 8. Known Limitations
 
@@ -284,23 +284,23 @@ These limitations should be considered when maintaining or extending the ingesti
 Before running the Bronze ingestion process, ensure that:
 
 - SQL Server is available and the `LogisticsAnalytics` database exists.
-- The Bronze schema and all 14 raw tables have been created using `ddl_bronze.sql`.
+- The Bronze schema and all 14 raw tables have been created using [`ddl_bronze.sql`](../../scripts/bronze/ddl_bronze.sql).
 - All required source CSV files are available.
 - SQL Server can access the source-file directory and has the necessary permissions.
-- The loading procedure has been created using `load_bronze.sql`.
-- The profiling configuration table has been created using `profiling_config.sql`, and the 150 column-classification rows have been imported.
+- The loading procedure has been created using [`load_bronze.sql`](../../scripts/bronze/load_bronze.sql).
+- The profiling configuration table has been created using [`profiling_config.sql`](../../scripts/bronze/profiling_config.sql), and the 150 column-classification rows have been imported.
 - CSV column names and column order match the corresponding Bronze table definitions.
 
 ### Recommended execution order
 
-1. Execute `ddl_bronze.sql`.
-2. Execute `load_bronze.sql`.
+1. Execute [`ddl_bronze.sql`](../../scripts/bronze/ddl_bronze.sql).
+2. Execute [`load_bronze.sql`](../../scripts/bronze/load_bronze.sql).
 3. Place the CSV files in a SQL Server-accessible directory.
 4. Execute `bronze.load_bronze` with the appropriate directory path.
-5. Execute `validate_bronze.sql`.
-6. Execute `profile_bronze.sql` for NULL, empty-string, and whitespace-only profiling.
-7. Execute `profiling_config.sql` to create and validate the profiling configuration table, then import the 150 configuration rows from the project CSV if they have not already been imported.
-8. Execute `profile_numeric.sql` for metadata-driven numeric profiling.
+5. Execute [`validate_bronze.sql`](../../tests/validate_bronze.sql).
+6. Execute [`profile_bronze.sql`](../../scripts/bronze/profile_bronze.sql) for NULL, empty-string, and whitespace-only profiling.
+7. Execute [`profiling_config.sql`](../../scripts/bronze/profiling_config.sql) to create and validate the profiling configuration table, then import the 150 configuration rows from the project CSV if they have not already been imported.
+8. Execute [`profile_numeric.sql`](../../scripts/bronze/profile_numeric.sql) for metadata-driven numeric profiling.
 9. Use the relevant scripts under `scripts/bronze/investigations/` to investigate flagged findings.
 10. Review and document validation and profiling findings in the corresponding project documentation.
 
