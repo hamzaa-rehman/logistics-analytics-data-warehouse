@@ -25,7 +25,7 @@ Evidence:
 */
 
 USE LogisticsAnalytics;
-GO
+
 
 /*=============================================================================
   1. COUNT JANUARY 2025 DELIVERY-EVENT TIMESTAMPS
@@ -47,7 +47,7 @@ SELECT
     END) AS JanuaryScheduledEvents
 
 FROM bronze.delivery_events;
-GO
+
 
 /*
 Observed:
@@ -92,7 +92,7 @@ WHERE
 ORDER BY
     TRY_CONVERT(DATETIME2, de.actual_datetime),
     de.event_id;
-GO
+
 
 /*
 Observed:
@@ -148,7 +148,7 @@ LEFT JOIN bronze.loads AS l
 ORDER BY
     de.trip_id,
     de.event_type;
-GO
+
 
 /*
 Observed:
@@ -233,7 +233,7 @@ SELECT
     END) AS InvalidOrMissingActualSequence
 
 FROM TripTimeline;
-GO
+
 
 /*
 Observed:
@@ -264,7 +264,7 @@ GROUP BY
 
 ORDER BY
     PurchaseDate;
-GO
+
 
 /*
 Observed:
@@ -299,7 +299,7 @@ LEFT JOIN bronze.trips AS t
 
 WHERE TRY_CONVERT(DATETIME2, fp.purchase_date) >= '2025-01-01'
   AND TRY_CONVERT(DATETIME2, fp.purchase_date) < '2025-02-01';
-GO
+
 
 /*
 Observed:
@@ -347,7 +347,7 @@ GROUP BY
 
 ORDER BY
     PurchaseCount DESC;
-GO
+
 
 /*
 Observed:
@@ -399,7 +399,7 @@ FROM JanuaryPurchases AS jp
 
 LEFT JOIN DeliveryTimeline AS dt
     ON jp.trip_id = dt.trip_id;
-GO
+
 
 /*
 Observed:
@@ -465,7 +465,7 @@ GROUP BY
         WHEN MinutesFromDelivery < 0 THEN 'Before Delivery'
         ELSE 'On or After Delivery'
     END;
-GO
+
 
 /*
 Observed:
@@ -531,7 +531,7 @@ WHERE jp.PurchaseDateTime >= dt.ActualDeliveryDateTime
 
 ORDER BY
     MinutesAfterDelivery DESC;
-GO
+
 
 /*
 This query was used to inspect individual purchases occurring after delivery.
@@ -582,7 +582,7 @@ LEFT JOIN bronze.trips AS t
 
 WHERE TRY_CONVERT(DATETIME2, fp.purchase_date) >= '2025-01-01'
   AND TRY_CONVERT(DATETIME2, fp.purchase_date) < '2025-02-01';
-GO
+
 
 /*
 Observed:
@@ -628,7 +628,7 @@ WHERE TRY_CONVERT(DATETIME2, fp.purchase_date) >= '2025-01-01'
 
 ORDER BY
     fp.fuel_purchase_id;
-GO
+
 
 /*
 Observed records:
