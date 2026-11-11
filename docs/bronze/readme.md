@@ -130,13 +130,15 @@ Bronze Layer
 │       ├── profile_bronze.sql
 │       ├── profiling_config.sql
 │       ├── profile_numeric.sql
+│       ├── profile_date_datetime.sql
 │       └── investigations/
 │           ├── investigate_detention_minutes.sql
 │           ├── investigate_on_time_delivery_rate.sql
 │           ├── investigate_on_time_flag.sql
 │           ├── investigate_safety_incident_financials.sql
 │           ├── investigate_truck_utilization_maintenance.sql
-│           └── investigate_utilization_rate.sql
+│           ├── investigate_utilization_rate.sql
+│           └── investigate_january_2025_timestamps.sql
 ├── docs/
 │   └── bronze/
 │       ├── readme.md
@@ -158,6 +160,8 @@ Bronze Layer
 | [`profiling_config.sql`](../../scripts/bronze/profiling_config.sql) | Creates and validates the metadata table that assigns a profiling category to each Bronze column. The 150 configuration rows are imported separately. |
 | [`profile_bronze.sql`](../../scripts/bronze/profile_bronze.sql) | Dynamically profiles Bronze columns for NULL, empty-string, and whitespace-only values. |
 | [`profile_numeric.sql`](../../scripts/bronze/profile_numeric.sql) | Uses the profiling configuration to dynamically calculate numeric profiling metrics across configured Bronze columns. |
+| [`profile_date_datetime.sql`](../../scripts/bronze/profile_date_datetime.sql) | Uses the profiling configuration to dynamically calculate DATE and DATETIME profiling metrics across configured Bronze columns. |
+| [`investigations/investigate_january_2025_timestamps.sql`](../../scripts/bronze/investigations/investigate_january_2025_timestamps.sql) | Contains the January 2025 delivery-event and fuel-purchase timestamp investigation, including trip timelines and truck/driver association checks. |
 | [`investigations/investigate_utilization_rate.sql`](../../scripts/bronze/investigations/investigate_utilization_rate.sql) | Contains the investigation queries used to verify the business meaning of the source `utilization_rate` field. |
 | [`investigations/investigate_detention_minutes.sql`](../../scripts/bronze/investigations/investigate_detention_minutes.sql) | Contains the exploratory queries used to examine `detention_minutes` by value, event type, facility, on-time flag, and schedule-deviation band. |
 | [`investigations/investigate_on_time_flag.sql`](../../scripts/bronze/investigations/investigate_on_time_flag.sql) | Contains the executed timestamp comparisons, mismatch analysis, boundary inspection, and full-record validation for the source `on_time_flag`. |
