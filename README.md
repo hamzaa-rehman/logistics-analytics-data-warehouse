@@ -36,6 +36,7 @@ logistics-analytics-data-warehouse/
 │   │   ├── profile_bronze.sql
 │   │   ├── profiling_config.sql
 │   │   ├── profile_numeric.sql
+│   │   ├── profile_date_datetime.sql
 │   │   └── investigations/
 │   │       ├── investigate_detention_minutes.sql
 │   │       ├── investigate_on_time_delivery_rate.sql
