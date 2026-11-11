@@ -450,7 +450,7 @@ The following principles will guide the next stage:
 - [x] Investigated zero values in `truck_utilization_metrics.maintenance_events`, `maintenance_cost`, and `downtime_hours`; all 3,312 truck-months reconciled with detailed maintenance records.
 - [x] Investigated zero values and relationships across the three `safety_incidents` financial columns; `claim_amount` matched the sum of cargo and vehicle damage costs for all 170 incidents.
 
-### Remaining investigations
+### Completed investigations
 
 - [x] Investigated zero values in `loads.accessorial_charges`; zeros occurred across load types, booking types, customers, and routes, with commercial correctness remaining unverified.
 - [x] Investigated the single zero value in `driver_monthly_metrics.on_time_delivery_rate` and reconciled all 4,464 monthly records against underlying Delivery events.
