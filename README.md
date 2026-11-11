@@ -37,10 +37,10 @@ logistics-analytics-data-warehouse/
 │   │   ├── profile_numeric.sql
 │   │   └── investigations/
 │   │       ├── investigate_detention_minutes.sql
+│   │       ├── investigate_on_time_delivery_rate.sql
 │   │       ├── investigate_on_time_flag.sql
 │   │       ├── investigate_safety_incident_financials.sql
 │   │       ├── investigate_truck_utilization_maintenance.sql
-│   │       ├── investigate_on_time_delivery_rate.sql
 │   │       └── investigate_utilization_rate.sql
 │   ├── gold/
 │   │   └── readme.md
