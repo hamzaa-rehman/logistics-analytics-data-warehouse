@@ -141,6 +141,7 @@ Bronze Layer
 │   └── bronze/
 │       ├── readme.md
 │       ├── numeric_profiling.md
+│       ├── date_datetime_profiling.md
 │       └── investigations/
 │           ├── detention_minutes_investigation.md
 │           ├── on_time_delivery_rate_investigation.md
@@ -162,12 +163,13 @@ Bronze Layer
 | [`investigations/investigate_on_time_flag.sql`](../../scripts/bronze/investigations/investigate_on_time_flag.sql) | Contains the executed timestamp comparisons, mismatch analysis, boundary inspection, and full-record validation for the source `on_time_flag`. |
 | [`investigations/investigate_safety_incident_financials.sql`](../../scripts/bronze/investigations/investigate_safety_incident_financials.sql) | Contains the investigation queries for zero-value patterns, incident categories and flags, positive damage amounts, and the relationship among the three financial fields. |
 | [`investigations/investigate_truck_utilization_maintenance.sql`](../../scripts/bronze/investigations/investigate_truck_utilization_maintenance.sql) | Contains the truck-month analysis and reconciliation of maintenance event counts, costs, and downtime against detailed maintenance records. |
-| [`investigate_on_time_delivery_rate.sql`](../../scripts/bronze/investigations/investigate_on_time_delivery_rate.sql) | Contains the driver-level zero-value investigation, monthly event-based rate recalculation, rounding/truncation comparisons, and full-dataset reconciliation. |
+| [`investigations/investigate_on_time_delivery_rate.sql`](../../scripts/bronze/investigations/investigate_on_time_delivery_rate.sql) | Contains the driver-level zero-value investigation, monthly event-based rate recalculation, rounding/truncation comparisons, and full-dataset reconciliation. |
 | [`numeric_profiling.md`](numeric_profiling.md) | Documents the numeric profiling methodology, results, completed investigations, and remaining investigations. |
+| [`date_datetime_profiling.md`](date_datetime_profiling.md) | Documents the metadata-driven DATE and DATETIME profiling methodology, all 15 column-level results, January 2025 timestamp investigation findings, Silver-layer recommendations, and limitations. |
 | [`investigations/on_time_flag_investigation.md`](investigations/on_time_flag_investigation.md) | Documents the investigation methodology and the validated ±120-minute tolerance rule for `delivery_events.on_time_flag`. |
 | [`investigations/safety_incident_financials_investigation.md`](investigations/safety_incident_financials_investigation.md) | Documents the zero-value patterns, incident-level comparisons, financial-field reconciliation, findings, and limitations for safety incident costs and claims. |
 | [`investigations/truck_utilization_maintenance_investigation.md`](investigations/truck_utilization_maintenance_investigation.md) | Documents the zero-value investigation and full truck-month reconciliation of maintenance metrics against detailed maintenance records. |
-| [`on_time_delivery_rate_investigation.md`](investigations/on_time_delivery_rate_investigation.md) | Documents the zero-rate investigation and reconciliation of all 4,464 monthly driver metrics against underlying Delivery events. |
+| [`investigations/on_time_delivery_rate_investigation.md`](investigations/on_time_delivery_rate_investigation.md) | Documents the zero-rate investigation and reconciliation of all 4,464 monthly driver metrics against underlying Delivery events. |
 | [`investigations/detention_minutes_investigation.md`](investigations/detention_minutes_investigation.md) | Documents detention distribution, Pickup/Delivery comparisons, schedule-deviation analysis, findings, and the unresolved business definition. |
 | [`validate_bronze.sql`](../../tests/validate_bronze.sql) | Checks Bronze table existence, expected row counts, column counts, and data types. |
 
