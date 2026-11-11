@@ -12,7 +12,7 @@ internal mapping; it does not independently prove which value is correct.
 Pair counts are distinct city/state combinations, not affected row counts.
 */
 USE LogisticsAnalytics;
-GO
+
 
 /* 1. City-to-multiple-state checks within each source. */
 SELECT N'delivery_events' AS SourceTable, location_city AS City,
