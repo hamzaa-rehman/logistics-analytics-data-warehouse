@@ -15,6 +15,7 @@ logistics-analytics-data-warehouse/
 │   ├── bronze/
 │   │   ├── readme.md
 │   │   ├── numeric_profiling.md
+│   │   ├── date_datetime_profiling.md
 │   │   └── investigations/
 │   │       ├── detention_minutes_investigation.md
 │   │       ├── on_time_delivery_rate_investigation.md
