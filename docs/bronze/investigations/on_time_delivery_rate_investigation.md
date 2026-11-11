@@ -1,4 +1,4 @@
-# Investigation: `driver_monthly_metrics.on-time delivery rate` 
+# Investigation: `driver_monthly_metrics` on-time delivery rate
 
 ## 1. Objective
 
