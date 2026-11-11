@@ -139,7 +139,8 @@ Bronze Layer
 │           ├── investigate_safety_incident_financials.sql
 │           ├── investigate_truck_utilization_maintenance.sql
 │           ├── investigate_utilization_rate.sql
-│           └── investigate_january_2025_timestamps.sql
+│           ├── investigate_january_2025_timestamps.sql
+│           └── investigate_geographic_consistency.sql
 ├── docs/
 │   └── bronze/
 │       ├── readme.md
