@@ -54,3 +54,12 @@ logistics-analytics-data-warehouse/
 ├── LICENSE
 └── README.md
 ```
+
+
+## Bronze CATEGORY Profiling
+
+CATEGORY profiling covers all 39 columns configured as CATEGORY in the Bronze profiling metadata. The automated script calculates distinct values, NULL counts, category frequencies, and percentages. A separate investigation checks city/state consistency across source tables.
+
+- [CATEGORY Profiling Report](docs/bronze/category_profiling.md)
+- [CATEGORY Profiling SQL](scripts/bronze/profile_category.sql)
+- [Geographic Consistency Investigation SQL](scripts/bronze/investigations/investigate_geographic_consistency.sql)

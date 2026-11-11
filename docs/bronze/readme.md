@@ -131,6 +131,7 @@ Bronze Layer
 │       ├── profiling_config.sql
 │       ├── profile_numeric.sql
 │       ├── profile_date_datetime.sql
+│       ├── profile_category.sql
 │       └── investigations/
 │           ├── investigate_detention_minutes.sql
 │           ├── investigate_on_time_delivery_rate.sql
@@ -144,6 +145,7 @@ Bronze Layer
 │       ├── readme.md
 │       ├── numeric_profiling.md
 │       ├── date_datetime_profiling.md
+│       ├── category_profiling.md
 │       └── investigations/
 │           ├── detention_minutes_investigation.md
 │           ├── on_time_delivery_rate_investigation.md
@@ -161,7 +163,9 @@ Bronze Layer
 | [`profile_bronze.sql`](../../scripts/bronze/profile_bronze.sql) | Dynamically profiles Bronze columns for NULL, empty-string, and whitespace-only values. |
 | [`profile_numeric.sql`](../../scripts/bronze/profile_numeric.sql) | Uses the profiling configuration to dynamically calculate numeric profiling metrics across configured Bronze columns. |
 | [`profile_date_datetime.sql`](../../scripts/bronze/profile_date_datetime.sql) | Uses the profiling configuration to dynamically calculate DATE and DATETIME profiling metrics across configured Bronze columns. |
+| [`profile_category.sql`](../../scripts/bronze/profile_category.sql) | Uses the profiling configuration to dynamically calculate category counts, frequencies, percentages, case-sensitive distinct counts, and ordinary boundary-space checks. |
 | [`investigations/investigate_january_2025_timestamps.sql`](../../scripts/bronze/investigations/investigate_january_2025_timestamps.sql) | Contains the January 2025 delivery-event and fuel-purchase timestamp investigation, including trip timelines and truck/driver association checks. |
+| [`investigations/investigate_geographic_consistency.sql`](../../scripts/bronze/investigations/investigate_geographic_consistency.sql) | Contains internal city/state consistency checks and cross-table comparison for fuel purchases and safety incidents. |
 | [`investigations/investigate_utilization_rate.sql`](../../scripts/bronze/investigations/investigate_utilization_rate.sql) | Contains the investigation queries used to verify the business meaning of the source `utilization_rate` field. |
 | [`investigations/investigate_detention_minutes.sql`](../../scripts/bronze/investigations/investigate_detention_minutes.sql) | Contains the exploratory queries used to examine `detention_minutes` by value, event type, facility, on-time flag, and schedule-deviation band. |
 | [`investigations/investigate_on_time_flag.sql`](../../scripts/bronze/investigations/investigate_on_time_flag.sql) | Contains the executed timestamp comparisons, mismatch analysis, boundary inspection, and full-record validation for the source `on_time_flag`. |
@@ -170,6 +174,7 @@ Bronze Layer
 | [`investigations/investigate_on_time_delivery_rate.sql`](../../scripts/bronze/investigations/investigate_on_time_delivery_rate.sql) | Contains the driver-level zero-value investigation, monthly event-based rate recalculation, rounding/truncation comparisons, and full-dataset reconciliation. |
 | [`numeric_profiling.md`](numeric_profiling.md) | Documents the numeric profiling methodology, results, completed investigations, and remaining investigations. |
 | [`date_datetime_profiling.md`](date_datetime_profiling.md) | Documents the metadata-driven DATE and DATETIME profiling methodology, all 15 column-level results, January 2025 timestamp investigation findings, Silver-layer recommendations, and limitations. |
+| [`category_profiling.md`](category_profiling.md) | Documents the metadata-driven CATEGORY profiling methodology, all 39 column-level distinct counts, frequency observations, geographic consistency investigation, findings, and limitations. |
 | [`investigations/on_time_flag_investigation.md`](investigations/on_time_flag_investigation.md) | Documents the investigation methodology and the validated ±120-minute tolerance rule for `delivery_events.on_time_flag`. |
 | [`investigations/safety_incident_financials_investigation.md`](investigations/safety_incident_financials_investigation.md) | Documents the zero-value patterns, incident-level comparisons, financial-field reconciliation, findings, and limitations for safety incident costs and claims. |
 | [`investigations/truck_utilization_maintenance_investigation.md`](investigations/truck_utilization_maintenance_investigation.md) | Documents the zero-value investigation and full truck-month reconciliation of maintenance metrics against detailed maintenance records. |
