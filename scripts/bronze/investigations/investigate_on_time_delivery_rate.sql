@@ -78,11 +78,9 @@ WHERE driver_id = 'DRV00074'
 
 SELECT
     de.event_type,
-    COUNT(*) AS TotalEvents,
-    SUM(CASE WHEN de.on_time_flag = 'False' THEN 1 ELSE 0 END)
-        AS FalseFlags,
-    SUM(CASE WHEN de.on_time_flag = 'True' THEN 1 ELSE 0 END)
-        AS TrueFlags
+    COUNT(*),
+    SUM(CASE WHEN de.on_time_flag = 'False' THEN 1 ELSE 0 END) AS falseflag,
+    SUM(CASE WHEN de.on_time_flag = 'True' THEN 1 ELSE 0 END) AS TRUEFLAG
 FROM bronze.trips AS t
 LEFT JOIN bronze.delivery_events AS de
     ON t.trip_id = de.trip_id
