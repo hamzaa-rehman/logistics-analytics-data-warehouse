@@ -244,6 +244,8 @@ The following are recommendations for future Silver-layer design. They are not c
 
 ## Related Documentation
 
+- [DATE and DATETIME Profiling SQL](../../scripts/bronze/profile_date_datetime.sql) — reusable metadata-driven profiling queries for all configured DATE and DATETIME columns.
+- [January 2025 Timestamp Investigation SQL](../../scripts/bronze/investigations/investigate_january_2025_timestamps.sql) — queries used to investigate cross-year delivery events and fuel purchases.
 - [Numeric Profiling](numeric_profiling.md) — methodology, results, and completed numeric investigations.
 - [Bronze Layer Overview](readme.md) — Bronze architecture, ingestion, validation, and profiling documentation.
 
