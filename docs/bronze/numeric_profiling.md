@@ -428,41 +428,28 @@ The following principles will guide the next stage:
 
 6. **Avoid premature assumptions:** Unusual patterns should be investigated before being classified as errors or corrected.
 
-## 9. Current Status and Next Steps
+## 9. Profiling Completion Status
 
-### Completed
+Numeric profiling and the investigations documented in this report are complete for the current Bronze extract.
 
-- [x] Classified all 150 Bronze columns by profiling type.
-- [x] Configured the metadata-driven profiling setup.
-- [x] Profiled all 53 numeric columns.
-- [x] Checked NULL and non-NULL counts.
-- [x] Checked numeric conversion failures.
-- [x] Calculated minimum, maximum, and average values.
-- [x] Counted negative and zero values.
-- [x] Investigated the `utilization_rate` calculation across all 3,312 records.
-- [x] Confirmed that `utilization_rate` represents average trips per calendar day.
-- [x] Checked all 50 facility coordinate values against valid latitude and longitude ranges.
-- [x] Compared facility coordinates by city/state and identified shared city-level coordinate pairs.
-- [x] Investigated repeated facility names and compared facility IDs and operational attributes.
-- [x] Recorded the facility identifier and duplicate-assessment decisions (AD-001 and AD-002).
-- [x] Investigated the constant `trailers.length_feet` value across trailer types and model years; all 180 records contain 53 feet.
-- [x] Completed descriptive investigation of `delivery_events.detention_minutes` by event type, facility, on-time flag, and schedule-deviation band.
-- [x] Investigated zero values in `truck_utilization_metrics.maintenance_events`, `maintenance_cost`, and `downtime_hours`; all 3,312 truck-months reconciled with detailed maintenance records.
-- [x] Investigated zero values and relationships across the three `safety_incidents` financial columns; `claim_amount` matched the sum of cargo and vehicle damage costs for all 170 incidents.
+Completed work includes:
 
-### Completed investigations
+- Metadata-driven profiling of all 53 configured numeric columns across 14 tables.
+- Validation of NULL counts, numeric convertibility, minimum/maximum/average values, and negative/zero occurrences.
+- Investigation of facility coordinate ranges and repeated city-level coordinate patterns.
+- Investigation of the constant 53-foot trailer-length value.
+- Descriptive investigation of detention minutes and the source on-time flag.
+- Investigation and reconciliation of truck-month maintenance metrics against detailed maintenance records.
+- Investigation of zero accessorial charges and the single zero monthly on-time delivery rate.
+- Investigation of safety-incident financial values and their row-level arithmetic relationship.
+- Recording the facility identifier and duplicate-assessment decisions (AD-001 and AD-002).
 
-- [x] Investigated zero values in `loads.accessorial_charges`; zeros occurred across load types, booking types, customers, and routes, with commercial correctness remaining unverified.
-- [x] Investigated the single zero value in `driver_monthly_metrics.on_time_delivery_rate` and reconciled all 4,464 monthly records against underlying Delivery events.
-
-**Unresolved source-context limitations (not outstanding profiling tasks):**
+The following are **source-context limitations**, not outstanding numeric profiling tasks:
 
 - Exact physical facility locations cannot be verified without street-level addresses or an authoritative geospatial reference.
-- The precise operational definition of `delivery_events.detention_minutes` remains unverified. The descriptive investigation is complete, but clarification would require reliable source documentation or business-owner confirmation.
+- The precise operational definition of `delivery_events.detention_minutes` remains unverified; clarification requires reliable source documentation or business-owner confirmation.
 - The physical correctness of the constant 53-foot trailer length cannot be independently confirmed from this dataset alone.
+- The commercial correctness of zero accessorial charges and some financial values cannot be established from the available source data.
+- The exact source-generation precision convention for `on_time_delivery_rate` remains unverified for the 81 records that matched truncation rather than standard rounding.
 
-All currently identified numeric zero-value investigations have been completed. Some source business definitions and commercial/physical attributes remain unverified; these are documented limitations rather than outstanding profiling tasks. Any Silver-layer decisions will be recorded when the relevant transformation rules are designed and agreed.
-
----
-
-**Note:** This document records the numeric profiling results and investigations completed to date. Pending observations are intentionally not classified as confirmed data-quality issues.
+No further numeric profiling queries are currently identified as outstanding for the current extract. If the Bronze data is refreshed or new source documentation becomes available, rerun the relevant checks and revise the findings where necessary.
