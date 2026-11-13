@@ -179,7 +179,7 @@ Bronze Layer
 | [`investigations/investigate_safety_incident_financials.sql`](../../scripts/bronze/investigations/investigate_safety_incident_financials.sql) | Contains the investigation queries for zero-value patterns, incident categories and flags, positive damage amounts, and the relationship among the three financial fields. |
 | [`investigations/investigate_truck_utilization_maintenance.sql`](../../scripts/bronze/investigations/investigate_truck_utilization_maintenance.sql) | Contains the truck-month analysis and reconciliation of maintenance event counts, costs, and downtime against detailed maintenance records. |
 | [`investigations/investigate_on_time_delivery_rate.sql`](../../scripts/bronze/investigations/investigate_on_time_delivery_rate.sql) | Contains the driver-level zero-value investigation, monthly event-based rate recalculation, rounding/truncation comparisons, and full-dataset reconciliation. |
-| [`numeric_profiling.md`](numeric_profiling.md) | Documents the numeric profiling methodology, results, completed investigations, and remaining investigations. |
+| [`numeric_profiling.md`](numeric_profiling.md) | Documents the numeric profiling methodology, results, completed investigations, analytical decisions, and unresolved source-context limitations. |
 | [`date_datetime_profiling.md`](date_datetime_profiling.md) | Documents the metadata-driven DATE and DATETIME profiling methodology, all 15 column-level results, January 2025 timestamp investigation findings, Silver-layer recommendations, and limitations. |
 | [`category_profiling.md`](category_profiling.md) | Documents the metadata-driven CATEGORY profiling methodology, all 39 column-level distinct counts, selected frequency observations, findings, and limitations. |
 | [`identifier_profiling.md`](identifier_profiling.md) | Documents the 36 configured identifier columns, candidate-key results, 18 relationship checks, business-identifier findings, and composite-key assessments. |
@@ -279,7 +279,7 @@ The 59,924 figure counts zero occurrences across columns, not distinct records. 
 - Several operational and financial columns contain zero values. These are observations to investigate, not automatic data-quality errors.
 - The source `truck_utilization_metrics.utilization_rate` was checked against `trips_completed / calendar days in the month`. The previously completed validation matched all 3,312 records with zero mismatches. The field therefore represents average trips per calendar day, not a utilization percentage.
 
-The full column-level results, methodology, findings, and remaining investigations are documented in [Numeric Data Profiling](numeric_profiling.md).
+The full column-level results, methodology, completed investigations, analytical decisions, and source-context limitations are documented in [Numeric Data Profiling](numeric_profiling.md).
 
 The profiling configuration setup is documented in [`profiling_config.sql`](../../scripts/bronze/profiling_config.sql). Its table definition is created by the script; the 150 column-classification rows are imported separately from the project configuration CSV.
 
