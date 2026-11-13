@@ -41,6 +41,7 @@ logistics-analytics-data-warehouse/
 │   │   ├── profile_numeric.sql
 │   │   ├── profile_date_datetime.sql
 │   │   ├── profile_category.sql
+│   │   ├── profile_identifier.sql
 │   │   └── investigations/
 │   │       ├── investigate_detention_minutes.sql
 │   │       ├── investigate_on_time_delivery_rate.sql
@@ -49,7 +50,8 @@ logistics-analytics-data-warehouse/
 │   │       ├── investigate_truck_utilization_maintenance.sql
 │   │       ├── investigate_utilization_rate.sql
 │   │       ├── investigate_january_2025_timestamps.sql
-│   │       └── investigate_geographic_consistency.sql
+│   │       ├── investigate_geographic_consistency.sql
+│   │       └── investigate_identifier_integrity.sql
 │   ├── gold/
 │   │   └── readme.md
 │   └── silver/
