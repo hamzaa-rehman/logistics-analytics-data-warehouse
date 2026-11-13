@@ -13,7 +13,7 @@
 */
 
 USE LogisticsAnalytics;
-GO
+
 
 SET NOCOUNT ON;
 
@@ -75,4 +75,4 @@ SET @sql = N'SELECT * FROM (' + @sql +
            N') AS identifier_profile ORDER BY schema_name, table_name, column_name;';
 
 EXEC sys.sp_executesql @sql;
-GO
+
