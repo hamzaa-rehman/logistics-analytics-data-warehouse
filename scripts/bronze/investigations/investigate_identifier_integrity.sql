@@ -21,23 +21,25 @@ SET NOCOUNT ON;
 -- 1. Candidate primary-key checks (12 columns)
 -------------------------------------------------------------------------------
 SELECT 'customers' AS table_name, 'customer_id' AS column_name,
-       COUNT_BIG(*) AS total_rows, COUNT_BIG(customer_id) AS non_null_count,
+       COUNT_BIG(*) AS total_rows,
+       COUNT_BIG(customer_id) AS non_null_count,
+       COUNT_BIG(*) - COUNT_BIG(customer_id) AS null_count,
        COUNT_BIG(DISTINCT customer_id) AS distinct_count,
        COUNT_BIG(customer_id) - COUNT_BIG(DISTINCT customer_id) AS duplicate_count
 FROM bronze.customers
-UNION ALL SELECT 'delivery_events','event_id',COUNT_BIG(*),COUNT_BIG(event_id),COUNT_BIG(DISTINCT event_id),COUNT_BIG(event_id)-COUNT_BIG(DISTINCT event_id) FROM bronze.delivery_events
-UNION ALL SELECT 'drivers','driver_id',COUNT_BIG(*),COUNT_BIG(driver_id),COUNT_BIG(DISTINCT driver_id),COUNT_BIG(driver_id)-COUNT_BIG(DISTINCT driver_id) FROM bronze.drivers
-UNION ALL SELECT 'facilities','facility_id',COUNT_BIG(*),COUNT_BIG(facility_id),COUNT_BIG(DISTINCT facility_id),COUNT_BIG(facility_id)-COUNT_BIG(DISTINCT facility_id) FROM bronze.facilities
-UNION ALL SELECT 'fuel_purchases','fuel_purchase_id',COUNT_BIG(*),COUNT_BIG(fuel_purchase_id),COUNT_BIG(DISTINCT fuel_purchase_id),COUNT_BIG(fuel_purchase_id)-COUNT_BIG(DISTINCT fuel_purchase_id) FROM bronze.fuel_purchases
-UNION ALL SELECT 'loads','load_id',COUNT_BIG(*),COUNT_BIG(load_id),COUNT_BIG(DISTINCT load_id),COUNT_BIG(load_id)-COUNT_BIG(DISTINCT load_id) FROM bronze.loads
-UNION ALL SELECT 'maintenance_records','maintenance_id',COUNT_BIG(*),COUNT_BIG(maintenance_id),COUNT_BIG(DISTINCT maintenance_id),COUNT_BIG(maintenance_id)-COUNT_BIG(DISTINCT maintenance_id) FROM bronze.maintenance_records
-UNION ALL SELECT 'routes','route_id',COUNT_BIG(*),COUNT_BIG(route_id),COUNT_BIG(DISTINCT route_id),COUNT_BIG(route_id)-COUNT_BIG(DISTINCT route_id) FROM bronze.routes
-UNION ALL SELECT 'safety_incidents','incident_id',COUNT_BIG(*),COUNT_BIG(incident_id),COUNT_BIG(DISTINCT incident_id),COUNT_BIG(incident_id)-COUNT_BIG(DISTINCT incident_id) FROM bronze.safety_incidents
-UNION ALL SELECT 'trailers','trailer_id',COUNT_BIG(*),COUNT_BIG(trailer_id),COUNT_BIG(DISTINCT trailer_id),COUNT_BIG(trailer_id)-COUNT_BIG(DISTINCT trailer_id) FROM bronze.trailers
-UNION ALL SELECT 'trips','trip_id',COUNT_BIG(*),COUNT_BIG(trip_id),COUNT_BIG(DISTINCT trip_id),COUNT_BIG(trip_id)-COUNT_BIG(DISTINCT trip_id) FROM bronze.trips
-UNION ALL SELECT 'trucks','truck_id',COUNT_BIG(*),COUNT_BIG(truck_id),COUNT_BIG(DISTINCT truck_id),COUNT_BIG(truck_id)-COUNT_BIG(DISTINCT truck_id) FROM bronze.trucks
+UNION ALL SELECT 'delivery_events','event_id',COUNT_BIG(*),COUNT_BIG(event_id),COUNT_BIG(*)-COUNT_BIG(event_id),COUNT_BIG(DISTINCT event_id),COUNT_BIG(event_id)-COUNT_BIG(DISTINCT event_id) FROM bronze.delivery_events
+UNION ALL SELECT 'drivers','driver_id',COUNT_BIG(*),COUNT_BIG(driver_id),COUNT_BIG(*)-COUNT_BIG(driver_id),COUNT_BIG(DISTINCT driver_id),COUNT_BIG(driver_id)-COUNT_BIG(DISTINCT driver_id) FROM bronze.drivers
+UNION ALL SELECT 'facilities','facility_id',COUNT_BIG(*),COUNT_BIG(facility_id),COUNT_BIG(*)-COUNT_BIG(facility_id),COUNT_BIG(DISTINCT facility_id),COUNT_BIG(facility_id)-COUNT_BIG(DISTINCT facility_id) FROM bronze.facilities
+UNION ALL SELECT 'fuel_purchases','fuel_purchase_id',COUNT_BIG(*),COUNT_BIG(fuel_purchase_id),COUNT_BIG(*)-COUNT_BIG(fuel_purchase_id),COUNT_BIG(DISTINCT fuel_purchase_id),COUNT_BIG(fuel_purchase_id)-COUNT_BIG(DISTINCT fuel_purchase_id) FROM bronze.fuel_purchases
+UNION ALL SELECT 'loads','load_id',COUNT_BIG(*),COUNT_BIG(load_id),COUNT_BIG(*)-COUNT_BIG(load_id),COUNT_BIG(DISTINCT load_id),COUNT_BIG(load_id)-COUNT_BIG(DISTINCT load_id) FROM bronze.loads
+UNION ALL SELECT 'maintenance_records','maintenance_id',COUNT_BIG(*),COUNT_BIG(maintenance_id),COUNT_BIG(*)-COUNT_BIG(maintenance_id),COUNT_BIG(DISTINCT maintenance_id),COUNT_BIG(maintenance_id)-COUNT_BIG(DISTINCT maintenance_id) FROM bronze.maintenance_records
+UNION ALL SELECT 'routes','route_id',COUNT_BIG(*),COUNT_BIG(route_id),COUNT_BIG(*)-COUNT_BIG(route_id),COUNT_BIG(DISTINCT route_id),COUNT_BIG(route_id)-COUNT_BIG(DISTINCT route_id) FROM bronze.routes
+UNION ALL SELECT 'safety_incidents','incident_id',COUNT_BIG(*),COUNT_BIG(incident_id),COUNT_BIG(*)-COUNT_BIG(incident_id),COUNT_BIG(DISTINCT incident_id),COUNT_BIG(incident_id)-COUNT_BIG(DISTINCT incident_id) FROM bronze.safety_incidents
+UNION ALL SELECT 'trailers','trailer_id',COUNT_BIG(*),COUNT_BIG(trailer_id),COUNT_BIG(*)-COUNT_BIG(trailer_id),COUNT_BIG(DISTINCT trailer_id),COUNT_BIG(trailer_id)-COUNT_BIG(DISTINCT trailer_id) FROM bronze.trailers
+UNION ALL SELECT 'trips','trip_id',COUNT_BIG(*),COUNT_BIG(trip_id),COUNT_BIG(*)-COUNT_BIG(trip_id),COUNT_BIG(DISTINCT trip_id),COUNT_BIG(trip_id)-COUNT_BIG(DISTINCT trip_id) FROM bronze.trips
+UNION ALL SELECT 'trucks','truck_id',COUNT_BIG(*),COUNT_BIG(truck_id),COUNT_BIG(*)-COUNT_BIG(truck_id),COUNT_BIG(DISTINCT truck_id),COUNT_BIG(truck_id)-COUNT_BIG(DISTINCT truck_id) FROM bronze.trucks
 ORDER BY table_name, column_name;
--- Also verify null_count = total_rows - non_null_count for each result.
+-- null_count is calculated explicitly for every candidate identifier.
 
 -------------------------------------------------------------------------------
 -- 2. Foreign-key integrity checks (18 unique relationships)
@@ -81,17 +83,45 @@ ORDER BY table_name,column_name;
 -------------------------------------------------------------------------------
 -- 4. Trailer-number duplicates: inspect the actual records
 -------------------------------------------------------------------------------
-SELECT trailer_number, COUNT_BIG(*) AS occurrence_count,
-       COUNT_BIG(DISTINCT trailer_id) AS distinct_trailer_ids
-FROM bronze.trailers
-GROUP BY trailer_number
-HAVING COUNT_BIG(*) > 1
-ORDER BY trailer_number;
+WITH DuplicateTrailerNumbers AS
+(
+    SELECT trailer_number
+    FROM bronze.trailers
+    WHERE trailer_number IS NOT NULL
+    GROUP BY trailer_number
+    HAVING COUNT_BIG(*) > 1
+)
+SELECT
+    t.trailer_number,
+    COUNT_BIG(*) AS occurrence_count,
+    COUNT_BIG(DISTINCT t.trailer_id) AS distinct_trailer_ids
+FROM bronze.trailers AS t
+INNER JOIN DuplicateTrailerNumbers AS d
+    ON d.trailer_number = t.trailer_number
+GROUP BY t.trailer_number
+ORDER BY t.trailer_number;
 
-SELECT trailer_id, trailer_number, vin, status, trailer_type, model_year
-FROM bronze.trailers
-WHERE trailer_number IN ('2791','6620','7703','9796')
-ORDER BY trailer_number, trailer_id;
+-- Return every record for every duplicated trailer number, not only values
+-- identified during the earlier investigation.
+WITH DuplicateTrailerNumbers AS
+(
+    SELECT trailer_number
+    FROM bronze.trailers
+    WHERE trailer_number IS NOT NULL
+    GROUP BY trailer_number
+    HAVING COUNT_BIG(*) > 1
+)
+SELECT
+    t.trailer_id,
+    t.trailer_number,
+    t.vin,
+    t.status,
+    t.trailer_type,
+    t.model_year
+FROM bronze.trailers AS t
+INNER JOIN DuplicateTrailerNumbers AS d
+    ON d.trailer_number = t.trailer_number
+ORDER BY t.trailer_number, t.trailer_id;
 
 -------------------------------------------------------------------------------
 -- 5. Composite-key checks
@@ -101,6 +131,8 @@ ORDER BY trailer_number, trailer_id;
 -- Driver-month: expected candidate grain is one row per driver per month.
 SELECT driver_id, month, COUNT_BIG(*) AS rows_in_group
 FROM bronze.driver_monthly_metrics
+WHERE driver_id IS NOT NULL
+  AND month IS NOT NULL
 GROUP BY driver_id, month
 HAVING COUNT_BIG(*) > 1
 ORDER BY driver_id, month;
@@ -114,6 +146,8 @@ FROM bronze.driver_monthly_metrics;
 -- Truck-month: expected candidate grain is one row per truck per month.
 SELECT truck_id, month, COUNT_BIG(*) AS rows_in_group
 FROM bronze.truck_utilization_metrics
+WHERE truck_id IS NOT NULL
+  AND month IS NOT NULL
 GROUP BY truck_id, month
 HAVING COUNT_BIG(*) > 1
 ORDER BY truck_id, month;
