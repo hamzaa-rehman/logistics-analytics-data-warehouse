@@ -142,7 +142,7 @@ The following table contains the results returned by the profiling query.
 
 All 53 columns had zero NULL values and zero invalid numeric conversions. These two metrics are summarized above rather than repeated in every row.
 
-## 5. Findings Requiring Further Investigation
+## 5. Investigated Patterns and Remaining Business-Context Questions
 
 Profiling identified several patterns that require business-context validation. These are observations, not confirmed data-quality errors.
 
