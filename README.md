@@ -17,6 +17,7 @@ logistics-analytics-data-warehouse/
 │   │   ├── numeric_profiling.md
 │   │   ├── date_datetime_profiling.md
 │   │   ├── category_profiling.md
+│   │   ├── identifier_profiling.md
 │   │   └── investigations/
 │   │       ├── geographic_consistency_investigation.md
 │   │       ├── detention_minutes_investigation.md
@@ -69,3 +70,18 @@ CATEGORY profiling covers all 39 columns configured as CATEGORY in the Bronze pr
 - [CATEGORY Profiling SQL](scripts/bronze/profile_category.sql)
 - [Geographic Consistency Investigation Report](docs/bronze/investigations/geographic_consistency_investigation.md)
 - [Geographic Consistency Investigation SQL](scripts/bronze/investigations/investigate_geographic_consistency.sql)
+
+## Bronze Numeric Profiling
+
+Numeric profiling covers all 53 configured numeric columns across the 14 Bronze tables. The report records conversion checks, descriptive statistics, zero/negative patterns, completed investigations, analytical decisions, and source-context limitations.
+
+- [Numeric Profiling Report](docs/bronze/numeric_profiling.md)
+- [Numeric Profiling SQL](scripts/bronze/profile_numeric.sql)
+
+## Bronze Identifier Profiling
+
+Identifier profiling covers all 36 configured identifier columns. Candidate row identifiers, 18 child-to-parent relationships, six business identifiers, trailer-number repeats, and the driver-month/truck-month candidate grains are documented separately.
+
+- [Identifier Profiling Report](docs/bronze/identifier_profiling.md)
+- [Reusable Identifier Profiling SQL](scripts/bronze/profile_identifier.sql)
+- [Identifier Integrity Investigation SQL](scripts/bronze/investigations/investigate_identifier_integrity.sql)
