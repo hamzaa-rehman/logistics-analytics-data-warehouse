@@ -344,10 +344,12 @@ Before running the Bronze ingestion process, ensure that:
 6. Execute [`profile_bronze.sql`](../../scripts/bronze/profile_bronze.sql) for NULL, empty-string, and whitespace-only profiling.
 7. Execute [`profiling_config.sql`](../../scripts/bronze/profiling_config.sql) to create and validate the profiling configuration table, then import the 150 configuration rows from the project CSV if they have not already been imported.
 8. Execute [`profile_numeric.sql`](../../scripts/bronze/profile_numeric.sql) for metadata-driven numeric profiling.
-9. Execute [`profile_identifier.sql`](../../scripts/bronze/profile_identifier.sql) for all 36 configured identifier columns.
-10. Execute [`investigate_identifier_integrity.sql`](../../scripts/bronze/investigations/investigate_identifier_integrity.sql) for candidate keys, FK integrity, business identifiers, and composite keys.
-11. Use the relevant scripts under `scripts/bronze/investigations/` to investigate flagged findings.
-12. Review and document validation and profiling findings in the corresponding project documentation.
+9. Execute [`profile_date_datetime.sql`](../../scripts/bronze/profile_date_datetime.sql) for DATE and DATETIME profiling.
+10. Execute [`profile_category.sql`](../../scripts/bronze/profile_category.sql) for CATEGORY profiling.
+11. Execute [`profile_identifier.sql`](../../scripts/bronze/profile_identifier.sql) for all 36 configured identifier columns.
+12. Execute [`investigate_identifier_integrity.sql`](../../scripts/bronze/investigations/investigate_identifier_integrity.sql) for candidate keys, FK integrity, business identifiers, and composite keys.
+13. Use the relevant scripts under `scripts/bronze/investigations/` to investigate flagged findings.
+14. Review and document validation and profiling findings in the corresponding project documentation.
 
 ## 10. Next Stage
 
