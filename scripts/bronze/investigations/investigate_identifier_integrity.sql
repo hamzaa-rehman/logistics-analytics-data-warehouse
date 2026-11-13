@@ -13,7 +13,7 @@
 */
 
 USE LogisticsAnalytics;
-GO
+
 
 SET NOCOUNT ON;
 
@@ -123,4 +123,4 @@ SELECT
     SUM(CASE WHEN truck_id IS NULL THEN CONVERT(BIGINT,1) ELSE 0 END) AS null_truck_id_rows,
     SUM(CASE WHEN month IS NULL THEN CONVERT(BIGINT,1) ELSE 0 END) AS null_month_rows
 FROM bronze.truck_utilization_metrics;
-GO
+
