@@ -133,6 +133,7 @@ Bronze Layer
 │       ├── profile_date_datetime.sql
 │       ├── profile_category.sql
 │       ├── profile_identifier.sql
+│       ├── profile_text_columns.sql
 │       └── investigations/
 │           ├── investigate_detention_minutes.sql
 │           ├── investigate_on_time_delivery_rate.sql
@@ -150,6 +151,7 @@ Bronze Layer
 │       ├── date_datetime_profiling.md
 │       ├── category_profiling.md
 │       ├── identifier_profiling.md
+│       ├── text_profiling.md
 │       └── investigations/
 │           ├── geographic_consistency_investigation.md
 │           ├── detention_minutes_investigation.md
@@ -170,6 +172,7 @@ Bronze Layer
 | [`profile_date_datetime.sql`](../../scripts/bronze/profile_date_datetime.sql) | Uses the profiling configuration to dynamically calculate DATE and DATETIME profiling metrics across configured Bronze columns. |
 | [`profile_category.sql`](../../scripts/bronze/profile_category.sql) | Uses the profiling configuration to dynamically calculate category counts, frequencies, percentages, case-sensitive distinct counts, and ordinary boundary-space checks. |
 | [`profile_identifier.sql`](../../scripts/bronze/profile_identifier.sql) | Uses the profiling configuration to dynamically calculate row, NULL, distinct, and duplicate counts for all configured identifier columns. |
+| [`profile_text_columns.sql`](../../scripts/bronze/profile_text_columns.sql) | Uses the profiling configuration to dynamically calculate completeness, distinct-value, and text-length metrics for configured TEXT columns, plus selected descriptive-value frequency distributions. |
 | [`investigations/investigate_identifier_integrity.sql`](../../scripts/bronze/investigations/investigate_identifier_integrity.sql) | Contains candidate-key, foreign-key orphan, business-identifier, trailer-number, and composite-key integrity checks. |
 | [`investigations/investigate_january_2025_timestamps.sql`](../../scripts/bronze/investigations/investigate_january_2025_timestamps.sql) | Contains the January 2025 delivery-event and fuel-purchase timestamp investigation, including trip timelines and truck/driver association checks. |
 | [`investigations/investigate_geographic_consistency.sql`](../../scripts/bronze/investigations/investigate_geographic_consistency.sql) | Contains internal city/state consistency checks and cross-table comparison for fuel purchases and safety incidents. |
@@ -183,6 +186,7 @@ Bronze Layer
 | [`date_datetime_profiling.md`](date_datetime_profiling.md) | Documents the metadata-driven DATE and DATETIME profiling methodology, all 15 column-level results, January 2025 timestamp investigation findings, Silver-layer recommendations, and limitations. |
 | [`category_profiling.md`](category_profiling.md) | Documents the metadata-driven CATEGORY profiling methodology, all 39 column-level distinct counts, selected frequency observations, findings, and limitations. |
 | [`identifier_profiling.md`](identifier_profiling.md) | Documents the 36 configured identifier columns, candidate-key results, 18 relationship checks, business-identifier findings, and composite-key assessments. |
+| [`text_profiling.md`](text_profiling.md) | Documents the seven configured TEXT columns, completeness and length metrics, selected value frequencies, findings, Silver-layer considerations, and profiling limitations. |
 | [`investigations/geographic_consistency_investigation.md`](investigations/geographic_consistency_investigation.md) | Documents within-source city/state consistency checks and comparison of fuel purchases and safety incidents against an internal reference mapping. |
 | [`investigations/on_time_flag_investigation.md`](investigations/on_time_flag_investigation.md) | Documents the investigation methodology and the validated ±120-minute tolerance rule for `delivery_events.on_time_flag`. |
 | [`investigations/safety_incident_financials_investigation.md`](investigations/safety_incident_financials_investigation.md) | Documents the zero-value patterns, incident-level comparisons, financial-field reconciliation, findings, and limitations for safety incident costs and claims. |
@@ -305,6 +309,25 @@ Four trailer numbers (2791, 6620, 7703, and 9796) each appeared twice across dif
 
 The reusable identifier profile and targeted integrity checks are documented in [Identifier Profiling](identifier_profiling.md).
 
+### 7.6 TEXT profiling
+
+The seven columns classified as `TEXT` were profiled for row counts, NULLs, empty strings, whitespace-only values, distinct values, and text lengths.
+
+| Check | Result |
+|---|---:|
+| Configured TEXT columns | 7 |
+| Tables represented | 5 |
+| Rows profiled across the seven columns | 3,690 |
+| NULL values | 0 |
+| Empty strings | 0 |
+| Whitespace-only values detected | 0 |
+
+Selected frequency distributions were reviewed for facility operating hours, maintenance service descriptions, and safety incident descriptions. These distributions revealed repeatable descriptive patterns but do not establish source-system business rules.
+
+The Bronze layer retains the original text. Potential derived attributes for maintenance classification and incident severity/context are considerations for Silver only, subject to validation.
+
+The methodology, column-level results, frequency observations, and limitations are documented in [TEXT Profiling](text_profiling.md).
+
 
 ## 8. Known Limitations
 
@@ -347,9 +370,10 @@ Before running the Bronze ingestion process, ensure that:
 9. Execute [`profile_date_datetime.sql`](../../scripts/bronze/profile_date_datetime.sql) for DATE and DATETIME profiling.
 10. Execute [`profile_category.sql`](../../scripts/bronze/profile_category.sql) for CATEGORY profiling.
 11. Execute [`profile_identifier.sql`](../../scripts/bronze/profile_identifier.sql) for all 36 configured identifier columns.
-12. Execute [`investigate_identifier_integrity.sql`](../../scripts/bronze/investigations/investigate_identifier_integrity.sql) for candidate keys, FK integrity, business identifiers, and composite keys.
-13. Use the relevant scripts under `scripts/bronze/investigations/` to investigate flagged findings.
-14. Review and document validation and profiling findings in the corresponding project documentation.
+12. Execute [`profile_text_columns.sql`](../../scripts/bronze/profile_text_columns.sql) for all 7 configured TEXT columns and selected descriptive-value frequencies.
+13. Execute [`investigate_identifier_integrity.sql`](../../scripts/bronze/investigations/investigate_identifier_integrity.sql) for candidate keys, FK integrity, business identifiers, and composite keys.
+14. Use the relevant scripts under `scripts/bronze/investigations/` to investigate flagged findings.
+15. Review and document validation and profiling findings in the corresponding project documentation.
 
 ## 10. Next Stage
 
