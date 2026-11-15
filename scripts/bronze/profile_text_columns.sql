@@ -107,7 +107,7 @@ SELECT
                      AND DATALENGTH(' + QUOTENAME(pc.ColumnName) + N') > 0
                      AND TRIM(REPLACE(REPLACE(REPLACE(' + QUOTENAME(pc.ColumnName) +
                         N', CHAR(9), '' ''), CHAR(10), '' ''), CHAR(13), '' '')) <> ''''
-                    THEN CONVERT(DECIMAL(19,4), LEN(' + QUOTENAME(pc.ColumnName) + N'))
+                    THEN CONVERT(DECIMAL(19,6), LEN(' + QUOTENAME(pc.ColumnName) + N'))
                 END) AS DECIMAL(19,6)) AS AvgLength
               FROM ' + QUOTENAME(pc.SchemaName) + N'.' + QUOTENAME(pc.TableName)
             AS NVARCHAR(MAX)
