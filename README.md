@@ -18,6 +18,7 @@ logistics-analytics-data-warehouse/
 │   │   ├── date_datetime_profiling.md
 │   │   ├── category_profiling.md
 │   │   ├── identifier_profiling.md
+│   │   ├── text_profiling.md
 │   │   └── investigations/
 │   │       ├── geographic_consistency_investigation.md
 │   │       ├── detention_minutes_investigation.md
@@ -42,6 +43,7 @@ logistics-analytics-data-warehouse/
 │   │   ├── profile_date_datetime.sql
 │   │   ├── profile_category.sql
 │   │   ├── profile_identifier.sql
+│   │   ├── profile_text_columns.sql
 │   │   └── investigations/
 │   │       ├── investigate_detention_minutes.sql
 │   │       ├── investigate_on_time_delivery_rate.sql
@@ -87,3 +89,10 @@ Identifier profiling covers all 36 configured identifier columns. Candidate row 
 - [Identifier Profiling Report](docs/bronze/identifier_profiling.md)
 - [Reusable Identifier Profiling SQL](scripts/bronze/profile_identifier.sql)
 - [Identifier Integrity Investigation SQL](scripts/bronze/investigations/investigate_identifier_integrity.sql)
+
+## Bronze TEXT Profiling
+
+TEXT profiling covers all 7 columns classified as TEXT in the Bronze profiling metadata. The reusable SQL reports completeness, distinct values, and text-length metrics, with frequency distributions for selected descriptive fields.
+
+- [TEXT Profiling Report](docs/bronze/text_profiling.md)
+- [TEXT Profiling SQL](scripts/bronze/profile_text_columns.sql)
