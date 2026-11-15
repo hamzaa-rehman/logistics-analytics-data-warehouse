@@ -30,7 +30,7 @@ SQL Server 2017+ is required for STRING_AGG. TRIM requires SQL Server 2017+.
 */
 
 USE LogisticsAnalytics;
-GO
+
 
 SET NOCOUNT ON;
 
@@ -126,7 +126,7 @@ SET @SummarySQL =
       ORDER BY TableName, ColumnName;';
 
 EXEC sys.sp_executesql @SummarySQL;
-GO
+
 
 /* 2. Frequency distribution: facility operating hours. */
 SELECT
@@ -137,7 +137,7 @@ SELECT
 FROM bronze.facilities
 GROUP BY operating_hours
 ORDER BY ValueCount DESC, TextValue;
-GO
+
 
 /* 3. Frequency distribution: maintenance service descriptions. */
 SELECT
@@ -148,7 +148,7 @@ SELECT
 FROM bronze.maintenance_records
 GROUP BY service_description
 ORDER BY ValueCount DESC, TextValue;
-GO
+
 
 /* 4. Frequency distribution: safety incident descriptions. */
 SELECT
@@ -159,4 +159,4 @@ SELECT
 FROM bronze.safety_incidents
 GROUP BY description
 ORDER BY ValueCount DESC, TextValue;
-GO
+
