@@ -19,7 +19,7 @@ For each column, it reports:
 - True empty-string count.
 - Whitespace-only count.
 - Distinct non-NULL value count.
-- Minimum, maximum, and average text length for non-empty values.
+- Minimum, maximum, and average text length, excluding NULL, true empty-string, and detected whitespace-only values.
 
 ### Whitespace and length handling
 
@@ -27,7 +27,9 @@ A true empty string is identified using `DATALENGTH(column) = 0`. This avoids re
 
 Whitespace-only detection converts tabs (`CHAR(9)`), line feeds (`CHAR(10)`), and carriage returns (`CHAR(13)`) to ordinary spaces before applying `TRIM()`. The check therefore covers ordinary spaces and these common control characters, but is not a universal Unicode-whitespace test.
 
-`LEN()` is used for character length and ignores trailing ordinary spaces. NULL, empty, and detected whitespace-only values are excluded from the length statistics.
+`LEN()` is used for character length and ignores trailing ordinary spaces. NULL, empty, and detected whitespace-only values are excluded from the length statistics. Average length is calculated from `DECIMAL(19,6)` character counts before aggregation, preserving the reported six-decimal precision.
+
+Distinct counts follow the SQL Server collation of each column. Depending on that collation, values that differ only by letter case or accents may be treated as equal; the distinct count is therefore collation-dependent rather than a byte-for-byte uniqueness count.
 
 The script also produces frequency distributions for `facilities.operating_hours`, `maintenance_records.service_description`, and `safety_incidents.description`.
 
