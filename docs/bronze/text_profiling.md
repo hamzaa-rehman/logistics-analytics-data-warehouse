@@ -46,6 +46,8 @@ The script also produces frequency distributions for `facilities.operating_hours
 
 All seven columns contained non-empty values in the observed extract.
 
+The corrected profiling script was re-executed after the average-length precision fix. The returned row counts, completeness counts, distinct counts, length ranges, and six-decimal average lengths matched the results recorded below.
+
 ## 4. Column-level results
 
 | Table | Column | Rows | Distinct values | Min length | Max length | Avg length |
