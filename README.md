@@ -46,8 +46,7 @@ logistics-analytics-data-warehouse/
 │   ├── data_dictionary/
 │   │   └── placeholder.txt
 │   ├── data_inventory/
-│   │   ├── Logistics_Data_Inventory_Bronze.xlsx
-│   │   └── placeholder.txt
+│   │   └── Logistics_Data_Inventory_Bronze.xlsx
 │   └── diagrams/
 │       ├── Logistics_Data_Warehouse_Architecture.drawio
 │       └── Logistics_Data_Warehouse_Architecture.png
