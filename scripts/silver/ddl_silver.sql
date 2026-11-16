@@ -23,6 +23,10 @@
     deliberate full reload.
 */
 
+-- Ensure the Silver schema exists before creating its tables.
+IF SCHEMA_ID(N'silver') IS NULL
+    EXEC(N'CREATE SCHEMA silver');
+
 
 -- ============================================================
 -- 1. CUSTOMERS
