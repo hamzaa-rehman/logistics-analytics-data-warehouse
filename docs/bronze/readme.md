@@ -95,16 +95,18 @@ This prevents records from accumulating across repeated executions and allows ea
 
 The Bronze ingestion process consists of the following steps:
 
-1. Create the database and Bronze table structures.
-2. Make the source CSV files accessible to SQL Server.
-3. Execute the Bronze loading procedure.
-4. Truncate the corresponding Bronze tables.
-5. Bulk load the source CSV files.
+1. Create the database and Bronze schema (the DDL script creates the schema if it does not exist).
+2. Execute `ddl_bronze.sql` to create the 14 raw tables. **Warning:** this script drops and recreates existing Bronze tables.
+3. Make all 14 source CSV files accessible to SQL Server.
+4. Execute `load_bronze.sql` to create or update the loading procedure. This script does not start a load automatically.
+5. Explicitly execute `bronze.load_bronze` with the correct SQL Server-accessible directory.
 6. Validate the loaded tables and profile their contents.
+
+The loading procedure performs the full refresh in a single transaction. If a table load fails, the transaction is rolled back so the previous Bronze contents are not left partially refreshed.
 
 ### Loading procedure
 
-The stored procedure `bronze.load_bronze` accepts a data-folder path through the `@DataFolder` parameter.
+The script `load_bronze.sql` creates or updates the stored procedure `bronze.load_bronze`; it does not execute the procedure. The procedure accepts a data-folder path through the `@DataFolder` parameter. Run the following command separately only after confirming that all 14 CSV files are accessible to SQL Server.
 
 Example execution:
 
