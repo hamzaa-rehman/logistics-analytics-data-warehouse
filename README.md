@@ -8,7 +8,24 @@ The tree below reflects the current repository contents. The presence of Silver 
 ```text
 logistics-analytics-data-warehouse/
 ├── datasets/
-│   └── README.md
+│   ├── README.md
+│   ├── logistics_operations_database/
+│   │   ├── customers.csv
+│   │   ├── delivery_events.csv
+│   │   ├── driver_monthly_metrics.csv
+│   │   ├── drivers.csv
+│   │   ├── facilities.csv
+│   │   ├── fuel_purchases.csv
+│   │   ├── loads.csv
+│   │   ├── maintenance_records.csv
+│   │   ├── routes.csv
+│   │   ├── safety_incidents.csv
+│   │   ├── trailers.csv
+│   │   ├── trips.csv
+│   │   ├── truck_utilization_metrics.csv
+│   │   └── trucks.csv
+│   └── profiling_config/
+│       └── bronze_profiling_config.csv
 ├── docs/
 │   ├── architecture/
 │   │   └── placeholder.txt
@@ -29,6 +46,7 @@ logistics-analytics-data-warehouse/
 │   ├── data_dictionary/
 │   │   └── placeholder.txt
 │   ├── data_inventory/
+│   │   ├── Logistics_Data_Inventory_Bronze.xlsx
 │   │   └── placeholder.txt
 │   └── diagrams/
 │       ├── Logistics_Data_Warehouse_Architecture.drawio
@@ -65,6 +83,11 @@ logistics-analytics-data-warehouse/
 └── README.md
 ```
 
+## Project Data Assets
+
+- [Dataset files, source-to-table mapping, and profiling configuration](datasets/README.md)
+- [Bronze data inventory and profiling workbook](docs/data_inventory/Logistics_Data_Inventory_Bronze.xlsx)
+- [Bronze layer documentation](docs/bronze/readme.md)
 
 ## Bronze CATEGORY Profiling
 
