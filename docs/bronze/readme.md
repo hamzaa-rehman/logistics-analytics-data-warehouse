@@ -98,15 +98,14 @@ The Bronze ingestion process consists of the following steps:
 1. Create the database and Bronze schema (the DDL script creates the schema if it does not exist).
 2. Execute `ddl_bronze.sql` to create the 14 raw tables. **Warning:** this script drops and recreates existing Bronze tables.
 3. Make all 14 source CSV files accessible to SQL Server.
-4. Execute `load_bronze.sql` to create or update the loading procedure. This script does not start a load automatically.
-5. Explicitly execute `bronze.load_bronze` with the correct SQL Server-accessible directory.
+4. Execute `load_bronze.sql`. It creates or updates the stored procedure and then automatically executes it using the folder path currently written at the end of the script (`/var/opt/mssql/logistics/`). Before running it, confirm that this path exists and is accessible from SQL Server. If your path differs, update the execution statement in the script.
 6. Validate the loaded tables and profile their contents.
 
-The loading procedure performs the full refresh in a single transaction. If a table load fails, the transaction is rolled back so the previous Bronze contents are not left partially refreshed.
+The procedure performs a full refresh by truncating and reloading the mapped tables one by one. It does not wrap all 14 table loads in a single transaction. If execution fails partway through, some tables may already have been refreshed while others may remain unchanged or partially loaded.
 
 ### Loading procedure
 
-The script `load_bronze.sql` creates or updates the stored procedure `bronze.load_bronze`; it does not execute the procedure. The procedure accepts a data-folder path through the `@DataFolder` parameter. Run the following command separately only after confirming that all 14 CSV files are accessible to SQL Server.
+The script `load_bronze.sql` creates or updates the stored procedure `bronze.load_bronze` and then executes it automatically. The execution statement at the end currently uses `/var/opt/mssql/logistics/`. This is the path inside the SQL Server Docker container used when the procedure was originally run. Confirm or edit this path before executing the script.
 
 Example execution:
 
@@ -115,7 +114,7 @@ USE LogisticsAnalytics;
 
 
 EXEC bronze.load_bronze
-    @DataFolder = N'<SQL Server accessible CSV directory>';
+    @DataFolder = N'/var/opt/mssql/logistics/';
 
 ```
 
@@ -363,7 +362,7 @@ The current Bronze implementation has the following limitations:
 
 2. **Column-order dependency:** `BULK INSERT` loads data by column position rather than matching CSV header names. A change in source column order can result in loading errors or incorrectly mapped values.
 
-3. **Transactional full-refresh behaviour:** The procedure wraps the 14-table refresh in an explicit transaction and attempts to roll back the refresh if an error occurs. This is designed to prevent a failed run from leaving earlier tables refreshed while later tables retain old data. This behaviour must still be verified by testing against the target SQL Server environment.
+3. **Partial loading risk:** The procedure does not use a single transaction across all 14 tables. If execution fails partway through, previously processed tables may already contain refreshed data, while the table being processed may be empty or partially loaded, depending on where the failure occurs. Subsequent tables may remain unchanged.
 
 4. **Full refresh strategy:** Existing table contents are removed before reloading. The process is not an incremental loading implementation.
 
