@@ -90,6 +90,14 @@ Identifier profiling covers all 36 configured identifier columns. Candidate row 
 - [Reusable Identifier Profiling SQL](scripts/bronze/profile_identifier.sql)
 - [Identifier Integrity Investigation SQL](scripts/bronze/investigations/investigate_identifier_integrity.sql)
 
+
+## Bronze DATE and DATETIME Profiling
+
+DATE and DATETIME profiling covers all 15 columns configured for temporal profiling across the 14 Bronze tables: 11 columns classified as `DATE` and 4 classified as `DATETIME`. The metadata-driven SQL uses `TRY_CONVERT` to assess technical convertibility, NULL and invalid values, and minimum and maximum dates or timestamps. These checks profile the original VARCHAR values without modifying the Bronze data.
+
+- [DATE and DATETIME Profiling Report](docs/bronze/date_datetime_profiling.md)
+- [DATE and DATETIME Profiling SQL](scripts/bronze/profile_date_datetime.sql)
+
 ## Bronze TEXT Profiling
 
 TEXT profiling covers all 7 columns classified as TEXT in the Bronze profiling metadata. The reusable SQL reports completeness, distinct values, and text-length metrics, with frequency distributions for selected descriptive fields.
