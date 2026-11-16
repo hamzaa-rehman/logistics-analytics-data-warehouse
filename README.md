@@ -3,7 +3,7 @@ A SQL Server data warehouse project using Medallion Architecture (Bronze, Silver
 
 ## Repository Structure
 
-The tree below reflects the current repository contents. The presence of Silver and Gold files or folders does not mean those layers have been implemented; their development and documentation will be covered when work begins on those stages.
+The tree below reflects the current repository contents. The Silver DDL is an initial table-structure draft only; the Silver transformation and loading pipeline is not yet implemented. Gold development will begin after Silver is complete.
 
 ```text
 logistics-analytics-data-warehouse/
