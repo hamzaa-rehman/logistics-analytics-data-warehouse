@@ -18,6 +18,8 @@ It provides a foundation for subsequent processing in the Silver and Gold layers
 
 **Source dataset:** Kaggle — Logistics Operations Database.
 
+The 14 source CSV files are stored in [`datasets/logistics_operations_database/`](../../datasets/logistics_operations_database/). The metadata file used to populate `bronze.profiling_config` is [`bronze_profiling_config.csv`](../../datasets/profiling_config/bronze_profiling_config.csv). See the [datasets README](../../datasets/README.md) for the source-file mapping, configuration fields, and import guidance.
+
 ## 2. Data Warehouse Architecture
 
 The project is designed around the Medallion Architecture, separating data ingestion, data transformation, and business-level modelling into three layers. The Bronze layer has been implemented; the Silver and Gold layers represent the planned next stages.
@@ -119,10 +121,31 @@ The directory must be accessible to the SQL Server environment, and the SQL Serv
 
 ## 6. Bronze Repository Structure
 
-The following tree contains only the files associated with the Bronze layer.
+The following tree shows the repository assets used by or documenting the Bronze layer, including its source CSV files, profiling configuration, inventory workbook, SQL scripts, and validation documentation.
 
 ```text
 Bronze Layer
+├── datasets/
+│   ├── logistics_operations_database/
+│   │   ├── customers.csv
+│   │   ├── delivery_events.csv
+│   │   ├── driver_monthly_metrics.csv
+│   │   ├── drivers.csv
+│   │   ├── facilities.csv
+│   │   ├── fuel_purchases.csv
+│   │   ├── loads.csv
+│   │   ├── maintenance_records.csv
+│   │   ├── routes.csv
+│   │   ├── safety_incidents.csv
+│   │   ├── trailers.csv
+│   │   ├── trips.csv
+│   │   ├── truck_utilization_metrics.csv
+│   │   └── trucks.csv
+│   └── profiling_config/
+│       └── bronze_profiling_config.csv
+├── docs/
+│   └── data_inventory/
+│       └── Logistics_Data_Inventory_Bronze.xlsx
 ├── scripts/
 │   └── bronze/
 │       ├── ddl_bronze.sql
@@ -351,7 +374,8 @@ Before running the Bronze ingestion process, ensure that:
 
 - SQL Server is available and the `LogisticsAnalytics` database exists.
 - The Bronze schema and all 14 raw tables have been created using [`ddl_bronze.sql`](../../scripts/bronze/ddl_bronze.sql).
-- All required source CSV files are available.
+- All 14 source CSV files are available from [`datasets/logistics_operations_database/`](../../datasets/logistics_operations_database/) and have been copied to a directory accessible to SQL Server.
+- The profiling metadata CSV is available at [`datasets/profiling_config/bronze_profiling_config.csv`](../../datasets/profiling_config/bronze_profiling_config.csv).
 - SQL Server can access the source-file directory and has the necessary permissions.
 - The loading procedure has been created using [`load_bronze.sql`](../../scripts/bronze/load_bronze.sql).
 - The profiling configuration table has been created using [`profiling_config.sql`](../../scripts/bronze/profiling_config.sql), and the 150 column-classification rows have been imported.
@@ -365,7 +389,7 @@ Before running the Bronze ingestion process, ensure that:
 4. Execute `bronze.load_bronze` with the appropriate directory path.
 5. Execute [`validate_bronze.sql`](../../tests/validate_bronze.sql).
 6. Execute [`profile_bronze.sql`](../../scripts/bronze/profile_bronze.sql) for NULL, empty-string, and whitespace-only profiling.
-7. Execute [`profiling_config.sql`](../../scripts/bronze/profiling_config.sql) to create and validate the profiling configuration table, then import the 150 configuration rows from the project CSV if they have not already been imported.
+7. Execute [`profiling_config.sql`](../../scripts/bronze/profiling_config.sql) to create and validate the profiling configuration table, then import the 150 rows from [`bronze_profiling_config.csv`](../../datasets/profiling_config/bronze_profiling_config.csv) if they have not already been imported.
 8. Execute [`profile_numeric.sql`](../../scripts/bronze/profile_numeric.sql) for metadata-driven numeric profiling.
 9. Execute [`profile_date_datetime.sql`](../../scripts/bronze/profile_date_datetime.sql) for DATE and DATETIME profiling.
 10. Execute [`profile_category.sql`](../../scripts/bronze/profile_category.sql) for CATEGORY profiling.
