@@ -1,5 +1,5 @@
-# logistics-analytics-data-warehouse
-An end-to-end Logistics Analytics Data Warehouse built using SQL Server and Medallion Architecture (Bronze, Silver, Gold), transforming raw logistics data into actionable business insights through data engineering, analytics, and Power BI.
+# Logistics Analytics Data Warehouse
+A SQL Server data warehouse project using Medallion Architecture (Bronze, Silver, Gold) to explore and prepare logistics operations data for business analytics. The Bronze ingestion and profiling layer is implemented; Silver transformations, Gold analytical models, and Power BI reporting are planned development stages.
 
 ## Repository Structure
 
