@@ -27,6 +27,10 @@ Usage:
 ======================================================================
 */
 
+-- Ensure the Bronze schema exists before creating its tables.
+IF SCHEMA_ID(N'bronze') IS NULL
+    EXEC(N'CREATE SCHEMA bronze');
+
 -- =============================================
 -- Table: bronze.customers
 -- Description: Stores raw customer information
