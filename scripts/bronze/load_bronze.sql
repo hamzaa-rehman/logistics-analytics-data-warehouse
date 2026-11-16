@@ -150,11 +150,6 @@ BEGIN
     -- If an error occurs, execution moves to CATCH.
     BEGIN TRY
 
-        -- Treat the full refresh as one transaction. If any table fails,
-        -- all earlier TRUNCATE and BULK INSERT operations are rolled back.
-        SET XACT_ABORT ON;
-        BEGIN TRANSACTION;
-
         -- Repeat until all mapped tables have been processed.
         WHILE @Counter <= @TotalTables
         BEGIN
@@ -258,17 +253,11 @@ BEGIN
 
         PRINT '========================================';
 
-        -- Commit only after all 14 tables have loaded successfully.
-        COMMIT TRANSACTION;
 
     END TRY
 
     -- CATCH block executes if an error occurs in the TRY block.
     BEGIN CATCH
-
-        -- Restore the previous Bronze contents if any table load fails.
-        IF XACT_STATE() <> 0
-            ROLLBACK TRANSACTION;
 
         PRINT '========================================';
         PRINT 'BRONZE LOADING FAILED';
@@ -288,6 +277,16 @@ BEGIN
 
 END;
 
--- The procedure is created here but is NOT executed automatically.
--- Run it explicitly after confirming the CSV directory is accessible:
--- EXEC bronze.load_bronze @DataFolder = N'<SQL Server accessible CSV directory>';
+-- =============================================
+-- EXECUTE BRONZE LOADING PROCEDURE
+-- =============================================
+
+-- Load all 14 CSV files from the folder inside
+-- the Docker SQL Server container into Bronze tables.
+-- The folder was populated by copying the CSV files
+-- from the Mac into the Docker container.
+
+EXEC bronze.load_bronze
+    @DataFolder = N'/var/opt/mssql/logistics/';
+
+
