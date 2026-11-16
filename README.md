@@ -27,8 +27,6 @@ logistics-analytics-data-warehouse/
 │   └── profiling_config/
 │       └── bronze_profiling_config.csv
 ├── docs/
-│   ├── architecture/
-│   │   └── placeholder.txt
 │   ├── bronze/
 │   │   ├── readme.md
 │   │   ├── numeric_profiling.md
@@ -43,8 +41,6 @@ logistics-analytics-data-warehouse/
 │   │       ├── on_time_flag_investigation.md
 │   │       ├── safety_incident_financials_investigation.md
 │   │       └── truck_utilization_maintenance_investigation.md
-│   ├── data_dictionary/
-│   │   └── placeholder.txt
 │   ├── data_inventory/
 │   │   └── Logistics_Data_Inventory_Bronze.xlsx
 │   └── diagrams/
@@ -71,11 +67,8 @@ logistics-analytics-data-warehouse/
 │   │       ├── investigate_january_2025_timestamps.sql
 │   │       ├── investigate_geographic_consistency.sql
 │   │       └── investigate_identifier_integrity.sql
-│   ├── gold/
-│   │   └── readme.md
 │   └── silver/
-│       ├── ddl_silver.sql
-│       └── readme.txt
+│       └── ddl_silver.sql
 ├── tests/
 │   └── validate_bronze.sql
 ├── LICENSE
