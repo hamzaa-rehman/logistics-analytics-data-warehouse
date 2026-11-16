@@ -31,6 +31,7 @@ Usage Example:
 -- Ensure the Bronze schema exists before creating the procedure.
 IF SCHEMA_ID(N'bronze') IS NULL
     EXEC(N'CREATE SCHEMA bronze');
+GO
 
 CREATE OR ALTER PROCEDURE bronze.load_bronze
     @DataFolder NVARCHAR(4000)
