@@ -184,6 +184,8 @@ Bronze Layer
 │           └── investigate_identifier_integrity.sql
 └── tests/
     └── validate_bronze.sql
+```
+
 | File | Responsibility |
 |---|---|
 | [`ddl_bronze.sql`](../../scripts/bronze/ddl_bronze.sql) | Creates the Bronze schema and raw tables. |
