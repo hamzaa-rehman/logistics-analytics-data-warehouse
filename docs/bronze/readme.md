@@ -363,7 +363,7 @@ The current Bronze implementation has the following limitations:
 
 2. **Column-order dependency:** `BULK INSERT` loads data by column position rather than matching CSV header names. A change in source column order can result in loading errors or incorrectly mapped values.
 
-3. **Partial loading risk:** The current procedure does not use a single transaction across all 14 tables. If execution fails partway through, previously processed tables may already contain refreshed data, while the table being processed may be empty or partially loaded, depending on where the failure occurs. Subsequent tables may remain unchanged.
+3. **Transactional full-refresh behaviour:** The procedure wraps the 14-table refresh in an explicit transaction and attempts to roll back the refresh if an error occurs. This is designed to prevent a failed run from leaving earlier tables refreshed while later tables retain old data. This behaviour must still be verified by testing against the target SQL Server environment.
 
 4. **Full refresh strategy:** Existing table contents are removed before reloading. The process is not an incremental loading implementation.
 
