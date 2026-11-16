@@ -126,6 +126,7 @@ The following tree shows the repository assets used by or documenting the Bronze
 ```text
 Bronze Layer
 ├── datasets/
+│   ├── README.md
 │   ├── logistics_operations_database/
 │   │   ├── customers.csv
 │   │   ├── delivery_events.csv
@@ -144,8 +145,22 @@ Bronze Layer
 │   └── profiling_config/
 │       └── bronze_profiling_config.csv
 ├── docs/
-│   └── data_inventory/
-│       └── Logistics_Data_Inventory_Bronze.xlsx
+│   ├── data_inventory/
+│   │   └── Logistics_Data_Inventory_Bronze.xlsx
+│   └── bronze/
+│       ├── readme.md
+│       ├── numeric_profiling.md
+│       ├── date_datetime_profiling.md
+│       ├── category_profiling.md
+│       ├── identifier_profiling.md
+│       ├── text_profiling.md
+│       └── investigations/
+│           ├── geographic_consistency_investigation.md
+│           ├── detention_minutes_investigation.md
+│           ├── on_time_delivery_rate_investigation.md
+│           ├── on_time_flag_investigation.md
+│           ├── safety_incident_financials_investigation.md
+│           └── truck_utilization_maintenance_investigation.md
 ├── scripts/
 │   └── bronze/
 │       ├── ddl_bronze.sql
@@ -167,24 +182,8 @@ Bronze Layer
 │           ├── investigate_january_2025_timestamps.sql
 │           ├── investigate_geographic_consistency.sql
 │           └── investigate_identifier_integrity.sql
-├── docs/
-│   └── bronze/
-│       ├── readme.md
-│       ├── numeric_profiling.md
-│       ├── date_datetime_profiling.md
-│       ├── category_profiling.md
-│       ├── identifier_profiling.md
-│       ├── text_profiling.md
-│       └── investigations/
-│           ├── geographic_consistency_investigation.md
-│           ├── detention_minutes_investigation.md
-│           ├── on_time_delivery_rate_investigation.md
-│           ├── on_time_flag_investigation.md
-│           ├── safety_incident_financials_investigation.md
-│           └── truck_utilization_maintenance_investigation.md
 └── tests/
     └── validate_bronze.sql
-```
 | File | Responsibility |
 |---|---|
 | [`ddl_bronze.sql`](../../scripts/bronze/ddl_bronze.sql) | Creates the Bronze schema and raw tables. |
