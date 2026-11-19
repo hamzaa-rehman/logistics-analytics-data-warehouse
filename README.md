@@ -1,9 +1,9 @@
 # Logistics Analytics Data Warehouse
-A SQL Server data warehouse project using Medallion Architecture (Bronze, Silver, Gold) to explore and prepare logistics operations data for business analytics. The Bronze ingestion and profiling layer is implemented; Silver transformations, Gold analytical models, and Power BI reporting are planned development stages.
+A SQL Server data warehouse project using the Medallion Architecture (Bronze, Silver, Gold) to prepare logistics operations data for business analytics. The Bronze ingestion and profiling layer and the Silver transformation, loading, and validation work are implemented. Gold analytical models and Power BI reporting are the next development stages.
 
 ## Repository Structure
 
-The tree below reflects the current repository contents. The Silver DDL is an initial table-structure draft only; the Silver transformation and loading pipeline is not yet implemented. Gold development will begin after Silver is complete.
+The tree below reflects the current repository contents. Bronze ingestion and profiling are implemented, and the Silver schema, loading procedure, and validation work are complete. Gold development will follow the validated Silver layer.
 
 ```text
 logistics-analytics-data-warehouse/
@@ -79,7 +79,7 @@ logistics-analytics-data-warehouse/
 
 - [Dataset files, source-to-table mapping, and profiling configuration](datasets/README.md)
 - [Bronze data inventory and profiling workbook](docs/data_inventory/Logistics_Data_Inventory_Bronze.xlsx)
-- [Bronze layer documentation](docs/bronze/readme.md)
+- [Bronze layer documentation](docs/bronze/readme.md)\n- [Silver layer documentation](docs/silver/readme.md)
 
 ## Bronze CATEGORY Profiling
 
