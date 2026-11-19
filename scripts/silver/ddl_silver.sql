@@ -14,14 +14,38 @@
       during the Silver loading process.
     - Retain source NULLs unless investigation establishes that
       they should be handled differently.
-    - Add PK, FK, UNIQUE and CHECK constraints after data
-      validation, not before.
+    - Define primary keys and foreign keys as named constraints
+      within the CREATE TABLE statements.
+    - Primary-key columns are NOT NULL.
+    - Preserve the original nullability of all non-primary-key
+      columns, including nullable foreign-key columns.
+    - Do not define UNIQUE or CHECK constraints in this script.
+    - Use CREATE TABLE statements only; no ALTER TABLE statements.
 
-    WARNING:
-    These DROP TABLE statements delete existing table data.
-    Use this script during schema development or before a
-    deliberate full reload.
+    Execution:
+    - Create the Silver schema if it does not already exist.
+    - Create all 14 tables in parent-to-child dependency order.
+    - Parent tables must exist before dependent tables are created.
+    - Execute this script after reset_silver.sql when a full
+      Silver rebuild is required.
+
+    Deployment:
+    - This script creates table structures only.
+    - It does not drop existing tables or delete existing data.
+    - It does not load or transform Bronze data.
+    - Silver data loading and validation are handled separately.
+
+    Related Scripts:
+    - reset_silver.sql : Drops existing Silver tables.
+    - ddl_silver.sql   : Creates Silver table structures.
+    - load_silver.sql  : Loads and transforms Bronze data (planned).
+
+    Database: LogisticsAnalytics
+    Schema:   silver
+    Tables:   14
 */
+
+
 
 -- ============================================================
 -- 1. CUSTOMERS
@@ -29,19 +53,19 @@
 -- Grain: One row per customer.
 -- ============================================================
 
-IF OBJECT_ID('silver.customers', 'U') IS NOT NULL
-    DROP TABLE silver.customers;
-
 CREATE TABLE silver.customers
 (
-    customer_id              VARCHAR(50),     -- Unique customer identifier
+    customer_id              VARCHAR(50)  NOT NULL,   -- Unique customer identifier
     customer_name            VARCHAR(255),    -- Customer or company name
     customer_type            VARCHAR(100),    -- Classification of the customer
-    credit_terms_days        INT,              -- Agreed credit period in days
+    credit_terms_days        INT,             -- Agreed credit period in days
     primary_freight_type     VARCHAR(50),     -- Main freight category handled
     account_status           VARCHAR(30),     -- Current account status
-    contract_start_date      DATE,             -- Date the customer contract began
-    annual_revenue_potential BIGINT            -- Estimated annual revenue potential
+    contract_start_date      DATE,            -- Date the customer contract began
+    annual_revenue_potential INT,             -- Estimated annual revenue potential
+
+    CONSTRAINT PK_customers
+        PRIMARY KEY (customer_id)
 );
 
 
@@ -51,12 +75,9 @@ CREATE TABLE silver.customers
 -- Grain: One row per driver.
 -- ============================================================
 
-IF OBJECT_ID('silver.drivers', 'U') IS NOT NULL
-    DROP TABLE silver.drivers;
-
 CREATE TABLE silver.drivers
 (
-    driver_id          VARCHAR(50),     -- Unique driver identifier
+    driver_id          VARCHAR(50)  NOT NULL,   -- Unique driver identifier
     first_name         VARCHAR(100),    -- Driver's first name
     last_name          VARCHAR(100),    -- Driver's last name
     hire_date          DATE,            -- Date the driver joined the company
@@ -67,7 +88,10 @@ CREATE TABLE silver.drivers
     home_terminal      VARCHAR(100),    -- Driver's assigned home terminal
     employment_status  VARCHAR(30),     -- Current employment status
     cdl_class          VARCHAR(1),      -- Commercial driver's license class
-    years_experience   SMALLINT         -- Reported years of driving experience
+    years_experience   SMALLINT,        -- Reported years of driving experience
+
+    CONSTRAINT PK_drivers
+        PRIMARY KEY (driver_id)
 );
 
 
@@ -77,12 +101,9 @@ CREATE TABLE silver.drivers
 -- Grain: One row per facility.
 -- ============================================================
 
-IF OBJECT_ID('silver.facilities', 'U') IS NOT NULL
-    DROP TABLE silver.facilities;
-
 CREATE TABLE silver.facilities
 (
-    facility_id       VARCHAR(50),       -- Unique facility identifier
+    facility_id       VARCHAR(50)  NOT NULL,   -- Unique facility identifier
     facility_name     VARCHAR(100),      -- Facility name
     facility_type     VARCHAR(100),      -- Type of facility
     city              VARCHAR(100),      -- Facility city
@@ -90,7 +111,10 @@ CREATE TABLE silver.facilities
     latitude          DECIMAL(10,6),     -- Geographic latitude
     longitude         DECIMAL(10,6),     -- Geographic longitude
     dock_doors        INT,               -- Number of loading dock doors
-    operating_hours   VARCHAR(50)        -- Facility operating hours or schedule
+    operating_hours   VARCHAR(50),       -- Facility operating hours or schedule
+
+    CONSTRAINT PK_facilities
+        PRIMARY KEY (facility_id)
 );
 
 
@@ -100,12 +124,9 @@ CREATE TABLE silver.facilities
 -- Grain: One row per route.
 -- ============================================================
 
-IF OBJECT_ID('silver.routes', 'U') IS NOT NULL
-    DROP TABLE silver.routes;
-
 CREATE TABLE silver.routes
 (
-    route_id                VARCHAR(50),      -- Unique route identifier
+    route_id                VARCHAR(50)  NOT NULL,   -- Unique route identifier
     origin_city             VARCHAR(100),     -- Route starting city
     origin_state            VARCHAR(50),      -- Route starting state
     destination_city        VARCHAR(100),     -- Route destination city
@@ -113,7 +134,10 @@ CREATE TABLE silver.routes
     typical_distance_miles  DECIMAL(10,2),    -- Expected route distance in miles
     base_rate_per_mile      DECIMAL(10,4),    -- Standard charge per mile
     fuel_surcharge_rate     DECIMAL(10,6),    -- Fuel surcharge rate; scale requires confirmation
-    typical_transit_days    SMALLINT         -- Expected transit duration in days
+    typical_transit_days    SMALLINT,         -- Expected transit duration in days
+
+    CONSTRAINT PK_routes
+        PRIMARY KEY (route_id)
 );
 
 
@@ -123,13 +147,10 @@ CREATE TABLE silver.routes
 -- Grain: One row per truck.
 -- ============================================================
 
-IF OBJECT_ID('silver.trucks', 'U') IS NOT NULL
-    DROP TABLE silver.trucks;
-
 CREATE TABLE silver.trucks
 (
-    truck_id              VARCHAR(50),     -- Unique truck identifier
-    unit_number           SMALLINT,        -- Internal truck unit number
+    truck_id              VARCHAR(50)  NOT NULL,   -- Unique truck identifier
+    unit_number           VARCHAR(50),     -- Internal truck unit number
     make                  VARCHAR(80),     -- Truck manufacturer
     model_year            SMALLINT,        -- Truck model year
     vin                   VARCHAR(150),    -- Vehicle identification number; source values need validation
@@ -138,7 +159,10 @@ CREATE TABLE silver.trucks
     fuel_type             VARCHAR(30),     -- Truck fuel type
     tank_capacity_gallons SMALLINT,        -- Fuel tank capacity in gallons
     status                VARCHAR(50),     -- Current truck status
-    home_terminal         VARCHAR(100)     -- Truck's assigned home terminal
+    home_terminal         VARCHAR(100),    -- Truck's assigned home terminal
+
+    CONSTRAINT PK_trucks
+        PRIMARY KEY (truck_id)
 );
 
 
@@ -148,20 +172,20 @@ CREATE TABLE silver.trucks
 -- Grain: One row per trailer.
 -- ============================================================
 
-IF OBJECT_ID('silver.trailers', 'U') IS NOT NULL
-    DROP TABLE silver.trailers;
-
 CREATE TABLE silver.trailers
 (
-    trailer_id       VARCHAR(50),     -- Unique trailer identifier
-    trailer_number   SMALLINT,        -- Internal trailer number
+    trailer_id       VARCHAR(50)  NOT NULL,   -- Unique trailer identifier
+    trailer_number   VARCHAR(50),     -- Internal trailer number
     trailer_type     VARCHAR(100),    -- Trailer classification
     length_feet      SMALLINT,        -- Trailer length in feet
     model_year       SMALLINT,        -- Trailer model year
     vin              VARCHAR(150),    -- Trailer vehicle identification number
     acquisition_date DATE,            -- Date the trailer was acquired
     status           VARCHAR(50),     -- Current trailer status
-    current_location VARCHAR(100)     -- Trailer's reported current location
+    current_location VARCHAR(100),    -- Trailer's reported current location
+
+    CONSTRAINT PK_trailers
+        PRIMARY KEY (trailer_id)
 );
 
 
@@ -171,12 +195,9 @@ CREATE TABLE silver.trailers
 -- Grain: One row per load.
 -- ============================================================
 
-IF OBJECT_ID('silver.loads', 'U') IS NOT NULL
-    DROP TABLE silver.loads;
-
 CREATE TABLE silver.loads
 (
-    load_id               VARCHAR(50),       -- Unique load identifier
+    load_id               VARCHAR(50)  NOT NULL,   -- Unique load identifier
     customer_id           VARCHAR(50),       -- Customer associated with the load
     route_id              VARCHAR(50),       -- Planned route for the load
     load_date             DATE,              -- Load booking or creation date
@@ -187,7 +208,18 @@ CREATE TABLE silver.loads
     fuel_surcharge        DECIMAL(12,2),     -- Fuel surcharge amount
     accessorial_charges   DECIMAL(12,2),     -- Additional charges; business meaning to be confirmed
     load_status           VARCHAR(50),       -- Current load status
-    booking_type          VARCHAR(50)        -- Load booking classification
+    booking_type          VARCHAR(50),       -- Load booking classification
+
+    CONSTRAINT PK_loads
+        PRIMARY KEY (load_id),
+
+    CONSTRAINT FK_loads_customers
+        FOREIGN KEY (customer_id)
+        REFERENCES silver.customers (customer_id),
+
+    CONSTRAINT FK_loads_routes
+        FOREIGN KEY (route_id)
+        REFERENCES silver.routes (route_id)
 );
 
 
@@ -197,12 +229,9 @@ CREATE TABLE silver.loads
 -- Grain: One row per trip.
 -- ============================================================
 
-IF OBJECT_ID('silver.trips', 'U') IS NOT NULL
-    DROP TABLE silver.trips;
-
 CREATE TABLE silver.trips
 (
-    trip_id                 VARCHAR(50),      -- Unique trip identifier
+    trip_id                 VARCHAR(50)  NOT NULL,   -- Unique trip identifier
     load_id                 VARCHAR(50),      -- Load transported during the trip
     driver_id               VARCHAR(50),      -- Driver assigned to the trip; may be NULL
     truck_id                VARCHAR(50),      -- Truck assigned to the trip; may be NULL
@@ -213,7 +242,26 @@ CREATE TABLE silver.trips
     fuel_gallons_used       DECIMAL(5,1),     -- Fuel consumed during the trip
     average_mpg             DECIMAL(5,2),     -- Average fuel efficiency in miles per gallon
     idle_time_hours         DECIMAL(5,2),     -- Time spent idling in hours
-    trip_status             VARCHAR(50)      -- Current or final trip status
+    trip_status             VARCHAR(50),      -- Current or final trip status
+
+    CONSTRAINT PK_trips
+        PRIMARY KEY (trip_id),
+
+    CONSTRAINT FK_trips_loads
+        FOREIGN KEY (load_id)
+        REFERENCES silver.loads (load_id),
+
+    CONSTRAINT FK_trips_drivers
+        FOREIGN KEY (driver_id)
+        REFERENCES silver.drivers (driver_id),
+
+    CONSTRAINT FK_trips_trucks
+        FOREIGN KEY (truck_id)
+        REFERENCES silver.trucks (truck_id),
+
+    CONSTRAINT FK_trips_trailers
+        FOREIGN KEY (trailer_id)
+        REFERENCES silver.trailers (trailer_id)
 );
 
 
@@ -223,12 +271,9 @@ CREATE TABLE silver.trips
 -- Grain: One row per fuel purchase.
 -- ============================================================
 
-IF OBJECT_ID('silver.fuel_purchases', 'U') IS NOT NULL
-    DROP TABLE silver.fuel_purchases;
-
 CREATE TABLE silver.fuel_purchases
 (
-    fuel_purchase_id  VARCHAR(50),      -- Unique fuel purchase identifier
+    fuel_purchase_id  VARCHAR(50)  NOT NULL,   -- Unique fuel purchase identifier
     trip_id           VARCHAR(50),      -- Trip associated with the fuel purchase
     truck_id          VARCHAR(50),      -- Truck making the purchase; may be NULL
     driver_id         VARCHAR(50),      -- Driver making the purchase; may be NULL
@@ -238,7 +283,22 @@ CREATE TABLE silver.fuel_purchases
     gallons           DECIMAL(10,2),    -- Quantity of fuel purchased in gallons
     price_per_gallon  DECIMAL(5,4),     -- Price charged per gallon
     total_cost        DECIMAL(8,2),     -- Total fuel purchase cost
-    fuel_card_number  VARCHAR(50)      -- Fuel card used for the transaction
+    fuel_card_number  VARCHAR(50),      -- Fuel card used for the transaction
+
+    CONSTRAINT PK_fuel_purchases
+        PRIMARY KEY (fuel_purchase_id),
+
+    CONSTRAINT FK_fuel_purchases_trips
+        FOREIGN KEY (trip_id)
+        REFERENCES silver.trips (trip_id),
+
+    CONSTRAINT FK_fuel_purchases_trucks
+        FOREIGN KEY (truck_id)
+        REFERENCES silver.trucks (truck_id),
+
+    CONSTRAINT FK_fuel_purchases_drivers
+        FOREIGN KEY (driver_id)
+        REFERENCES silver.drivers (driver_id)
 );
 
 
@@ -248,12 +308,9 @@ CREATE TABLE silver.fuel_purchases
 -- Grain: One row per maintenance record.
 -- ============================================================
 
-IF OBJECT_ID('silver.maintenance_records', 'U') IS NOT NULL
-    DROP TABLE silver.maintenance_records;
-
 CREATE TABLE silver.maintenance_records
 (
-    maintenance_id      VARCHAR(50),      -- Unique maintenance record identifier
+    maintenance_id      VARCHAR(50)  NOT NULL,   -- Unique maintenance record identifier
     truck_id            VARCHAR(50),      -- Truck receiving maintenance
     maintenance_date    DATE,             -- Maintenance service date
     maintenance_type    VARCHAR(100),     -- Category of maintenance performed
@@ -264,7 +321,14 @@ CREATE TABLE silver.maintenance_records
     total_cost          DECIMAL(8,2),     -- Total maintenance cost
     facility_location   VARCHAR(100),     -- Facility or location where service occurred
     downtime_hours      DECIMAL(4,1),     -- Truck downtime resulting from maintenance
-    service_description VARCHAR(200)     -- Description of the service performed
+    service_description VARCHAR(200),     -- Description of the service performed
+
+    CONSTRAINT PK_maintenance_records
+        PRIMARY KEY (maintenance_id),
+
+    CONSTRAINT FK_maintenance_records_trucks
+        FOREIGN KEY (truck_id)
+        REFERENCES silver.trucks (truck_id)
 );
 
 
@@ -274,12 +338,9 @@ CREATE TABLE silver.maintenance_records
 -- Grain: One row per delivery event.
 -- ============================================================
 
-IF OBJECT_ID('silver.delivery_events', 'U') IS NOT NULL
-    DROP TABLE silver.delivery_events;
-
 CREATE TABLE silver.delivery_events
 (
-    event_id            VARCHAR(50),      -- Unique delivery event identifier
+    event_id            VARCHAR(50)  NOT NULL,   -- Unique delivery event identifier
     load_id             VARCHAR(50),      -- Load associated with the event
     trip_id             VARCHAR(50),      -- Trip associated with the event
     event_type          VARCHAR(50),      -- Event classification, e.g. pickup or delivery
@@ -289,7 +350,22 @@ CREATE TABLE silver.delivery_events
     detention_minutes   SMALLINT,         -- Detention duration in minutes
     on_time_flag        BIT,              -- 1 = on time, 0 = not on time
     location_city       VARCHAR(100),     -- City where the event occurred
-    location_state      VARCHAR(10)       -- State where the event occurred
+    location_state      VARCHAR(10),      -- State where the event occurred
+
+    CONSTRAINT PK_delivery_events
+        PRIMARY KEY (event_id),
+
+    CONSTRAINT FK_delivery_events_loads
+        FOREIGN KEY (load_id)
+        REFERENCES silver.loads (load_id),
+
+    CONSTRAINT FK_delivery_events_trips
+        FOREIGN KEY (trip_id)
+        REFERENCES silver.trips (trip_id),
+
+    CONSTRAINT FK_delivery_events_facilities
+        FOREIGN KEY (facility_id)
+        REFERENCES silver.facilities (facility_id)
 );
 
 
@@ -299,12 +375,9 @@ CREATE TABLE silver.delivery_events
 -- Grain: One row per safety incident.
 -- ============================================================
 
-IF OBJECT_ID('silver.safety_incidents', 'U') IS NOT NULL
-    DROP TABLE silver.safety_incidents;
-
 CREATE TABLE silver.safety_incidents
 (
-    incident_id          VARCHAR(50),      -- Unique safety incident identifier
+    incident_id          VARCHAR(50)  NOT NULL,   -- Unique safety incident identifier
     trip_id              VARCHAR(50),      -- Trip associated with the incident
     truck_id             VARCHAR(50),      -- Truck involved; may be NULL
     driver_id            VARCHAR(50),      -- Driver involved; may be NULL
@@ -318,7 +391,22 @@ CREATE TABLE silver.safety_incidents
     cargo_damage_cost    DECIMAL(8,2),     -- Estimated cargo damage cost
     claim_amount         DECIMAL(8,2),     -- Associated insurance claim amount
     preventable_flag     BIT,              -- 1 = preventable, 0 = not preventable
-    description          VARCHAR(MAX)      -- Detailed incident description
+    description          VARCHAR(100),     -- Detailed incident description
+
+    CONSTRAINT PK_safety_incidents
+        PRIMARY KEY (incident_id),
+
+    CONSTRAINT FK_safety_incidents_trips
+        FOREIGN KEY (trip_id)
+        REFERENCES silver.trips (trip_id),
+
+    CONSTRAINT FK_safety_incidents_trucks
+        FOREIGN KEY (truck_id)
+        REFERENCES silver.trucks (truck_id),
+
+    CONSTRAINT FK_safety_incidents_drivers
+        FOREIGN KEY (driver_id)
+        REFERENCES silver.drivers (driver_id)
 );
 
 
@@ -328,20 +416,24 @@ CREATE TABLE silver.safety_incidents
 -- Grain: One row per driver per reporting month.
 -- ============================================================
 
-IF OBJECT_ID('silver.driver_monthly_metrics', 'U') IS NOT NULL
-    DROP TABLE silver.driver_monthly_metrics;
-
 CREATE TABLE silver.driver_monthly_metrics
 (
-    driver_id               VARCHAR(50),      -- Driver associated with the metrics
-    month                   DATE,             -- Reporting month
+    driver_id               VARCHAR(50)  NOT NULL,   -- Driver associated with the metrics
+    [month]                 DATE         NOT NULL,   -- Reporting month
     trips_completed         SMALLINT,         -- Number of completed trips
     total_miles             DECIMAL(8,2),     -- Total miles driven during the month
-    total_revenue            DECIMAL(12,2),    -- Total revenue attributed to the driver
+    total_revenue           DECIMAL(12,2),    -- Total revenue attributed to the driver
     average_mpg             DECIMAL(4,2),     -- Average fuel efficiency
     total_fuel_gallons      DECIMAL(6,1),     -- Total fuel consumed during the month
     on_time_delivery_rate   DECIMAL(5,4),     -- On-time delivery proportion; 1.0000 = 100%
-    average_idle_hours      DECIMAL(3,1)      -- Average idle hours; calculation period to be confirmed
+    average_idle_hours      DECIMAL(3,1),     -- Average idle hours; calculation period to be confirmed
+
+    CONSTRAINT PK_driver_monthly_metrics
+        PRIMARY KEY (driver_id, [month]),
+
+    CONSTRAINT FK_driver_monthly_metrics_drivers
+        FOREIGN KEY (driver_id)
+        REFERENCES silver.drivers (driver_id)
 );
 
 
@@ -352,13 +444,10 @@ CREATE TABLE silver.driver_monthly_metrics
 -- Grain: One row per truck per reporting month.
 -- ============================================================
 
-IF OBJECT_ID('silver.truck_utilization_metrics', 'U') IS NOT NULL
-    DROP TABLE silver.truck_utilization_metrics;
-
 CREATE TABLE silver.truck_utilization_metrics
 (
-    truck_id           VARCHAR(50),      -- Truck associated with the metrics
-    month              DATE,             -- Reporting month
+    truck_id           VARCHAR(50)  NOT NULL,   -- Truck associated with the metrics
+    [month]            DATE         NOT NULL,   -- Reporting month
     trips_completed    SMALLINT,         -- Number of completed trips
     total_miles        DECIMAL(9,2),     -- Total miles travelled during the month
     total_revenue      DECIMAL(12,2),    -- Total revenue attributed to the truck
@@ -366,5 +455,12 @@ CREATE TABLE silver.truck_utilization_metrics
     maintenance_events SMALLINT,         -- Number of maintenance events
     maintenance_cost   DECIMAL(8,2),     -- Total maintenance cost
     downtime_hours     DECIMAL(4,1),     -- Total downtime in hours
-    utilization_rate   DECIMAL(6,4)      -- Utilization measure; formula and scale need confirmation
+    trips_per_day      DECIMAL(6,4),     -- Utilization measure; formula and scale need confirmation
+
+    CONSTRAINT PK_truck_utilization_metrics
+        PRIMARY KEY (truck_id, [month]),
+
+    CONSTRAINT FK_truck_utilization_metrics_trucks
+        FOREIGN KEY (truck_id)
+        REFERENCES silver.trucks (truck_id)
 );
