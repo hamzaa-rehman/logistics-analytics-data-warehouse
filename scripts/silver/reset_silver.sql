@@ -27,7 +27,7 @@
     - After resetting, execute ddl_silver.sql to recreate
       the Silver table structures.
 
-    Database: DataWarehouse
+    Database: LogisticsAnalytics
     Schema:   silver
     Tables:   14
 */
