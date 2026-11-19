@@ -41,6 +41,8 @@ logistics-analytics-data-warehouse/
 │   │       ├── on_time_flag_investigation.md
 │   │       ├── safety_incident_financials_investigation.md
 │   │       └── truck_utilization_maintenance_investigation.md
+│   ├── silver/
+│   │   └── readme.md
 │   ├── data_inventory/
 │   │   └── Logistics_Data_Inventory_Bronze.xlsx
 │   └── diagrams/
@@ -68,7 +70,8 @@ logistics-analytics-data-warehouse/
 │   │       ├── investigate_geographic_consistency.sql
 │   │       └── investigate_identifier_integrity.sql
 │   └── silver/
-│       └── ddl_silver.sql
+│       ├── ddl_silver.sql
+│       └── load_silver.sql
 ├── tests/
 │   └── validate_bronze.sql
 ├── LICENSE
@@ -79,7 +82,8 @@ logistics-analytics-data-warehouse/
 
 - [Dataset files, source-to-table mapping, and profiling configuration](datasets/README.md)
 - [Bronze data inventory and profiling workbook](docs/data_inventory/Logistics_Data_Inventory_Bronze.xlsx)
-- [Bronze layer documentation](docs/bronze/readme.md)\n- [Silver layer documentation](docs/silver/readme.md)
+- [Bronze layer documentation](docs/bronze/readme.md)
+- [Silver layer documentation](docs/silver/readme.md)
 
 ## Bronze CATEGORY Profiling
 
