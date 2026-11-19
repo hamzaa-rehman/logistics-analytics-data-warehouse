@@ -1,6 +1,6 @@
 
 USE LogisticsAnalytics;
-GO
+
 
 -- =====================================================
 -- Silver Schema Inspection
