@@ -22,7 +22,7 @@ The 14 source CSV files are stored in [`datasets/logistics_operations_database/`
 
 ## 2. Data Warehouse Architecture
 
-The project is designed around the Medallion Architecture, separating data ingestion, data transformation, and business-level modelling into three layers. The Bronze layer has been implemented; the Silver and Gold layers represent the planned next stages.
+The project is designed around the Medallion Architecture, separating data ingestion, data transformation, and business-level modelling into three layers. The Bronze and Silver layers have been implemented; Gold modelling is the next development stage.
 
 ![Logistics Analytics Data Warehouse Architecture](../diagrams/Logistics_Data_Warehouse_Architecture.png)
 
