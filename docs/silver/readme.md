@@ -42,7 +42,7 @@ See the [Bronze layer documentation](../bronze/readme.md) for the ingestion and 
 
 Silver contains 14 tables. The table structures preserve the source entity grain, with primary and foreign keys defining the implemented relational model.
 
-### 3.1 Table inventory
+### 3.1 Entity Relationship Diagram (ERD)\n\nThe diagram below documents the implemented Silver relational schema. It includes all 14 tables and 150 columns, with SQL data types, nullability, primary-key and foreign-key markers, and the 18 declared foreign-key relationships. The two monthly metric tables show their composite primary keys.\n\n![Silver Layer Entity Relationship Diagram](../diagrams/silver_erd.png)\n\n- [Open the editable Draw.io source](../diagrams/silver_erd.drawio)\n\nThe ERD is generated from and should be maintained against [ddl_silver.sql](../../scripts/silver/ddl_silver.sql). The DDL remains the authoritative implementation; the diagram is its visual documentation.\n\n### 3.2 Table inventory
 
 | Table | Grain | Rows loaded |
 |---|---|---:|
@@ -62,7 +62,7 @@ Silver contains 14 tables. The table structures preserve the source entity grain
 | **truck_utilization_metrics** | One row per truck per reporting month | 3,312 |
 | **Total** | **14 tables** | **549,706** |
 
-### 3.2 Primary keys
+### 3.3 Primary keys
 
 Every Silver table has a primary key. Twelve tables use a single-column primary key; the two monthly metric tables use composite primary keys.
 
@@ -85,7 +85,7 @@ Every Silver table has a primary key. Twelve tables use a single-column primary 
 
 The composite keys enforce the intended monthly grain: one record per driver/month and one record per truck/month.
 
-### 3.3 Foreign-key relationships
+### 3.4 Foreign-key relationships
 
 The Silver DDL defines 18 foreign-key relationships. All 18 foreign keys are enabled and trusted. Nullable foreign keys preserve the source model's optional relationships.
 
@@ -273,7 +273,7 @@ The Silver layer establishes typed, relationally consistent data. It does not by
 - Zero values are retained unless a documented business rule establishes otherwise.
 - Some source measures and descriptions may still require business-context interpretation before they are used in Gold calculations.
 - The validation suite checks row counts, keys, foreign-key orphans, constraint state, key reconciliation, and selected transformations. It is not a full comparison of every non-key column between Bronze and Silver.
-- The Silver ERD and transformation-flow diagrams are deferred to a later documentation update.
+- The Silver ERD is documented in Section 3.1. A separate transformation-flow diagram may be added after the end-to-end Gold loading design is finalized.
 
 ## 10. Next Stage: Gold
 
