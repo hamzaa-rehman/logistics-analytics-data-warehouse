@@ -955,19 +955,228 @@ INNER JOIN FirstCustomerLoad f
 
     ON c.customer_id = f.customer_id;
 
+SELECT
+    COUNT_BIG(*) AS total_purchases,
+    COUNT(trip_id) AS purchases_with_trip_id,
+    COUNT(truck_id) AS purchases_with_truck_id,
+    COUNT(driver_id) AS purchases_with_driver_id,
+    SUM(CASE WHEN trip_id IS NULL THEN 1 ELSE 0 END) AS purchases_without_trip_id,
+    SUM(CASE WHEN truck_id IS NULL THEN 1 ELSE 0 END) AS purchases_without_truck_id,
+    SUM(CASE WHEN driver_id IS NULL THEN 1 ELSE 0 END) AS purchases_without_driver_id,
+    SUM(CASE WHEN purchase_date IS NULL THEN 1 ELSE 0 END) AS null_purchase_dates,
+    SUM(CASE WHEN gallons IS NULL THEN 1 ELSE 0 END) AS null_gallons,
+    SUM(CASE WHEN price_per_gallon IS NULL THEN 1 ELSE 0 END) AS null_unit_prices,
+    SUM(CASE WHEN total_cost IS NULL THEN 1 ELSE 0 END) AS null_total_costs,
+    MIN(purchase_date) AS earliest_purchase,
+    MAX(purchase_date) AS latest_purchase,
+    SUM(gallons) AS total_gallons,
+    SUM(total_cost) AS total_fuel_cost,
+    MIN(gallons) AS minimum_gallons,
+    MAX(gallons) AS maximum_gallons,
+    MIN(price_per_gallon) AS minimum_price_per_gallon,
+    MAX(price_per_gallon) AS maximum_price_per_gallon
+FROM silver.fuel_purchases;
 
-/* ============================================================
-   GOLD INVESTIGATION 07G — Trip-Level Fuel Reconciliation
+-- GOLD INVESTIGATION 07B — Fuel Purchase Cost Validation
+WITH FuelCostCheck AS
+(
+    SELECT
+        fuel_purchase_id,
+        gallons,
+        price_per_gallon,
+        total_cost,
+        CAST(ROUND(gallons * price_per_gallon, 2) AS DECIMAL(18,2)) AS calculated_total_cost
+    FROM silver.fuel_purchases
+)
+SELECT
+    COUNT_BIG(*) AS total_purchases,
+    SUM(CASE WHEN total_cost = calculated_total_cost THEN 1 ELSE 0 END) AS matching_costs,
+    SUM(CASE WHEN total_cost <> calculated_total_cost THEN 1 ELSE 0 END) AS mismatching_costs,
+    CAST(MAX(ABS(total_cost - calculated_total_cost)) AS DECIMAL(18,2)) AS maximum_absolute_difference,
+    CAST(SUM(total_cost - calculated_total_cost) AS DECIMAL(18,2)) AS total_cost_difference
+FROM FuelCostCheck;
 
-   Business question:
-     How do fuel purchase gallons linked to each trip compare
-     with the fuel consumption recorded on that trip?
+-- GOLD INVESTIGATION 07C — Fuel Cost Mismatch Analysis
+WITH FuelCostCheck AS
+(
+    SELECT
+        fuel_purchase_id,
+        gallons,
+        price_per_gallon,
+        total_cost,
+        CAST(ROUND(gallons * price_per_gallon, 2) AS DECIMAL(18,2)) AS calculated_total_cost
+    FROM silver.fuel_purchases
+)
+SELECT
+    total_cost - calculated_total_cost AS cost_difference,
+    COUNT_BIG(*) AS affected_purchases
+FROM FuelCostCheck
+WHERE total_cost <> calculated_total_cost
+GROUP BY total_cost - calculated_total_cost
+ORDER BY cost_difference;
 
-   Important:
-     This is a comparison, not proof that purchased gallons
-     were consumed exclusively during the linked trip.
-   ============================================================ */
+-- Sample mismatching purchase records
+WITH FuelCostCheck AS
+(
+    SELECT
+        fuel_purchase_id,
+        gallons,
+        price_per_gallon,
+        total_cost,
+        CAST(ROUND(gallons * price_per_gallon, 2) AS DECIMAL(18,2)) AS calculated_total_cost
+    FROM silver.fuel_purchases
+)
+SELECT TOP (20)
+    fuel_purchase_id,
+    gallons,
+    price_per_gallon,
+    total_cost,
+    calculated_total_cost,
+    total_cost - calculated_total_cost AS cost_difference
+FROM FuelCostCheck
+WHERE total_cost <> calculated_total_cost
+ORDER BY fuel_purchase_id;
 
+-- GOLD INVESTIGATION 07D — Fuel Purchase and Trip Assignment Reconciliation
+WITH FuelTripComparison AS
+(
+    SELECT
+        f.fuel_purchase_id,
+        f.truck_id AS purchase_truck_id,
+        t.truck_id AS trip_truck_id,
+        f.driver_id AS purchase_driver_id,
+        t.driver_id AS trip_driver_id
+    FROM silver.fuel_purchases f
+    INNER JOIN silver.trips t
+        ON f.trip_id = t.trip_id
+)
+SELECT
+    'Truck' AS assignment_type,
+    COUNT_BIG(*) AS total_purchases,
+    SUM(CASE WHEN purchase_truck_id = trip_truck_id THEN 1 ELSE 0 END) AS matching_assignments,
+    SUM(CASE WHEN purchase_truck_id IS NULL AND trip_truck_id IS NOT NULL THEN 1 ELSE 0 END) AS purchase_assignment_missing,
+    SUM(CASE WHEN purchase_truck_id IS NOT NULL AND trip_truck_id IS NULL THEN 1 ELSE 0 END) AS trip_assignment_missing,
+    SUM(CASE WHEN purchase_truck_id IS NULL AND trip_truck_id IS NULL THEN 1 ELSE 0 END) AS both_missing,
+    SUM(CASE WHEN purchase_truck_id IS NOT NULL AND trip_truck_id IS NOT NULL AND purchase_truck_id <> trip_truck_id THEN 1 ELSE 0 END) AS mismatching_assignments
+FROM FuelTripComparison
+UNION ALL
+SELECT
+    'Driver',
+    COUNT_BIG(*),
+    SUM(CASE WHEN purchase_driver_id = trip_driver_id THEN 1 ELSE 0 END),
+    SUM(CASE WHEN purchase_driver_id IS NULL AND trip_driver_id IS NOT NULL THEN 1 ELSE 0 END),
+    SUM(CASE WHEN purchase_driver_id IS NOT NULL AND trip_driver_id IS NULL THEN 1 ELSE 0 END),
+    SUM(CASE WHEN purchase_driver_id IS NULL AND trip_driver_id IS NULL THEN 1 ELSE 0 END),
+    SUM(CASE WHEN purchase_driver_id IS NOT NULL AND trip_driver_id IS NOT NULL AND purchase_driver_id <> trip_driver_id THEN 1 ELSE 0 END)
+FROM FuelTripComparison;
+
+-- GOLD INVESTIGATION 07E — Fuel Purchase Quantity and Monthly Patterns
+
+-- 07E.1 Overall purchase quantity distribution
+SELECT
+    COUNT_BIG(*) AS total_purchases,
+    MIN(gallons) AS minimum_gallons,
+    MAX(gallons) AS maximum_gallons,
+    AVG(gallons) AS average_gallons,
+    STDEV(gallons) AS standard_deviation_gallons,
+    COUNT(DISTINCT gallons) AS distinct_purchase_quantities,
+    SUM(CASE WHEN gallons = 50 THEN 1 ELSE 0 END) AS purchases_of_50_gallons,
+    SUM(CASE WHEN gallons = 200 THEN 1 ELSE 0 END) AS purchases_of_200_gallons
+FROM silver.fuel_purchases;
+
+-- 07E.2 Purchase quantity frequency distribution
+SELECT
+    gallons,
+    COUNT_BIG(*) AS purchase_count
+FROM silver.fuel_purchases
+GROUP BY gallons
+ORDER BY purchase_count DESC;
+
+-- 07E.3 Monthly fuel purchasing trend
+SELECT
+    YEAR(purchase_date) AS purchase_year,
+    MONTH(purchase_date) AS purchase_month,
+    COUNT_BIG(*) AS purchase_count,
+    SUM(gallons) AS total_gallons,
+    SUM(total_cost) AS total_fuel_cost,
+    AVG(gallons) AS average_gallons_per_purchase,
+    AVG(price_per_gallon) AS average_price_per_gallon
+FROM silver.fuel_purchases
+GROUP BY YEAR(purchase_date), MONTH(purchase_date)
+ORDER BY purchase_year, purchase_month;
+
+-- 07F — Monthly Fuel Purchased vs. Trip-Recorded Fuel Consumption
+WITH MonthlyFuelPurchases AS
+(
+    SELECT
+        YEAR(purchase_date) AS purchase_year,
+        MONTH(purchase_date) AS purchase_month,
+        COUNT_BIG(*) AS purchase_count,
+        SUM(gallons) AS purchased_gallons,
+        SUM(total_cost) AS fuel_purchase_cost
+    FROM silver.fuel_purchases
+    GROUP BY YEAR(purchase_date), MONTH(purchase_date)
+),
+MonthlyTripFuel AS
+(
+    SELECT
+        YEAR(dispatch_date) AS dispatch_year,
+        MONTH(dispatch_date) AS dispatch_month,
+        COUNT_BIG(*) AS trip_count,
+        SUM(fuel_gallons_used) AS consumed_gallons
+    FROM silver.trips
+    GROUP BY YEAR(dispatch_date), MONTH(dispatch_date)
+)
+SELECT
+    COALESCE(p.purchase_year, t.dispatch_year) AS [year],
+    COALESCE(p.purchase_month, t.dispatch_month) AS [month],
+    p.purchase_count,
+    t.trip_count,
+    p.purchased_gallons,
+    t.consumed_gallons,
+    p.purchased_gallons - t.consumed_gallons AS monthly_difference_gallons,
+    p.fuel_purchase_cost
+FROM MonthlyFuelPurchases p
+FULL OUTER JOIN MonthlyTripFuel t
+    ON p.purchase_year = t.dispatch_year
+    AND p.purchase_month = t.dispatch_month
+ORDER BY [year], [month];
+
+-- 07F SUPPORTING — Trip-level aggregate purchase/consumption totals
+WITH PurchaseByTrip AS
+(
+    SELECT
+        trip_id,
+        COUNT_BIG(*) AS purchase_count,
+        SUM(gallons) AS purchased_gallons,
+        SUM(total_cost) AS purchase_cost
+    FROM silver.fuel_purchases
+    GROUP BY trip_id
+),
+TripFuel AS
+(
+    SELECT
+        trip_id,
+        fuel_gallons_used,
+        actual_distance_miles,
+        truck_id
+    FROM silver.trips
+)
+SELECT
+    COUNT_BIG(*) AS total_trips,
+    SUM(CASE WHEN p.trip_id IS NOT NULL THEN 1 ELSE 0 END) AS trips_with_purchases,
+    SUM(CASE WHEN p.trip_id IS NULL THEN 1 ELSE 0 END) AS trips_without_purchases,
+    SUM(COALESCE(p.purchase_count, 0)) AS total_purchase_records,
+    SUM(COALESCE(p.purchased_gallons, 0)) AS total_purchased_gallons,
+    SUM(t.fuel_gallons_used) AS total_trip_fuel_consumption,
+    SUM(CASE WHEN p.trip_id IS NOT NULL THEN t.fuel_gallons_used ELSE 0 END) AS consumption_for_trips_with_purchases,
+    SUM(CASE WHEN p.trip_id IS NULL THEN t.fuel_gallons_used ELSE 0 END) AS consumption_for_trips_without_purchases,
+    SUM(COALESCE(p.purchased_gallons, 0)) - SUM(t.fuel_gallons_used) AS purchase_vs_consumption_difference
+FROM TripFuel t
+LEFT JOIN PurchaseByTrip p
+    ON t.trip_id = p.trip_id;
+
+-- GOLD INVESTIGATION 07G — Trip-Level Fuel Purchase vs. Consumption Reconciliation
 WITH FuelPurchasesByTrip AS
 (
     SELECT
@@ -990,8 +1199,8 @@ TripFuelComparison AS
             WHEN f.purchased_gallons < t.fuel_gallons_used THEN 'Purchased < Consumed'
             ELSE 'Purchased = Consumed'
         END AS reconciliation_status
-    FROM silver.trips AS t
-    LEFT JOIN FuelPurchasesByTrip AS f
+    FROM silver.trips t
+    LEFT JOIN FuelPurchasesByTrip f
         ON t.trip_id = f.trip_id
 )
 SELECT
@@ -1005,46 +1214,20 @@ FROM TripFuelComparison
 GROUP BY reconciliation_status
 ORDER BY reconciliation_status;
 
-
-/* ------------------------------------------------------------
-   07G SUPPORTING CHECK — Trip Fuel Consumption Quality
-
-   Confirms NULL, zero, and negative consumption values before
-   interpreting the trip-level comparison.
-   ------------------------------------------------------------ */
-
+-- 07G SUPPORTING CHECK — Trip Fuel Consumption Quality
 SELECT
     COUNT_BIG(*) AS total_trips,
-    SUM(CASE WHEN fuel_gallons_used IS NULL THEN 1 ELSE 0 END)
-        AS null_consumption,
-    SUM(CASE WHEN fuel_gallons_used = 0 THEN 1 ELSE 0 END)
-        AS zero_consumption,
-    SUM(CASE WHEN fuel_gallons_used < 0 THEN 1 ELSE 0 END)
-        AS negative_consumption,
+    SUM(CASE WHEN fuel_gallons_used IS NULL THEN 1 ELSE 0 END) AS null_consumption,
+    SUM(CASE WHEN fuel_gallons_used = 0 THEN 1 ELSE 0 END) AS zero_consumption,
+    SUM(CASE WHEN fuel_gallons_used < 0 THEN 1 ELSE 0 END) AS negative_consumption,
     MIN(fuel_gallons_used) AS minimum_consumption,
     MAX(fuel_gallons_used) AS maximum_consumption
 FROM silver.trips;
 
-
-/* ============================================================
-   GOLD INVESTIGATION 07H — Fuel Cost by Truck and Driver
-
-   Business question:
-     How much recorded fuel expenditure can be attributed to
-     trucks and drivers, and how much remains unassigned?
-
-   Keep unassigned purchases in the overall totals.
-   ============================================================ */
-
+-- GOLD INVESTIGATION 07H — Fuel Cost Attribution by Truck and Driver
 SELECT
-    CASE
-        WHEN truck_id IS NULL THEN 'Unassigned'
-        ELSE 'Assigned'
-    END AS truck_assignment,
-    CASE
-        WHEN driver_id IS NULL THEN 'Unassigned'
-        ELSE 'Assigned'
-    END AS driver_assignment,
+    CASE WHEN truck_id IS NULL THEN 'Unassigned' ELSE 'Assigned' END AS truck_assignment,
+    CASE WHEN driver_id IS NULL THEN 'Unassigned' ELSE 'Assigned' END AS driver_assignment,
     COUNT_BIG(*) AS purchase_count,
     COUNT(DISTINCT truck_id) AS distinct_trucks,
     COUNT(DISTINCT driver_id) AS distinct_drivers,
@@ -1055,6 +1238,4 @@ FROM silver.fuel_purchases
 GROUP BY
     CASE WHEN truck_id IS NULL THEN 'Unassigned' ELSE 'Assigned' END,
     CASE WHEN driver_id IS NULL THEN 'Unassigned' ELSE 'Assigned' END
-ORDER BY
-    truck_assignment,
-    driver_assignment;
+ORDER BY truck_assignment, driver_assignment;
