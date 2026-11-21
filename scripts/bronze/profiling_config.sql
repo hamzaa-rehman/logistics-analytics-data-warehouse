@@ -57,7 +57,6 @@ ELSE
 BEGIN
     PRINT 'Profiling configuration table already exists. No changes made.';
 END;
-GO
 
 
 /*
