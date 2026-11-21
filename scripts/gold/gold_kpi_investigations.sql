@@ -487,7 +487,6 @@ ORDER BY reporting_month;
 
 USE LogisticsAnalytics;
 
-GO
 
 /* GOLD INVESTIGATION 04 — Fleet Performance */
 
