@@ -83,7 +83,7 @@ logistics-analytics-data-warehouse/
 - [Dataset files, source-to-table mapping, and profiling configuration](datasets/README.md)
 - [Bronze data inventory and profiling workbook](docs/data_inventory/Logistics_Data_Inventory_Bronze.xlsx)
 - [Bronze layer documentation](docs/bronze/readme.md)
-- [Silver layer documentation](docs/silver/readme.md)
+- [Silver layer documentation](docs/silver/readme.md)\n- [Silver layer ERD (PNG)](docs/diagrams/silver_erd.png) | [Editable Draw.io source](docs/diagrams/silver_erd.drawio)\n- [Warehouse architecture diagram (PNG)](docs/diagrams/Logistics_Data_Warehouse_Architecture.png) | [Editable Draw.io source](docs/diagrams/Logistics_Data_Warehouse_Architecture.drawio)
 
 ## Bronze CATEGORY Profiling
 
