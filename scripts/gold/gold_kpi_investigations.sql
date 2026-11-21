@@ -565,7 +565,9 @@ GROUP BY truck_id
 
 ORDER BY trip_count DESC;
 
--- GOLD INVESTIGATION 04B — Weighted Fleet MPG
+-- GOLD INVESTIGATION 04B — Truck-Level Aggregate MPG
+-- This query calculates aggregate MPG separately for each truck.
+-- It is not the overall fleet-wide weighted MPG calculation.
 
 SELECT
 
