@@ -13,7 +13,6 @@ TRY_CONVERT is not required: CATEGORY source values remain VARCHAR and are
 profiled without modifying Bronze data.
 */
 USE LogisticsAnalytics;
-GO
 
 /* Validate configured objects. */
 IF NOT EXISTS (SELECT 1 FROM bronze.profiling_config WHERE ProfilingType = 'CATEGORY')
