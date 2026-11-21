@@ -22,19 +22,22 @@ The 14 source CSV files are stored in [`datasets/logistics_operations_database/`
 
 ## 2. Data Warehouse Architecture
 
-The project is designed around the Medallion Architecture, separating data ingestion, data transformation, and business-level modelling into three layers. The Bronze and Silver layers have been implemented; Gold modelling is the next development stage.
+The project follows the Medallion Architecture, separating source ingestion, structural transformation, and business-focused analytical modelling into three layers. The architecture diagram shows the end-to-end flow from the 14 source CSV files through Bronze and Silver, with Gold and BI / Reporting shown as planned downstream stages.
 
-![Logistics Analytics Data Warehouse Architecture](../diagrams/Logistics_Data_Warehouse_Architecture (1).png)
+![Logistics Analytics Data Warehouse Architecture](../diagrams/Logistics_Data_Warehouse_Architecture%20(1).png)
 
 *Figure 1: High-level architecture of the Logistics Analytics Data Warehouse.*
 
-Each layer has a clearly defined responsibility:
+- [Open the editable Draw.io architecture diagram](../diagrams/Logistics_Data_Warehouse_Architecture%20(1).drawio)
 
-- **Bronze:** Preserves raw source data.
-- **Silver:** Cleans, standardizes, validates, and converts data into appropriate data types.
-- **Gold:** Applies business logic and prepares analytical datasets for reporting and decision-making.
+Each layer has a distinct responsibility:
 
-This separation makes the pipeline modular, maintainable, easier to troubleshoot, and easier to extend.
+- **Bronze:** Ingests and preserves the source data in its raw VARCHAR representation. It does not apply cleaning, typing, or business rules.
+- **Silver:** Converts source values to approved data types, applies targeted trimming and blank-to-NULL handling, implements approved column mappings, and enforces relational integrity while preserving source grain.
+- **Gold:** The planned dimensional layer will organize validated Silver entities into business-focused fact and dimension tables and provide KPI-ready reporting structures.
+- **BI / Reporting:** The planned consumption layer will use Gold for analytical SQL and Power BI dashboards.
+
+Bronze and Silver have been implemented and validated within their documented scopes. Gold and BI / Reporting are not yet implemented. Separate validation gates are shown for Bronze profiling and Silver structural and relationship checks.
 
 ## 3. Source Data Inventory
 
