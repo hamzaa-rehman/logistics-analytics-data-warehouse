@@ -1239,3 +1239,69 @@ GROUP BY
     CASE WHEN truck_id IS NULL THEN 'Unassigned' ELSE 'Assigned' END,
     CASE WHEN driver_id IS NULL THEN 'Unassigned' ELSE 'Assigned' END
 ORDER BY truck_assignment, driver_assignment;
+
+/* ============================================================
+   GOLD KPI INVESTIGATION 08 — MAINTENANCE PERFORMANCE AND COST
+   Source: silver.maintenance_records
+   Grain: one row per maintenance event
+   ============================================================ */
+
+-- 08A — Maintenance completeness, cost profile, and validity
+SELECT
+    COUNT_BIG(*) AS total_records,
+    COUNT(truck_id) AS records_with_truck_id,
+    COUNT_BIG(*) - COUNT(truck_id) AS records_without_truck_id,
+    COUNT(maintenance_date) AS records_with_maintenance_date,
+    COUNT(maintenance_type) AS records_with_maintenance_type,
+    COUNT(labor_hours) AS records_with_labor_hours,
+    COUNT(labor_cost) AS records_with_labor_cost,
+    COUNT(parts_cost) AS records_with_parts_cost,
+    COUNT(total_cost) AS records_with_total_cost,
+    COUNT(downtime_hours) AS records_with_downtime,
+    SUM(total_cost) AS total_recorded_maintenance_cost,
+    SUM(labor_cost) AS total_labor_cost,
+    SUM(parts_cost) AS total_parts_cost,
+    MIN(maintenance_date) AS earliest_maintenance_date,
+    MAX(maintenance_date) AS latest_maintenance_date,
+    MIN(total_cost) AS minimum_total_cost,
+    MAX(total_cost) AS maximum_total_cost,
+    MIN(downtime_hours) AS minimum_downtime_hours,
+    MAX(downtime_hours) AS maximum_downtime_hours,
+    SUM(CASE WHEN total_cost < 0 THEN 1 ELSE 0 END) AS negative_total_cost_records,
+    SUM(CASE WHEN labor_cost < 0 THEN 1 ELSE 0 END) AS negative_labor_cost_records,
+    SUM(CASE WHEN parts_cost < 0 THEN 1 ELSE 0 END) AS negative_parts_cost_records,
+    SUM(CASE WHEN downtime_hours < 0 THEN 1 ELSE 0 END) AS negative_downtime_records,
+    SUM(CASE WHEN total_cost IS NOT NULL AND labor_cost IS NOT NULL AND parts_cost IS NOT NULL
+        AND ABS(total_cost - (labor_cost + parts_cost)) > 0.01 THEN 1 ELSE 0 END)
+        AS cost_component_mismatches
+FROM silver.maintenance_records;
+
+-- 08B — Truck-level maintenance events, cost, and downtime
+SELECT
+    truck_id,
+    COUNT_BIG(*) AS maintenance_events,
+    SUM(total_cost) AS total_maintenance_cost,
+    AVG(total_cost) AS average_cost_per_event,
+    SUM(labor_cost) AS total_labor_cost,
+    SUM(parts_cost) AS total_parts_cost,
+    SUM(downtime_hours) AS total_downtime_hours,
+    AVG(downtime_hours) AS average_downtime_per_event,
+    MIN(maintenance_date) AS first_maintenance_date,
+    MAX(maintenance_date) AS latest_maintenance_date
+FROM silver.maintenance_records
+GROUP BY truck_id
+ORDER BY total_maintenance_cost DESC;
+
+-- 08C — Maintenance cost and downtime by maintenance type
+SELECT
+    maintenance_type,
+    COUNT_BIG(*) AS maintenance_events,
+    SUM(total_cost) AS total_maintenance_cost,
+    AVG(total_cost) AS average_cost_per_event,
+    SUM(labor_cost) AS total_labor_cost,
+    SUM(parts_cost) AS total_parts_cost,
+    SUM(downtime_hours) AS total_downtime_hours,
+    AVG(downtime_hours) AS average_downtime_per_event
+FROM silver.maintenance_records
+GROUP BY maintenance_type
+ORDER BY total_maintenance_cost DESC;
