@@ -504,9 +504,9 @@ Final fact/dimension selection, surrogate-key strategy, relationships, and DDL m
 
 ## 12. KPI 8 — Safety Performance
 
-**Status: Investigated.** This investigation uses \`silver.safety_incidents\` at its natural grain (the level of detail represented by each row): one row per recorded safety incident. Trip exposure is sourced separately from \`silver.trips\`. The investigation contains 11 executed queries (08A–08K), preserved in \`scripts/gold/gold_kpi_investigations.sql\`.
+**Status: Investigated.** This investigation uses `silver.safety_incidents` at its natural grain (the level of detail represented by each row): one row per recorded safety incident. Trip exposure is sourced separately from `silver.trips`. The investigation contains 11 executed queries (09A–09K), preserved in `scripts/gold/gold_kpi_investigations.sql`.
 
-### 12.1 Completeness, date coverage, and recorded amounts (08A)
+### 12.1 Completeness, date coverage, and recorded amounts (09A)
 
 | Measure | Result |
 |---|---:|
@@ -532,7 +532,7 @@ All incidents have a date, type, trip ID, classification flags, damage amounts, 
 
 The source currency was not established. Use **recorded claim amount**, **recorded vehicle damage cost**, and **recorded cargo damage cost**; do not label these values as AED, USD, or another assumed currency.
 
-### 12.2 Claim amount reconciliation (08B)
+### 12.2 Claim amount reconciliation (09B)
 
 The recorded claim amount was compared with the sum of vehicle and cargo damage costs for every incident, using a 0.01 tolerance (the accepted margin of difference).
 
@@ -546,11 +546,11 @@ The recorded claim amount was compared with the sum of vehicle and cargo damage 
 
 Every incident satisfies:
 
-\`claim_amount = vehicle_damage_cost + cargo_damage_cost\`
+`claim_amount = vehicle_damage_cost + cargo_damage_cost`
 
-**Decision:** Use source \`claim_amount\` as the claim measure. Do not add claim amount to vehicle and cargo damage costs when calculating a combined financial total; that would count the same damage twice. Vehicle and cargo damage remain useful as separate breakdown measures.
+**Decision:** Use source `claim_amount` as the claim measure. Do not add claim amount to vehicle and cargo damage costs when calculating a combined financial total; that would count the same damage twice. Vehicle and cargo damage remain useful as separate breakdown measures.
 
-### 12.3 Missing truck and driver attribution (08C and 08E)
+### 12.3 Missing truck and driver attribution (09C and 09E)
 
 The two records with missing identifiers are:
 
@@ -565,11 +565,11 @@ The associated trip records were checked:
 - INC00000086: both the incident and trip record have NULL driver_id; truck TRK00120 is present in both.
 - Both incidents occurred two calendar days after their associated trip dispatch dates.
 
-The missing identifiers cannot be recovered from \`silver.trips\`. This is partial attribution (an incident can be linked to some operational entities but not all), not proof that the incident record itself is invalid.
+The missing identifiers cannot be recovered from `silver.trips`. This is partial attribution (an incident can be linked to some operational entities but not all), not proof that the incident record itself is invalid.
 
-**Decision:** Preserve both incidents. Keep \`truck_id\` and \`driver_id\` nullable in the candidate safety fact. Do not infer or manufacture missing identifiers.
+**Decision:** Preserve both incidents. Keep `truck_id` and `driver_id` nullable in the candidate safety fact. Do not infer or manufacture missing identifiers.
 
-### 12.4 Incident frequency, classifications, and financial impact by type (08D)
+### 12.4 Incident frequency, classifications, and financial impact by type (09D)
 
 | Incident type | Incidents | At fault | Injury | Preventable | Vehicle damage | Cargo damage | Recorded claim |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -594,7 +594,7 @@ Average recorded claim per incident, calculated from the category totals:
 
 Frequency (how often an event occurs) and severity (the impact of an event) are different views. These claim amounts are descriptive financial measures; the dataset does not establish the currency or the cause of the differences.
 
-### 12.5 Incident-to-trip relationship (08F)
+### 12.5 Incident-to-trip relationship (09F)
 
 | Measure | Result |
 |---|---:|
@@ -604,11 +604,11 @@ Frequency (how often an event occurs) and severity (the impact of an event) are 
 | Incident trip IDs matched to Silver trips | 170 |
 | Incident trip IDs not found | 0 |
 
-Each recorded incident is associated with a different trip, and all 170 trip IDs match \`silver.trips\`. This is a one-to-one relationship within the observed incident records only; it does not mean every trip has an incident.
+Each recorded incident is associated with a different trip, and all 170 trip IDs match `silver.trips`. This is a one-to-one relationship within the observed incident records only; it does not mean every trip has an incident.
 
-### 12.6 Overall safety rates (08G)
+### 12.6 Overall safety rates (09G)
 
-Trip exposure was calculated independently from \`silver.trips\` before being combined with incident totals. This avoids a fanout (a join that duplicates rows and inflates aggregated measures) between the trip and incident records.
+Trip exposure was calculated independently from `silver.trips` before being combined with incident totals. This avoids a fanout (a join that duplicates rows and inflates aggregated measures) between the trip and incident records.
 
 | Measure | Result |
 |---|---:|
@@ -628,9 +628,9 @@ Definitions:
 
 The incident count and distinct affected-trip count are equal in this dataset because each incident belongs to a different trip. These are recorded incident rates, not verified industry-standard safety rates. They depend on the completeness and consistency of incident reporting and should not be compared with another operator unless definitions and exposure methods are aligned.
 
-### 12.7 Annual safety trend (08H)
+### 12.7 Annual safety trend (09H)
 
-Incident counts are grouped by \`incident_date\`; trip counts and distance are grouped by \`dispatch_date\`.
+Incident counts are grouped by `incident_date`; trip counts and distance are grouped by `dispatch_date`.
 
 | Year | Incidents | Trips | Trip miles | Incidents / 1,000 trips | Incidents / million miles |
 |---|---:|---:|---:|---:|---:|
@@ -644,7 +644,7 @@ Incident counts are grouped by \`incident_date\`; trip counts and distance are g
 
 **Defensible interpretation:** Recorded safety performance deteriorated in 2024 compared with 2023 because both incident rates increased while trip volume and distance remained relatively stable. The dataset does not establish why this occurred. The total of 170 incidents across three years is limited evidence for strong conclusions about long-term safety performance.
 
-### 12.8 Overlap among at-fault, injury, and preventable flags (08I)
+### 12.8 Overlap among at-fault, injury, and preventable flags (09I)
 
 The three flags are independent classifications. All eight possible TRUE/FALSE combinations were present.
 
@@ -672,7 +672,7 @@ These percentages overlap because one incident can satisfy more than one classif
 
 Preventable does not mean at fault: 36 incidents were marked preventable but not at fault. Injury involvement is also independent of the other flags. The highest average claim appears in the at-fault, injury-involved, non-preventable group (9 incidents); the lowest average appears in the group marked all three (2 incidents). These small group sizes do not support strong severity conclusions.
 
-### 12.9 Incident and trip calendar-year alignment (08J)
+### 12.9 Incident and trip calendar-year alignment (09J)
 
 | Validation | Result |
 |---|---:|
@@ -685,7 +685,7 @@ Preventable does not mean at fault: 36 incidents were marked preventable but not
 
 All incident dates fall in the same calendar year as the associated trip dispatch dates. This supports the annual comparison in Section 12.7, even though the incident and dispatch dates are not necessarily the same date.
 
-### 12.10 Driver and truck attribution (08K)
+### 12.10 Driver and truck attribution (09K)
 
 | Measure | Result |
 |---|---:|
@@ -700,7 +700,7 @@ Driver and truck incident counts can support descriptive drill-downs (moving fro
 
 ### 12.11 Gold definitions, modelling decisions, and caveats
 
-**Candidate fact grain:** \`fact_safety_incidents\`, one row per incident.
+**Candidate fact grain:** `fact_safety_incidents`, one row per incident.
 
 Recommended reporting scope:
 
@@ -711,15 +711,15 @@ Recommended reporting scope:
 
 Modelling and interpretation rules:
 
-1. Retain \`incident_id\` as the incident identity and preserve one row per incident.
-2. Retain nullable \`trip_id\`, \`driver_id\`, and \`truck_id\` relationships. In the observed data all incident trip IDs match; one driver ID and one truck ID are missing and cannot be recovered from the associated trip records.
+1. Retain `incident_id` as the incident identity and preserve one row per incident.
+2. Retain nullable `trip_id`, `driver_id`, and `truck_id` relationships. In the observed data all incident trip IDs match; one driver ID and one truck ID are missing and cannot be recovered from the associated trip records.
 3. Keep the incident fact separate from the trip fact. Do not directly join raw incident rows to other event facts and then sum their measures without controlling the relationship grain.
-4. Use source \`claim_amount\` as the recorded claim measure. Vehicle and cargo damage are component views and must not be added again to claim amount.
-5. Retain \`at_fault_flag\`, \`injury_flag\`, and \`preventable_flag\` independently.
+4. Use source `claim_amount` as the recorded claim measure. Vehicle and cargo damage are component views and must not be added again to claim amount.
+5. Retain `at_fault_flag`, `injury_flag`, and `preventable_flag` independently.
 6. Use recorded incident rates as descriptive operational measures, not as verified industry-standard rates.
 7. Do not rank individual drivers or trucks as good/bad performers using raw incident counts. Add exposure-adjusted entity-level rates only after validating driver- and truck-specific trip/mileage denominators.
 8. Currency is unknown. Do not label claim or damage amounts with a currency symbol or currency name until confirmed.
 9. Do not infer causation for the 2024 increase or for differences among incident categories.
 
-**Gold decision:** Include a candidate \`fact_safety_incidents\` in dimensional model design, with overall, category, annual, driver, and truck reporting supported. Driver- and truck-level views are descriptive drill-downs, not performance leaderboards.
+**Gold decision:** Include a candidate `fact_safety_incidents` in dimensional model design, with overall, category, annual, driver, and truck reporting supported. Driver- and truck-level views are descriptive drill-downs, not performance leaderboards.
 
