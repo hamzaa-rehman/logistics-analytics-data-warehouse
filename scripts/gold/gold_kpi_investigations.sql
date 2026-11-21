@@ -16,7 +16,7 @@
      - Route pricing comparisons are indicative, not proof of billing rules.
      - trips_per_day is not a true fleet-utilization percentage.
      - On-time delivery rate must use Delivery events, not Pickup events.
-     - This collection contains investigations 01–06D supplied so far.
+     - This collection contains the Gold KPI investigation SQL through Safety Performance (08A–08K).
 
    ============================================================================ */
 
@@ -1304,3 +1304,270 @@ SELECT
 FROM silver.maintenance_records
 GROUP BY maintenance_type
 ORDER BY total_maintenance_cost DESC;
+
+
+/* ============================================================
+   GOLD KPI INVESTIGATION 09 — SAFETY PERFORMANCE
+   Source: silver.safety_incidents
+   Incident grain: one row per safety incident
+   Related exposure source: silver.trips
+   Purpose: Profile safety records, validate claims and attribution,
+            analyse incident patterns, and calculate descriptive
+            exposure-adjusted rates.
+   ============================================================ */
+
+-- 08A — Safety incident completeness, date coverage, and recorded amounts
+SELECT
+    COUNT_BIG(*) AS total_incidents,
+    COUNT(incident_date) AS incidents_with_date,
+    COUNT(incident_type) AS incidents_with_type,
+    COUNT(trip_id) AS incidents_with_trip_id,
+    COUNT(truck_id) AS incidents_with_truck_id,
+    COUNT(driver_id) AS incidents_with_driver_id,
+    COUNT(at_fault_flag) AS incidents_with_at_fault_flag,
+    COUNT(injury_flag) AS incidents_with_injury_flag,
+    COUNT(preventable_flag) AS incidents_with_preventable_flag,
+    COUNT(vehicle_damage_cost) AS incidents_with_vehicle_damage_cost,
+    COUNT(cargo_damage_cost) AS incidents_with_cargo_damage_cost,
+    COUNT(claim_amount) AS incidents_with_claim_amount,
+    MIN(incident_date) AS earliest_incident_date,
+    MAX(incident_date) AS latest_incident_date,
+    SUM(vehicle_damage_cost) AS total_vehicle_damage_cost,
+    SUM(cargo_damage_cost) AS total_cargo_damage_cost,
+    SUM(claim_amount) AS total_claim_amount,
+    MIN(claim_amount) AS minimum_claim_amount,
+    MAX(claim_amount) AS maximum_claim_amount
+FROM silver.safety_incidents;
+
+-- 08B — Validate claim amount against vehicle and cargo damage per incident
+SELECT
+    COUNT_BIG(*) AS total_incidents,
+    SUM(
+        CASE
+            WHEN ABS(
+                claim_amount -
+                (vehicle_damage_cost + cargo_damage_cost)
+            ) <= 0.01
+            THEN 1 ELSE 0
+        END
+    ) AS matching_incidents,
+    SUM(
+        CASE
+            WHEN ABS(
+                claim_amount -
+                (vehicle_damage_cost + cargo_damage_cost)
+            ) > 0.01
+            THEN 1 ELSE 0
+        END
+    ) AS mismatching_incidents,
+    MAX(
+        ABS(
+            claim_amount -
+            (vehicle_damage_cost + cargo_damage_cost)
+        )
+    ) AS maximum_absolute_difference,
+    SUM(
+        claim_amount -
+        (vehicle_damage_cost + cargo_damage_cost)
+    ) AS total_difference
+FROM silver.safety_incidents;
+
+-- 08C — Identify incidents missing truck or driver attribution
+SELECT
+    incident_id,
+    trip_id,
+    truck_id,
+    driver_id,
+    incident_date,
+    incident_type
+FROM silver.safety_incidents
+WHERE truck_id IS NULL
+   OR driver_id IS NULL;
+
+-- 08D — Incident frequency, classifications, and recorded financial impact by type
+SELECT
+    incident_type,
+    COUNT_BIG(*) AS total_incidents,
+    SUM(CASE WHEN at_fault_flag = 1 THEN 1 ELSE 0 END) AS at_fault_incidents,
+    SUM(CASE WHEN injury_flag = 1 THEN 1 ELSE 0 END) AS injury_incidents,
+    SUM(CASE WHEN preventable_flag = 1 THEN 1 ELSE 0 END) AS preventable_incidents,
+    SUM(vehicle_damage_cost) AS total_vehicle_damage_cost,
+    SUM(cargo_damage_cost) AS total_cargo_damage_cost,
+    SUM(claim_amount) AS total_claim_amount
+FROM silver.safety_incidents
+GROUP BY incident_type
+ORDER BY total_incidents DESC;
+
+-- 08E — Compare missing incident truck/driver IDs with the associated trip
+SELECT
+    s.incident_id,
+    s.trip_id,
+    s.truck_id AS incident_truck_id,
+    t.truck_id AS trip_truck_id,
+    s.driver_id AS incident_driver_id,
+    t.driver_id AS trip_driver_id,
+    t.dispatch_date,
+    s.incident_date,
+    DATEDIFF(
+        DAY,
+        t.dispatch_date,
+        CAST(s.incident_date AS DATE)
+    ) AS days_between_dispatch_and_incident
+FROM silver.safety_incidents AS s
+LEFT JOIN silver.trips AS t
+    ON s.trip_id = t.trip_id
+WHERE s.truck_id IS NULL
+   OR s.driver_id IS NULL;
+
+-- 08F — Check incident-record to distinct-trip relationship and trip matching
+SELECT
+    COUNT_BIG(*) AS total_incident_records,
+    COUNT(DISTINCT s.trip_id) AS distinct_trips_with_incidents,
+    COUNT_BIG(*) - COUNT(DISTINCT s.trip_id)
+        AS additional_incident_records,
+    COUNT(DISTINCT CASE
+        WHEN t.trip_id IS NOT NULL THEN s.trip_id
+    END) AS incidents_linked_to_existing_trips,
+    COUNT(DISTINCT CASE
+        WHEN t.trip_id IS NULL THEN s.trip_id
+    END) AS incident_trip_ids_not_found
+FROM silver.safety_incidents AS s
+LEFT JOIN silver.trips AS t
+    ON s.trip_id = t.trip_id;
+
+-- 08G — Overall safety rates using completed trips and trip miles as exposure
+WITH TripSummary AS
+(
+    SELECT
+        COUNT_BIG(*) AS total_trips,
+        SUM(actual_distance_miles) AS total_trip_miles
+    FROM silver.trips
+),
+IncidentSummary AS
+(
+    SELECT
+        COUNT_BIG(*) AS total_incidents,
+        COUNT(DISTINCT trip_id) AS trips_with_incidents
+    FROM silver.safety_incidents
+)
+SELECT
+    i.total_incidents,
+    i.trips_with_incidents,
+    t.total_trips,
+    t.total_trip_miles,
+    CAST(
+        i.total_incidents * 1000.0 / t.total_trips
+        AS DECIMAL(10,4)
+    ) AS incidents_per_1000_trips,
+    CAST(
+        i.total_incidents * 1000000.0 / t.total_trip_miles
+        AS DECIMAL(10,4)
+    ) AS incidents_per_million_miles,
+    CAST(
+        i.trips_with_incidents * 100.0 / t.total_trips
+        AS DECIMAL(10,4)
+    ) AS percentage_of_trips_with_incidents
+FROM TripSummary AS t
+CROSS JOIN IncidentSummary AS i;
+
+-- 08H — Annual incident counts and exposure-adjusted rates
+WITH AnnualIncidents AS
+(
+    SELECT
+        YEAR(incident_date) AS reporting_year,
+        COUNT_BIG(*) AS total_incidents
+    FROM silver.safety_incidents
+    GROUP BY YEAR(incident_date)
+),
+AnnualTrips AS
+(
+    SELECT
+        YEAR(dispatch_date) AS reporting_year,
+        COUNT_BIG(*) AS total_trips,
+        SUM(actual_distance_miles) AS total_trip_miles
+    FROM silver.trips
+    GROUP BY YEAR(dispatch_date)
+)
+SELECT
+    t.reporting_year,
+    COALESCE(i.total_incidents, 0) AS total_incidents,
+    t.total_trips,
+    t.total_trip_miles,
+    CAST(
+        COALESCE(i.total_incidents, 0) * 1000.0
+        / NULLIF(t.total_trips, 0)
+        AS DECIMAL(10,4)
+    ) AS incidents_per_1000_trips,
+    CAST(
+        COALESCE(i.total_incidents, 0) * 1000000.0
+        / NULLIF(t.total_trip_miles, 0)
+        AS DECIMAL(10,4)
+    ) AS incidents_per_million_miles
+FROM AnnualTrips AS t
+LEFT JOIN AnnualIncidents AS i
+    ON t.reporting_year = i.reporting_year
+ORDER BY t.reporting_year;
+
+-- 08I — Analyse overlap among at-fault, injury, and preventable classifications
+SELECT
+    at_fault_flag,
+    injury_flag,
+    preventable_flag,
+    COUNT_BIG(*) AS total_incidents,
+    SUM(claim_amount) AS total_claim_amount,
+    AVG(claim_amount) AS average_claim_amount,
+    SUM(vehicle_damage_cost) AS total_vehicle_damage_cost,
+    SUM(cargo_damage_cost) AS total_cargo_damage_cost
+FROM silver.safety_incidents
+GROUP BY
+    at_fault_flag,
+    injury_flag,
+    preventable_flag
+ORDER BY
+    total_incidents DESC;
+
+-- 08J — Validate incident year against associated trip dispatch year
+SELECT
+    COUNT_BIG(*) AS total_incidents,
+    SUM(CASE
+        WHEN YEAR(s.incident_date) = YEAR(t.dispatch_date)
+        THEN 1 ELSE 0
+    END) AS same_year_incidents,
+    SUM(CASE
+        WHEN YEAR(s.incident_date) <> YEAR(t.dispatch_date)
+        THEN 1 ELSE 0
+    END) AS different_year_incidents,
+    MIN(DATEDIFF(
+        DAY,
+        t.dispatch_date,
+        CAST(s.incident_date AS DATE)
+    )) AS minimum_days_after_dispatch,
+    MAX(DATEDIFF(
+        DAY,
+        t.dispatch_date,
+        CAST(s.incident_date AS DATE)
+    )) AS maximum_days_after_dispatch,
+    AVG(CAST(DATEDIFF(
+        DAY,
+        t.dispatch_date,
+        CAST(s.incident_date AS DATE)
+    ) AS DECIMAL(10,2))) AS average_days_after_dispatch
+FROM silver.safety_incidents AS s
+INNER JOIN silver.trips AS t
+    ON s.trip_id = t.trip_id;
+
+-- 08K — Overall driver and truck attribution coverage
+SELECT
+    COUNT_BIG(*) AS total_incidents,
+    COUNT(DISTINCT driver_id) AS distinct_drivers_involved,
+    COUNT(DISTINCT truck_id) AS distinct_trucks_involved,
+    SUM(CASE
+        WHEN driver_id IS NULL THEN 1
+        ELSE 0
+    END) AS incidents_without_driver,
+    SUM(CASE
+        WHEN truck_id IS NULL THEN 1
+        ELSE 0
+    END) AS incidents_without_truck,
+    COUNT(DISTINCT trip_id) AS distinct_trips_involved
+FROM silver.safety_incidents;
