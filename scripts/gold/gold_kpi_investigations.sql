@@ -1316,7 +1316,7 @@ ORDER BY total_maintenance_cost DESC;
             exposure-adjusted rates.
    ============================================================ */
 
--- 08A — Safety incident completeness, date coverage, and recorded amounts
+-- 09A — Safety incident completeness, date coverage, and recorded amounts
 SELECT
     COUNT_BIG(*) AS total_incidents,
     COUNT(incident_date) AS incidents_with_date,
@@ -1339,7 +1339,7 @@ SELECT
     MAX(claim_amount) AS maximum_claim_amount
 FROM silver.safety_incidents;
 
--- 08B — Validate claim amount against vehicle and cargo damage per incident
+-- 09B — Validate claim amount against vehicle and cargo damage per incident
 SELECT
     COUNT_BIG(*) AS total_incidents,
     SUM(
@@ -1372,7 +1372,7 @@ SELECT
     ) AS total_difference
 FROM silver.safety_incidents;
 
--- 08C — Identify incidents missing truck or driver attribution
+-- 09C — Identify incidents missing truck or driver attribution
 SELECT
     incident_id,
     trip_id,
@@ -1384,7 +1384,7 @@ FROM silver.safety_incidents
 WHERE truck_id IS NULL
    OR driver_id IS NULL;
 
--- 08D — Incident frequency, classifications, and recorded financial impact by type
+-- 09D — Incident frequency, classifications, and recorded financial impact by type
 SELECT
     incident_type,
     COUNT_BIG(*) AS total_incidents,
@@ -1398,7 +1398,7 @@ FROM silver.safety_incidents
 GROUP BY incident_type
 ORDER BY total_incidents DESC;
 
--- 08E — Compare missing incident truck/driver IDs with the associated trip
+-- 09E — Compare missing incident truck/driver IDs with the associated trip
 SELECT
     s.incident_id,
     s.trip_id,
@@ -1419,7 +1419,7 @@ LEFT JOIN silver.trips AS t
 WHERE s.truck_id IS NULL
    OR s.driver_id IS NULL;
 
--- 08F — Check incident-record to distinct-trip relationship and trip matching
+-- 09F — Check incident-record to distinct-trip relationship and trip matching
 SELECT
     COUNT_BIG(*) AS total_incident_records,
     COUNT(DISTINCT s.trip_id) AS distinct_trips_with_incidents,
@@ -1435,7 +1435,7 @@ FROM silver.safety_incidents AS s
 LEFT JOIN silver.trips AS t
     ON s.trip_id = t.trip_id;
 
--- 08G — Overall safety rates using completed trips and trip miles as exposure
+-- 09G — Overall safety rates using completed trips and trip miles as exposure
 WITH TripSummary AS
 (
     SELECT
@@ -1470,7 +1470,7 @@ SELECT
 FROM TripSummary AS t
 CROSS JOIN IncidentSummary AS i;
 
--- 08H — Annual incident counts and exposure-adjusted rates
+-- 09H — Annual incident counts and exposure-adjusted rates
 WITH AnnualIncidents AS
 (
     SELECT
@@ -1508,7 +1508,7 @@ LEFT JOIN AnnualIncidents AS i
     ON t.reporting_year = i.reporting_year
 ORDER BY t.reporting_year;
 
--- 08I — Analyse overlap among at-fault, injury, and preventable classifications
+-- 09I — Analyse overlap among at-fault, injury, and preventable classifications
 SELECT
     at_fault_flag,
     injury_flag,
@@ -1526,7 +1526,7 @@ GROUP BY
 ORDER BY
     total_incidents DESC;
 
--- 08J — Validate incident year against associated trip dispatch year
+-- 09J — Validate incident year against associated trip dispatch year
 SELECT
     COUNT_BIG(*) AS total_incidents,
     SUM(CASE
@@ -1556,7 +1556,7 @@ FROM silver.safety_incidents AS s
 INNER JOIN silver.trips AS t
     ON s.trip_id = t.trip_id;
 
--- 08K — Overall driver and truck attribution coverage
+-- 09K — Overall driver and truck attribution coverage
 SELECT
     COUNT_BIG(*) AS total_incidents,
     COUNT(DISTINCT driver_id) AS distinct_drivers_involved,
