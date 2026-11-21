@@ -954,3 +954,107 @@ FROM silver.customers c
 INNER JOIN FirstCustomerLoad f
 
     ON c.customer_id = f.customer_id;
+
+
+/* ============================================================
+   GOLD INVESTIGATION 07G — Trip-Level Fuel Reconciliation
+
+   Business question:
+     How do fuel purchase gallons linked to each trip compare
+     with the fuel consumption recorded on that trip?
+
+   Important:
+     This is a comparison, not proof that purchased gallons
+     were consumed exclusively during the linked trip.
+   ============================================================ */
+
+WITH FuelPurchasesByTrip AS
+(
+    SELECT
+        trip_id,
+        COUNT_BIG(*) AS purchase_count,
+        SUM(gallons) AS purchased_gallons
+    FROM silver.fuel_purchases
+    GROUP BY trip_id
+),
+TripFuelComparison AS
+(
+    SELECT
+        t.trip_id,
+        t.fuel_gallons_used,
+        COALESCE(f.purchase_count, 0) AS purchase_count,
+        COALESCE(f.purchased_gallons, 0) AS purchased_gallons,
+        CASE
+            WHEN f.trip_id IS NULL THEN 'No Purchase Record'
+            WHEN f.purchased_gallons > t.fuel_gallons_used THEN 'Purchased > Consumed'
+            WHEN f.purchased_gallons < t.fuel_gallons_used THEN 'Purchased < Consumed'
+            ELSE 'Purchased = Consumed'
+        END AS reconciliation_status
+    FROM silver.trips AS t
+    LEFT JOIN FuelPurchasesByTrip AS f
+        ON t.trip_id = f.trip_id
+)
+SELECT
+    reconciliation_status,
+    COUNT_BIG(*) AS trip_count,
+    SUM(purchase_count) AS total_purchase_records,
+    SUM(purchased_gallons) AS total_purchased_gallons,
+    SUM(fuel_gallons_used) AS total_consumed_gallons,
+    SUM(purchased_gallons - fuel_gallons_used) AS net_gallon_difference
+FROM TripFuelComparison
+GROUP BY reconciliation_status
+ORDER BY reconciliation_status;
+
+
+/* ------------------------------------------------------------
+   07G SUPPORTING CHECK — Trip Fuel Consumption Quality
+
+   Confirms NULL, zero, and negative consumption values before
+   interpreting the trip-level comparison.
+   ------------------------------------------------------------ */
+
+SELECT
+    COUNT_BIG(*) AS total_trips,
+    SUM(CASE WHEN fuel_gallons_used IS NULL THEN 1 ELSE 0 END)
+        AS null_consumption,
+    SUM(CASE WHEN fuel_gallons_used = 0 THEN 1 ELSE 0 END)
+        AS zero_consumption,
+    SUM(CASE WHEN fuel_gallons_used < 0 THEN 1 ELSE 0 END)
+        AS negative_consumption,
+    MIN(fuel_gallons_used) AS minimum_consumption,
+    MAX(fuel_gallons_used) AS maximum_consumption
+FROM silver.trips;
+
+
+/* ============================================================
+   GOLD INVESTIGATION 07H — Fuel Cost by Truck and Driver
+
+   Business question:
+     How much recorded fuel expenditure can be attributed to
+     trucks and drivers, and how much remains unassigned?
+
+   Keep unassigned purchases in the overall totals.
+   ============================================================ */
+
+SELECT
+    CASE
+        WHEN truck_id IS NULL THEN 'Unassigned'
+        ELSE 'Assigned'
+    END AS truck_assignment,
+    CASE
+        WHEN driver_id IS NULL THEN 'Unassigned'
+        ELSE 'Assigned'
+    END AS driver_assignment,
+    COUNT_BIG(*) AS purchase_count,
+    COUNT(DISTINCT truck_id) AS distinct_trucks,
+    COUNT(DISTINCT driver_id) AS distinct_drivers,
+    SUM(gallons) AS total_gallons,
+    SUM(total_cost) AS total_fuel_cost,
+    AVG(price_per_gallon) AS avg_price_per_gallon
+FROM silver.fuel_purchases
+GROUP BY
+    CASE WHEN truck_id IS NULL THEN 'Unassigned' ELSE 'Assigned' END,
+    CASE WHEN driver_id IS NULL THEN 'Unassigned' ELSE 'Assigned' END
+ORDER BY
+    truck_assignment,
+    driver_assignment;
