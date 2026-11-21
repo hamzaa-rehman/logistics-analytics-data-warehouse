@@ -1316,6 +1316,8 @@ ORDER BY total_maintenance_cost DESC;
             exposure-adjusted rates.
    ============================================================ */
 
+USE LogisticsAnalytics;
+
 -- 09A — Safety incident completeness, date coverage, and recorded amounts
 SELECT
     COUNT_BIG(*) AS total_incidents,
