@@ -42,7 +42,17 @@ See the [Bronze layer documentation](../bronze/readme.md) for the ingestion and 
 
 Silver contains 14 tables. The table structures preserve the source entity grain, with primary and foreign keys defining the implemented relational model.
 
-### 3.1 Entity Relationship Diagram (ERD)\n\nThe diagram below documents the implemented Silver relational schema. It includes all 14 tables and 150 columns, with SQL data types, nullability, primary-key and foreign-key markers, and the 18 declared foreign-key relationships. The two monthly metric tables show their composite primary keys.\n\n![Silver Layer Entity Relationship Diagram](../diagrams/silver_erd.png)\n\n- [Open the editable Draw.io source](../diagrams/silver_erd.drawio)\n\nThe ERD is generated from and should be maintained against [ddl_silver.sql](../../scripts/silver/ddl_silver.sql). The DDL remains the authoritative implementation; the diagram is its visual documentation.\n\n### 3.2 Table inventory
+### 3.1 Entity Relationship Diagram (ERD)
+
+The diagram below documents the implemented Silver relational schema. It includes all 14 tables and 150 columns, with SQL data types, nullability, primary-key and foreign-key markers, and the 18 declared foreign-key relationships. The two monthly metric tables show their composite primary keys.
+
+![Silver Layer Entity Relationship Diagram](../diagrams/silver_erd.png)
+
+- [Open the editable Draw.io source](../diagrams/silver_erd.drawio)
+
+The ERD is generated from and should be maintained against [ddl_silver.sql](../../scripts/silver/ddl_silver.sql). The DDL remains the authoritative implementation; the diagram is its visual documentation.
+
+### 3.2 Table inventory
 
 | Table | Grain | Rows loaded |
 |---|---|---:|
