@@ -383,6 +383,86 @@ The two unassigned-cost totals overlap for the 94 purchases missing both IDs; do
 6. **Respect missing identifiers.** Retain unassigned truck trips in overall trip measures, while excluding them from truck-level attribution.
 7. **Separate observation from causation.** Correlations and data patterns do not establish business causality.
 
+
+## 8. Maintenance performance and cost (KPI 7)
+
+**Status: Investigated.** The maintenance investigation used `silver.maintenance_records` at its natural grain: one row per maintenance event. The source contains 2,920 maintenance records dated 2022-01-01 through 2024-12-31.
+
+### 8.1 Completeness and cost validation (08A)
+
+| Check | Result |
+|---|---:|
+| Maintenance records | 2,920 |
+| Records with truck ID | 2,920 |
+| Missing truck IDs | 0 |
+| Records with maintenance date, type, labor hours, labor cost, parts cost, total cost, and downtime | 2,920 for each field |
+| Recorded maintenance cost | 5,730,573.28 |
+| Labor cost | 1,280,507.09 |
+| Parts cost | 4,450,066.19 |
+| Minimum / maximum recorded cost per event | 60.82 / 4,426.57 |
+| Minimum / maximum downtime per event | 2 / 48 hours |
+| Negative total-cost, labor-cost, parts-cost, or downtime records | 0 |
+| Cost-component mismatches | 0 |
+
+The component totals reconcile exactly: labor cost plus parts cost equals recorded total cost (1,280,507.09 + 4,450,066.19 = 5,730,573.28). The mismatch check allowed a 0.01 tolerance; no records exceeded it. Parts account for approximately 77.65% of recorded maintenance cost and labor approximately 22.35%.
+
+The dataset does not establish the currency. Report the measure as **recorded maintenance cost**, not as AED, USD, or another assumed currency. Retain source `total_cost`; do not replace it with a recalculated value.
+
+### 8.2 Truck-level maintenance attribution (08B)
+
+All 2,920 maintenance events have a populated `truck_id`. The query returned 120 trucks with maintenance records, covering the 120 trucks in the Silver truck inventory. This supports truck-level attribution of maintenance events, recorded costs, and downtime.
+
+There are approximately 24.33 maintenance events per truck on average across the observed period (2,920 / 120); this is a simple fleet-wide average and does not adjust for truck age, mileage, or operating exposure.
+
+Highest recorded maintenance cost by truck in the returned results:
+
+| Truck | Events | Recorded maintenance cost |
+|---|---:|---:|
+| TRK00003 | 41 | 90,161.42 |
+| TRK00073 | 39 | 76,573.99 |
+| TRK00081 | 32 | 73,892.72 |
+| TRK00099 | 34 | 73,231.77 |
+| TRK00014 | 34 | 71,801.82 |
+
+Highest cumulative downtime in the returned results:
+
+| Truck | Events | Downtime |
+|---|---:|---:|
+| TRK00003 | 41 | 1,133.1 hours |
+| TRK00044 | 38 | 1,080.4 hours |
+| TRK00073 | 39 | 996.3 hours |
+| TRK00046 | 29 | 974.5 hours |
+| TRK00014 | 34 | 940.4 hours |
+
+These are descriptive rankings, not evidence that a truck is unreliable or poorly maintained. Usage exposure (for example, trips and miles), truck age, and maintenance mix would be needed for fair comparisons. Summed maintenance downtime is not necessarily total truck unavailability; the source does not establish whether downtime intervals overlap or how availability should be measured.
+
+### 8.3 Maintenance type analysis (08C)
+
+Seven maintenance categories were present:
+
+| Maintenance type | Events | Recorded cost | Average cost / event | Labor cost | Parts cost | Downtime hours | Average downtime / event |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Preventive | 422 | 963,576.34 | 2,283.36 | 185,316.55 | 778,259.79 | 10,569.8 | 25.05 |
+| Repair | 424 | 945,375.44 | 2,229.66 | 183,295.81 | 762,079.63 | 10,452.9 | 24.65 |
+| Tire | 414 | 919,413.24 | 2,220.80 | 185,706.00 | 733,707.24 | 10,087.1 | 24.36 |
+| Brake | 402 | 911,667.23 | 2,267.83 | 182,732.81 | 728,934.42 | 10,031.8 | 24.95 |
+| Engine | 415 | 890,537.88 | 2,145.87 | 187,553.72 | 702,984.16 | 10,396.3 | 25.05 |
+| Transmission | 411 | 879,620.87 | 2,140.20 | 170,056.41 | 709,564.46 | 10,034.9 | 24.42 |
+| Inspection | 432 | 220,382.28 | 510.14 | 185,845.79 | 34,536.49 | 10,657.7 | 24.67 |
+
+Inspection has the highest event count (432) and the lowest recorded cost (220,382.28), while its cumulative downtime (10,657.7 hours) is the highest among the categories. This demonstrates that recorded expenditure and downtime should be reported as separate measures; it does not establish why the patterns differ or that inspections prevent repairs.
+
+### 8.4 Gold implications and approved analytical handling
+
+- Candidate `fact_maintenance_records` grain: **one row per maintenance event**.
+- Preserve `truck_id`, `maintenance_date`, and `maintenance_type` for truck, date, and category analysis.
+- Use source `total_cost` for recorded maintenance expenditure. Retain `labor_cost` and `parts_cost` as separate measures; their sum reconciles to source total within the tested 0.01 tolerance.
+- Retain `downtime_hours` as a separate measure. Do not label its sum as fleet unavailability without a validated availability definition.
+- Supported measures include maintenance event count, recorded maintenance cost, labor cost, parts cost, downtime hours, average cost per event, and average downtime per event.
+- Truck-level comparisons are supported because all maintenance records have `truck_id`; comparisons of reliability or cost efficiency should account for usage exposure and truck age.
+- Do not assume the currency or infer causation from descriptive category patterns.
+- Avoid joining raw maintenance events directly to trip-level records and summing measures without controlling the relationship grain; one-to-many joins can duplicate measures.
+
 ## 9. Candidate Gold model implications (not yet final)
 
 The following are modelling directions for design review, not approved DDL:
@@ -392,8 +472,8 @@ The following are modelling directions for design review, not approved DDL:
 - `fact_delivery_events`: one row per event; event type, scheduled and actual timestamps, detention, on-time flag, load/trip/facility relationships.
 - `dim_customer`: customer attributes including customer type, account status, contract start date; customer key must be based on customer identity.
 - Shared dimensions such as date, truck, driver, route, and facility should be included only where they support defined analysis and can be related without creating ambiguous or fanout-prone joins.
-- Fuel-purchase and maintenance facts are pending investigation and design.
-- Safety incident fact is a possible later extension; rate definitions require an appropriate exposure denominator.
+- Candidate `fact_fuel_purchases` and `fact_maintenance_records` have now been investigated; their grains and measures should be finalized in Gold design.
+- A safety incident fact is a possible extension; rate definitions require an appropriate exposure denominator.
 
 Final fact/dimension selection, surrogate-key strategy, relationships, and DDL must be decided in the Gold model design stage after remaining cost and safety investigations.
 
@@ -407,7 +487,7 @@ Final fact/dimension selection, surrogate-key strategy, relationships, and DDL m
 | Delivery performance | Investigated | Carry Delivery-only denominator, partial January caveat, and detention finding into Gold |
 | Customer performance | Investigated | Carry customer coverage, concentration, segmentation, and acquisition-proxy caveat into Gold |
 | Fuel purchases | Investigated | Carry source-cost validation, assignment coverage, separate purchase/consumption grains, partial January 2025 caveat, and attribution rules into Gold |
-| Maintenance | Pending | Investigate maintenance costs, downtime, truck attribution, and time trends |
+| Maintenance | Investigated | Carry event grain, source-cost measure, truck attribution, maintenance categories, and downtime caveats into Gold design |
 | Safety | Pending | Review incident patterns and financial measures; avoid rates without a valid exposure denominator |
 | Gold dimensional model | Pending | Define business processes, fact grains, dimensions, relationships, and measures before DDL |
 | Gold validation | Pending | Define source-to-Gold reconciliation and business-rule checks after implementation |
