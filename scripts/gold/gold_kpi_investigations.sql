@@ -854,3 +854,101 @@ SELECT
 SELECT
 
     c.customer_type,
+
+    COUNT(DISTINCT c.customer_id) AS total_customers,
+
+    COUNT_BIG(l.load_id) AS total_loads,
+
+    CAST(
+
+        SUM(l.revenue) AS DECIMAL(18,2)
+
+    ) AS reported_load_revenue,
+
+    CAST(
+
+        AVG(l.revenue) AS DECIMAL(18,2)
+
+    ) AS average_revenue_per_load,
+
+    CAST(
+
+        SUM(l.revenue) * 100.0
+
+        / NULLIF((SELECT SUM(revenue) FROM silver.loads), 0)
+
+        AS DECIMAL(6,2)
+
+    ) AS revenue_contribution_pct
+
+FROM silver.customers c
+
+INNER JOIN silver.loads l
+
+    ON c.customer_id = l.customer_id
+
+GROUP BY c.customer_type
+
+ORDER BY reported_load_revenue DESC;
+
+-- GOLD INVESTIGATION 06D — Contract Start vs First Observed Load
+
+WITH FirstCustomerLoad AS
+
+(
+
+    SELECT
+
+        customer_id,
+
+        MIN(load_date) AS first_observed_load_date,
+
+        COUNT_BIG(*) AS total_loads
+
+    FROM silver.loads
+
+    GROUP BY customer_id
+
+)
+
+SELECT
+
+    COUNT_BIG(*) AS total_customers,
+
+    SUM(CASE
+
+        WHEN f.first_observed_load_date < c.contract_start_date
+
+        THEN 1 ELSE 0
+
+    END) AS first_load_before_contract,
+
+    SUM(CASE
+
+        WHEN f.first_observed_load_date = c.contract_start_date
+
+        THEN 1 ELSE 0
+
+    END) AS first_load_on_contract_start,
+
+    SUM(CASE
+
+        WHEN f.first_observed_load_date > c.contract_start_date
+
+        THEN 1 ELSE 0
+
+    END) AS first_load_after_contract,
+
+    MIN(c.contract_start_date) AS earliest_contract_start,
+
+    MAX(c.contract_start_date) AS latest_contract_start,
+
+    MIN(f.first_observed_load_date) AS earliest_first_load,
+
+    MAX(f.first_observed_load_date) AS latest_first_load
+
+FROM silver.customers c
+
+INNER JOIN FirstCustomerLoad f
+
+    ON c.customer_id = f.customer_id;
