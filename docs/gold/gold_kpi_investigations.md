@@ -1,6 +1,6 @@
 # Gold Layer — KPI Investigations & Business Rules
 
-**Status:** Working reference — updated through Customer Performance (KPI 5)  
+**Status:** Working reference — updated through Fuel Purchases and Fuel Cost (KPI 6)  
 **Purpose:** Preserve the evidence, KPI definitions, data limitations, and modelling decisions established during pre-Gold investigations. This document is the business-analysis reference for Gold design and should be updated as further investigations are completed.
 
 > **Important:** Figures below are based on SQL query outputs shared and reviewed during the investigation. This document records those results; it does not claim that every source column has undergone full reconciliation. Where an interpretation is provisional, it is explicitly labelled.
@@ -239,7 +239,141 @@ All customers' first observed loads occur after their recorded contract start da
 - Customer acquisition or cohort analysis must be explicitly labelled as contract-start cohorts or first-observed-load cohorts, not verified acquisition.
 - Customer revenue contribution should use the complete reported load revenue denominator. Current results show no unassigned customer loads.
 
-## 7. Cross-KPI modelling and interpretation rules
+## 7. KPI 6 — Fuel Purchases and Fuel Cost
+
+### 7.1 Purchase profile and date coverage
+
+Source: `silver.fuel_purchases`, one row per fuel purchase.
+
+| Measure | Result |
+|---|---:|
+| Fuel purchase records | 196,442 |
+| Records with trip_id | 196,442 |
+| Records with truck_id | 192,562 |
+| Records with NULL truck_id | 3,880 (1.97%) |
+| Records with driver_id | 192,454 |
+| Records with NULL driver_id | 3,988 (2.03%) |
+| NULL purchase dates | 0 |
+| NULL gallons | 0 |
+| NULL price per gallon | 0 |
+| NULL total_cost | 0 |
+| Purchase date range | 2022-01-01 to 2025-01-02 23:00 |
+| Total purchased gallons | 24,519,037.80 |
+| Total recorded fuel cost | 95,592,992.04 |
+| Purchase quantity range | 50–200 gallons |
+| Price-per-gallon range | 3.15–5.00 |
+
+All fuel purchase records have a trip_id. The missing truck and driver identifiers are not random assignment conflicts: the subsequent purchase-to-trip comparison found that missing purchase-level IDs correspond to NULL IDs on the associated trip.
+
+The currency represented by `total_cost` was not established in the investigation. Report it as recorded fuel cost unless the source currency is confirmed.
+
+### 7.2 Recorded fuel cost validation
+
+The recorded `total_cost` was compared with `ROUND(gallons * price_per_gallon, 2)`.
+
+| Result | Records |
+|---|---:|
+| Matches rounded calculation | 193,964 |
+| Variances | 2,478 (1.26%) |
+| Variance on every mismatching row | -0.01 |
+| Aggregate recorded-minus-calculated difference | -24.78 |
+
+Every mismatch showed the recorded `total_cost` exactly 0.01 below the rounded product of gallons and price per gallon. The precise origin of this consistent one-cent difference was not established.
+
+**Decision:** Use source-recorded `total_cost` for fuel expenditure reporting. Do not recalculate, overwrite, or exclude affected purchase records. Preserve the one-cent variance as a documented source-level difference.
+
+### 7.3 Purchase-to-trip assignment reconciliation
+
+All 196,442 purchase records have a trip_id. Comparing purchase-level truck and driver IDs with the corresponding `silver.trips` assignments produced:
+
+- All populated purchase truck IDs matched the associated trip truck IDs.
+- All populated purchase driver IDs matched the associated trip driver IDs.
+- No conflicting truck or driver assignments were found.
+- The 3,880 NULL purchase truck IDs correspond to trips with NULL truck_id.
+- The 3,988 NULL purchase driver IDs correspond to trips with NULL driver_id.
+
+This validates identifier consistency; it does not prove that the purchased gallons were consumed exclusively during the referenced trip.
+
+### 7.4 Purchase quantity and monthly patterns
+
+- Purchase quantities ranged from 50 to 200 gallons.
+- Average purchase quantity was approximately 124.82 gallons; standard deviation was approximately 43.35 gallons.
+- There were 1,501 distinct purchase quantities. The frequency review returned only the 150 most common quantities, so it was not treated as a complete distribution review.
+- Monthly purchase volume during complete months in 2022–2024 was approximately 615,000–737,000 gallons.
+- Average price per gallon was approximately 4.20 in 2022, 3.85 in 2023, and 3.65 in 2024. These are source-observed values; no external economic explanation or currency assumption is attached.
+- January 2025 contains only 201 purchases and is a partial period.
+
+### 7.5 Purchase gallons compared with trip-recorded fuel consumption
+
+Monthly purchases were aggregated separately from trip consumption before being compared. For each complete month from January 2022 through December 2024, purchased gallons exceeded trip-recorded consumption by approximately 120,000–180,000 gallons.
+
+Examples:
+- January 2022: 669,956.20 purchased vs. 549,603.7 consumed; difference 120,352.5 gallons.
+- August 2022: 736,548.20 purchased vs. 556,760.8 consumed; difference 179,787.4 gallons.
+- December 2024: 674,250.70 purchased vs. 523,421.3 consumed; difference 150,829.4 gallons.
+
+January 2025 has 201 purchases (25,477 gallons) and no trips in the same-month comparison because the trip dispatch-date range ends on 2024-12-31. It is not comparable with complete months.
+
+The monthly comparison is descriptive only. Purchase date and dispatch date represent different business events, and fuel purchased in one month may be consumed during another month. The monthly difference does not establish wastage, theft, inventory change, or data error.
+
+### 7.6 Trip-level purchase-to-consumption comparison
+
+Fuel purchases were aggregated by trip_id and compared with each trip's `fuel_gallons_used`.
+
+| Comparison category | Trips | Purchase records | Purchased gallons | Trip-recorded gallons |
+|---|---:|---:|---:|---:|
+| No Purchase Record | 8,471 | 0 | 0.00 | 1,884,461.8 |
+| Purchased < Consumed | 26,990 | 43,375 | 4,896,930.30 | 8,430,140.6 |
+| Purchased = Consumed | 9 | 18 | 2,111.80 | 2,111.8 |
+| Purchased > Consumed | 49,940 | 153,049 | 19,619,995.70 | 8,629,565.9 |
+| **Total** | **85,410** | **196,442** | **24,519,037.80** | **18,946,280.1** |
+
+A separate trip-consumption check found:
+- 85,410 total trips.
+- 0 NULL fuel-consumption values.
+- 0 zero fuel-consumption values.
+- 0 negative fuel-consumption values.
+- Minimum recorded consumption: 12.0 gallons.
+- Maximum recorded consumption: 611.9 gallons.
+
+The aggregate purchased-minus-consumed difference is 5,572,757.70 gallons. Although purchase records are linked to trips and their truck/driver IDs are consistent, this does not prove that all gallons purchased against a trip were consumed on that same trip. Purchases may replenish a tank for use across multiple trips; the dataset does not establish exclusive trip-level fuel allocation.
+
+**Decision:** Do not calculate or label the purchase-versus-consumption difference as fuel wastage, theft, or operational loss. Keep purchase quantities and trip fuel consumption as separate measures at their respective grains.
+
+### 7.7 Fuel cost attribution by truck and driver
+
+The final assignment breakdown grouped fuel purchase records by whether truck_id and driver_id were present.
+
+| Truck assignment | Driver assignment | Purchases | Distinct trucks | Distinct drivers | Gallons | Recorded fuel cost |
+|---|---|---:|---:|---:|---:|---:|
+| Assigned | Assigned | 188,668 | 92 | 124 | 23,551,617.00 | 91,828,723.79 |
+| Assigned | Unassigned | 3,894 | 92 | 0 | 481,576.60 | 1,869,833.77 |
+| Unassigned | Assigned | 3,786 | 0 | 124 | 474,353.40 | 1,849,485.04 |
+| Unassigned | Unassigned | 94 | 0 | 0 | 11,490.80 | 44,949.44 |
+| **Total** | | **196,442** | | | **24,519,037.80** | **95,592,992.04** |
+
+- 188,668 purchases (approximately 96.04%) have both assignments.
+- 3,894 purchases have a truck but no driver.
+- 3,786 purchases have a driver but no truck.
+- 94 purchases have neither assignment.
+- Fuel cost without a truck assignment is 1,894,434.48.
+- Fuel cost without a driver assignment is 1,914,382.21.
+
+The two unassigned-cost totals overlap for the 94 purchases missing both IDs; do not add them together.
+
+### 7.8 Gold definitions and decisions
+
+1. **Fuel expenditure:** `SUM(fuel_purchases.total_cost)`, using the source-recorded amount.
+2. **Fuel purchase volume:** `SUM(fuel_purchases.gallons)`, at one row per purchase.
+3. **Average purchase price:** derive from purchase-level values with a clearly stated averaging method; do not confuse a simple average of row prices with total cost divided by total gallons.
+4. **Truck and driver attribution:** use the respective purchase-level IDs. Retain unassigned purchases in overall expenditure totals and show unassigned cost separately in truck/driver reporting.
+5. **Trip fuel consumption:** use `SUM(trips.fuel_gallons_used)`, at one row per trip.
+6. Keep fuel purchases and trips as separate fact processes. Do not join raw purchase rows directly to trip rows and then aggregate trip measures, as multiple purchases per trip can duplicate trip values.
+7. Do not infer fuel wastage or a fuel loss KPI from purchase-versus-consumption differences.
+8. January 2025 fuel activity is partial and must be qualified in time trends.
+9. Do not state a currency until the source currency is verified.
+
+## 8. Cross-KPI modelling and interpretation rules
 
 1. **Preserve fact grain.** Loads, trips, delivery events, fuel purchases, and maintenance records have different grains. Do not flatten one-to-many relationships into a single joined fact in a way that duplicates revenue, trip counts, or costs.
 2. **Keep measures at their natural grain.** Load revenue belongs to the load grain; trip distance and trip fuel belong to trip grain; delivery punctuality belongs to delivery-event grain; fuel-purchase expense belongs to fuel-purchase grain.
@@ -249,7 +383,7 @@ All customers' first observed loads occur after their recorded contract start da
 6. **Respect missing identifiers.** Retain unassigned truck trips in overall trip measures, while excluding them from truck-level attribution.
 7. **Separate observation from causation.** Correlations and data patterns do not establish business causality.
 
-## 8. Candidate Gold model implications (not yet final)
+## 9. Candidate Gold model implications (not yet final)
 
 The following are modelling directions for design review, not approved DDL:
 
@@ -263,7 +397,7 @@ The following are modelling directions for design review, not approved DDL:
 
 Final fact/dimension selection, surrogate-key strategy, relationships, and DDL must be decided in the Gold model design stage after remaining cost and safety investigations.
 
-## 9. Outstanding investigations
+## 10. Outstanding investigations
 
 | Area | Status | Required next work |
 |---|---|---|
@@ -272,16 +406,16 @@ Final fact/dimension selection, surrogate-key strategy, relationships, and DDL m
 | Fleet performance | Investigated | Carry weighted MPG, NULL truck handling, and utilization limitation into Gold |
 | Delivery performance | Investigated | Carry Delivery-only denominator, partial January caveat, and detention finding into Gold |
 | Customer performance | Investigated | Carry customer coverage, concentration, segmentation, and acquisition-proxy caveat into Gold |
-| Fuel purchases | Pending | Investigate purchase costs, purchase-to-trip/truck relationships, date coverage, and cost aggregation |
+| Fuel purchases | Investigated | Carry source-cost validation, assignment coverage, separate purchase/consumption grains, partial January 2025 caveat, and attribution rules into Gold |
 | Maintenance | Pending | Investigate maintenance costs, downtime, truck attribution, and time trends |
 | Safety | Pending | Review incident patterns and financial measures; avoid rates without a valid exposure denominator |
 | Gold dimensional model | Pending | Define business processes, fact grains, dimensions, relationships, and measures before DDL |
 | Gold validation | Pending | Define source-to-Gold reconciliation and business-rule checks after implementation |
 
-## 10. Evidence and change-control notes
+## 11. Evidence and change-control notes
 
 - This document records the investigation results and decisions available at the time of writing.
-- The exact executed SQL should be maintained separately under `scripts/gold/investigations/` (or another clearly defined investigation-script location) as queries are organized and checked into the repository.
+- The investigation SQL is maintained in `scripts/gold/gold_kpi_investigations.sql`. The exact 07G and 07H queries and the trip-consumption quality check have been appended. Exact query text for earlier Fuel checks 07A–07F was not available in the reviewed source material and has not been reconstructed or presented as executed SQL.
 - Do not imply that a query is committed merely because its output is documented here.
 - When a new investigation is completed, add its query purpose, source tables and grain, result, interpretation, caveats, Gold implication, and status.
 - If a definition changes, update this document and the Gold model/data dictionary together.
