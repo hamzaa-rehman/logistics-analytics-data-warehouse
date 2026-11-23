@@ -1,9 +1,9 @@
 # Logistics Analytics Data Warehouse
-A SQL Server data warehouse project using the Medallion Architecture (Bronze, Silver, Gold) to prepare logistics operations data for business analytics. The Bronze ingestion and profiling layer and the Silver transformation, loading, and validation work are implemented. Gold analytical models and Power BI reporting are the next development stages.
+A SQL Server data warehouse project using the Medallion Architecture (Bronze, Silver, Gold) to prepare logistics operations data for business analytics. Bronze ingestion and profiling, Silver transformation and validation, and Gold KPI and relationship investigations are complete. Gold dimensional-model implementation, reporting views, and Power BI reporting are the next development stages.
 
 ## Repository Structure
 
-The tree below reflects the current repository contents. Bronze ingestion and profiling are implemented, and the Silver schema, loading procedure, and validation work are complete. Gold development will follow the validated Silver layer.
+The tree below reflects the current repository contents. Bronze ingestion and profiling, and the Silver schema, loading procedure, and validation work are complete. Gold KPI and relationship discovery are documented; Gold model implementation and Power BI reporting remain in progress.
 
 ```text
 logistics-analytics-data-warehouse/
@@ -84,7 +84,7 @@ logistics-analytics-data-warehouse/
 - [Bronze data inventory and profiling workbook](docs/data_inventory/Logistics_Data_Inventory_Bronze.xlsx)
 - [Bronze layer documentation](docs/bronze/readme.md)
 - [Silver layer documentation](docs/silver/readme.md)
-- [Silver layer ERD (PNG)](docs/diagrams/silver_erd.png) | [Editable Draw.io source](docs/diagrams/silver_erd.drawio)
+- [Silver layer ERD (PNG)](docs/diagrams/silver_erd.png) | [Editable Draw.io source](docs/diagrams/silver_erd.drawio)\n- [Gold KPI investigations and business rules](docs/gold/gold_kpi_investigations.md)\n- [Gold relationship investigations and modelling decisions](docs/gold/gold_relationship_investigations.md)\n- [Gold KPI investigation SQL](scripts/gold/gold_kpi_investigations.sql)
 
 ## Bronze CATEGORY Profiling
 
