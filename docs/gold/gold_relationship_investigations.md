@@ -4,6 +4,8 @@
 **Source:** Validated Silver tables in the `LogisticsAnalytics` database  
 **Purpose:** Preserve the relationship checks, observed cardinalities, data-quality findings, and modelling decisions established before Gold implementation.
 
+**Supporting SQL:** [Gold relationship investigation queries](../../scripts/gold/gold_relationship_investigations.sql).
+
 > **Scope note:** The figures in this document are the results of SQL queries run by the project owner and reviewed during the modelling discussion. This document records those outputs; it does not claim that the assistant independently executed queries against the database.
 
 ## 1. Summary

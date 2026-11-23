@@ -90,6 +90,7 @@ logistics-analytics-data-warehouse/
 - [Bronze layer documentation](docs/bronze/readme.md)
 - [Silver layer documentation](docs/silver/readme.md)
 - [Silver layer ERD (PNG)](docs/diagrams/silver_erd.png) | [Editable Draw.io source](docs/diagrams/silver_erd.drawio)\n- [Gold KPI investigations and business rules](docs/gold/gold_kpi_investigations.md)\n- [Gold relationship investigations and modelling decisions](docs/gold/gold_relationship_investigations.md)\n- [Gold KPI investigation SQL](scripts/gold/gold_kpi_investigations.sql)
+- [Gold relationship investigation SQL](scripts/gold/gold_relationship_investigations.sql)
 
 ## Bronze CATEGORY Profiling
 
