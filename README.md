@@ -43,6 +43,9 @@ logistics-analytics-data-warehouse/
 │   │       └── truck_utilization_maintenance_investigation.md
 │   ├── silver/
 │   │   └── readme.md
+│   ├── gold/
+│   │   ├── gold_kpi_investigations.md
+│   │   └── gold_relationship_investigations.md
 │   ├── data_inventory/
 │   │   └── Logistics_Data_Inventory_Bronze.xlsx
 │   └── diagrams/
@@ -69,9 +72,11 @@ logistics-analytics-data-warehouse/
 │   │       ├── investigate_january_2025_timestamps.sql
 │   │       ├── investigate_geographic_consistency.sql
 │   │       └── investigate_identifier_integrity.sql
-│   └── silver/
-│       ├── ddl_silver.sql
-│       └── load_silver.sql
+│   ├── silver/
+│   │   ├── ddl_silver.sql
+│   │   └── load_silver.sql
+│   └── gold/
+│       └── gold_kpi_investigations.sql
 ├── tests/
 │   └── validate_bronze.sql
 ├── LICENSE
