@@ -76,7 +76,8 @@ logistics-analytics-data-warehouse/
 │   │   ├── ddl_silver.sql
 │   │   └── load_silver.sql
 │   └── gold/
-│       └── gold_kpi_investigations.sql
+│       ├── gold_kpi_investigations.sql
+│       └── gold_relationship_investigations.sql
 ├── tests/
 │   └── validate_bronze.sql
 ├── LICENSE
