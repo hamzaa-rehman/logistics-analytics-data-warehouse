@@ -45,6 +45,7 @@ logistics-analytics-data-warehouse/
 │   │   └── readme.md
 │   ├── gold/
 │   │   ├── gold_kpi_investigations.md
+│   │   ├── gold_data_dictionary.md
 │   │   └── gold_relationship_investigations.md
 │   ├── data_inventory/
 │   │   └── Logistics_Data_Inventory_Bronze.xlsx
