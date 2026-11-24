@@ -190,7 +190,8 @@ CREATE TABLE gold.dim_date
     day_of_month    TINYINT NOT NULL,
     day_name        VARCHAR(10) NOT NULL,
     day_of_week     TINYINT NOT NULL, -- Monday = 1, Sunday = 7
-    week_of_year    TINYINT NOT NULL, -- ISO week number
+    week_of_year    TINYINT NOT NULL, -- ISO week number (1-53)
+    iso_week_year   SMALLINT NOT NULL, -- Year to which the ISO week belongs
     month_number    TINYINT NOT NULL,
     month_name      VARCHAR(10) NOT NULL,
     quarter_number  TINYINT NOT NULL,
@@ -221,7 +222,7 @@ calendar_attributes AS
 INSERT INTO gold.dim_date
 (
     date_key, full_date, day_of_month, day_name, day_of_week,
-    week_of_year, month_number, month_name, quarter_number,
+    week_of_year, iso_week_year, month_number, month_name, quarter_number,
     year_number, year_month, is_weekend
 )
 SELECT
@@ -235,6 +236,7 @@ SELECT
     END,
     weekday_number,
     DATEPART(ISO_WEEK, calendar_date),
+    YEAR(DATEADD(DAY, 4 - weekday_number, calendar_date)),
     MONTH(calendar_date),
     CASE MONTH(calendar_date)
         WHEN 1 THEN 'January' WHEN 2 THEN 'February' WHEN 3 THEN 'March'
