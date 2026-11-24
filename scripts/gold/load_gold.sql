@@ -171,7 +171,11 @@ BEGIN
             WHERE s.customer_id IS NOT NULL
               AND d.customer_key IS NULL
         )
-            ;THROW 50001, 'Unresolved customer_id in silver.loads.', 1;
+            BEGIN
+                ;THROW 50001, 'Unresolved customer_id in silver.loads.', 1;
+
+        END;
+
 
         IF EXISTS
         (
@@ -182,7 +186,11 @@ BEGIN
             WHERE s.route_id IS NOT NULL
               AND d.route_key IS NULL
         )
-            ;THROW 50002, 'Unresolved route_id in silver.loads.', 1;
+            BEGIN
+                ;THROW 50002, 'Unresolved route_id in silver.loads.', 1;
+
+        END;
+
 
         IF EXISTS
         (
@@ -192,7 +200,11 @@ BEGIN
                 ON s.load_date = d.full_date
             WHERE s.load_date IS NULL OR d.date_key IS NULL
         )
-            ;THROW 50003, 'Missing or unresolved load_date in silver.loads.', 1;
+            BEGIN
+                ;THROW 50003, 'Missing or unresolved load_date in silver.loads.', 1;
+
+        END;
+
 
         INSERT INTO gold.fact_loads
         (
@@ -227,7 +239,11 @@ BEGIN
             LEFT JOIN gold.dim_driver AS d ON s.driver_id = d.driver_id
             WHERE s.driver_id IS NOT NULL AND d.driver_key IS NULL
         )
-            ;THROW 50004, 'Unresolved driver_id in silver.trips.', 1;
+            BEGIN
+                ;THROW 50004, 'Unresolved driver_id in silver.trips.', 1;
+
+        END;
+
 
         IF EXISTS
         (
@@ -235,7 +251,11 @@ BEGIN
             LEFT JOIN gold.dim_truck AS d ON s.truck_id = d.truck_id
             WHERE s.truck_id IS NOT NULL AND d.truck_key IS NULL
         )
-            ;THROW 50005, 'Unresolved truck_id in silver.trips.', 1;
+            BEGIN
+                ;THROW 50005, 'Unresolved truck_id in silver.trips.', 1;
+
+        END;
+
 
         IF EXISTS
         (
@@ -243,7 +263,11 @@ BEGIN
             LEFT JOIN gold.dim_trailer AS d ON s.trailer_id = d.trailer_id
             WHERE s.trailer_id IS NOT NULL AND d.trailer_key IS NULL
         )
-            ;THROW 50006, 'Unresolved trailer_id in silver.trips.', 1;
+            BEGIN
+                ;THROW 50006, 'Unresolved trailer_id in silver.trips.', 1;
+
+        END;
+
 
         IF EXISTS
         (
@@ -251,7 +275,11 @@ BEGIN
             LEFT JOIN gold.dim_date AS d ON s.dispatch_date = d.full_date
             WHERE s.dispatch_date IS NULL OR d.date_key IS NULL
         )
-            ;THROW 50007, 'Missing or unresolved dispatch_date in silver.trips.', 1;
+            BEGIN
+                ;THROW 50007, 'Missing or unresolved dispatch_date in silver.trips.', 1;
+
+        END;
+
 
         INSERT INTO gold.fact_trips
         (
@@ -284,7 +312,11 @@ BEGIN
             LEFT JOIN gold.dim_facility AS d ON s.facility_id = d.facility_id
             WHERE s.facility_id IS NOT NULL AND d.facility_key IS NULL
         )
-            ;THROW 50008, 'Unresolved facility_id in silver.delivery_events.', 1;
+            BEGIN
+                ;THROW 50008, 'Unresolved facility_id in silver.delivery_events.', 1;
+
+        END;
+
 
         IF EXISTS
         (
@@ -293,7 +325,11 @@ BEGIN
                 ON CAST(s.scheduled_datetime AS DATE) = d.full_date
             WHERE s.scheduled_datetime IS NULL OR d.date_key IS NULL
         )
-            ;THROW 50009, 'Missing or unresolved scheduled_datetime date.', 1;
+            BEGIN
+                ;THROW 50009, 'Missing or unresolved scheduled_datetime date.', 1;
+
+        END;
+
 
         IF EXISTS
         (
@@ -302,7 +338,11 @@ BEGIN
                 ON CAST(s.actual_datetime AS DATE) = d.full_date
             WHERE s.actual_datetime IS NULL OR d.date_key IS NULL
         )
-            ;THROW 50010, 'Missing or unresolved actual_datetime date.', 1;
+            BEGIN
+                ;THROW 50010, 'Missing or unresolved actual_datetime date.', 1;
+
+        END;
+
 
         INSERT INTO gold.fact_delivery_events
         (
@@ -337,7 +377,11 @@ BEGIN
             LEFT JOIN gold.dim_truck AS d ON s.truck_id = d.truck_id
             WHERE s.truck_id IS NOT NULL AND d.truck_key IS NULL
         )
-            ;THROW 50011, 'Unresolved truck_id in silver.fuel_purchases.', 1;
+            BEGIN
+                ;THROW 50011, 'Unresolved truck_id in silver.fuel_purchases.', 1;
+
+        END;
+
 
         IF EXISTS
         (
@@ -345,7 +389,11 @@ BEGIN
             LEFT JOIN gold.dim_driver AS d ON s.driver_id = d.driver_id
             WHERE s.driver_id IS NOT NULL AND d.driver_key IS NULL
         )
-            ;THROW 50012, 'Unresolved driver_id in silver.fuel_purchases.', 1;
+            BEGIN
+                ;THROW 50012, 'Unresolved driver_id in silver.fuel_purchases.', 1;
+
+        END;
+
 
         IF EXISTS
         (
@@ -354,7 +402,11 @@ BEGIN
                 ON CAST(s.purchase_date AS DATE) = d.full_date
             WHERE s.purchase_date IS NULL OR d.date_key IS NULL
         )
-            ;THROW 50013, 'Missing or unresolved purchase_date in silver.fuel_purchases.', 1;
+            BEGIN
+                ;THROW 50013, 'Missing or unresolved purchase_date in silver.fuel_purchases.', 1;
+
+        END;
+
 
         INSERT INTO gold.fact_fuel_purchases
         (
@@ -388,7 +440,11 @@ BEGIN
             LEFT JOIN gold.dim_truck AS d ON s.truck_id = d.truck_id
             WHERE s.truck_id IS NOT NULL AND d.truck_key IS NULL
         )
-            ;THROW 50014, 'Unresolved truck_id in silver.maintenance_records.', 1;
+            BEGIN
+                ;THROW 50014, 'Unresolved truck_id in silver.maintenance_records.', 1;
+
+        END;
+
 
         IF EXISTS
         (
@@ -396,7 +452,11 @@ BEGIN
             LEFT JOIN gold.dim_date AS d ON s.maintenance_date = d.full_date
             WHERE s.maintenance_date IS NULL OR d.date_key IS NULL
         )
-            ;THROW 50015, 'Missing or unresolved maintenance_date.', 1;
+            BEGIN
+                ;THROW 50015, 'Missing or unresolved maintenance_date.', 1;
+
+        END;
+
 
         INSERT INTO gold.fact_maintenance_records
         (
@@ -428,7 +488,11 @@ BEGIN
             LEFT JOIN gold.dim_truck AS d ON s.truck_id = d.truck_id
             WHERE s.truck_id IS NOT NULL AND d.truck_key IS NULL
         )
-            ;THROW 50016, 'Unresolved truck_id in silver.safety_incidents.', 1;
+            BEGIN
+                ;THROW 50016, 'Unresolved truck_id in silver.safety_incidents.', 1;
+
+        END;
+
 
         IF EXISTS
         (
@@ -436,7 +500,11 @@ BEGIN
             LEFT JOIN gold.dim_driver AS d ON s.driver_id = d.driver_id
             WHERE s.driver_id IS NOT NULL AND d.driver_key IS NULL
         )
-            ;THROW 50017, 'Unresolved driver_id in silver.safety_incidents.', 1;
+            BEGIN
+                ;THROW 50017, 'Unresolved driver_id in silver.safety_incidents.', 1;
+
+        END;
+
 
         IF EXISTS
         (
@@ -445,7 +513,11 @@ BEGIN
                 ON CAST(s.incident_date AS DATE) = d.full_date
             WHERE s.incident_date IS NULL OR d.date_key IS NULL
         )
-            ;THROW 50018, 'Missing or unresolved incident_date in silver.safety_incidents.', 1;
+            BEGIN
+                ;THROW 50018, 'Missing or unresolved incident_date in silver.safety_incidents.', 1;
+
+        END;
+
 
         INSERT INTO gold.fact_safety_incidents
         (
