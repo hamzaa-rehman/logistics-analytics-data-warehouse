@@ -76,6 +76,8 @@ logistics-analytics-data-warehouse/
 │   │   ├── ddl_silver.sql
 │   │   └── load_silver.sql
 │   └── gold/
+│       ├── ddl_gold.sql
+│       ├── reset_gold.sql
 │       ├── gold_kpi_investigations.sql
 │       └── gold_relationship_investigations.sql
 ├── tests/
@@ -90,9 +92,13 @@ logistics-analytics-data-warehouse/
 - [Bronze data inventory and profiling workbook](docs/data_inventory/Logistics_Data_Inventory_Bronze.xlsx)
 - [Bronze layer documentation](docs/bronze/readme.md)
 - [Silver layer documentation](docs/silver/readme.md)
-- [Silver layer ERD (PNG)](docs/diagrams/silver_erd.png) | [Editable Draw.io source](docs/diagrams/silver_erd.drawio)\n- [Gold KPI investigations and business rules](docs/gold/gold_kpi_investigations.md)\n- [Gold relationship investigations and modelling decisions](docs/gold/gold_relationship_investigations.md)\n- [Gold KPI investigation SQL](scripts/gold/gold_kpi_investigations.sql)
+- [Silver layer ERD (PNG)](docs/diagrams/silver_erd.png) | [Editable Draw.io source](docs/diagrams/silver_erd.drawio)
+- [Gold dimensional model DDL](scripts/gold/ddl_gold.sql)
+- [Gold reset script](scripts/gold/reset_gold.sql) — use only for a full Gold rebuild
+- [Gold KPI investigations and business rules](docs/gold/gold_kpi_investigations.md)
+- [Gold relationship investigations and modelling decisions](docs/gold/gold_relationship_investigations.md)
+- [Gold KPI investigation SQL](scripts/gold/gold_kpi_investigations.sql)
 - [Gold relationship investigation SQL](scripts/gold/gold_relationship_investigations.sql)
-
 ## Bronze CATEGORY Profiling
 
 CATEGORY profiling covers all 39 columns configured as CATEGORY in the Bronze profiling metadata. The automated script calculates distinct values, NULL counts, category frequencies, and percentages. A separate investigation checks city/state consistency across source tables.
