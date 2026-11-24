@@ -50,7 +50,7 @@ BEGIN TRY
         WHERE iso_week_year IS NULL
     )
     BEGIN
-        THROW 51001, 'ISO week-year population failed: NULL values remain.', 1;
+        ;THROW 51001, 'ISO week-year population failed: NULL values remain.', 1;
     END;
 
     ALTER TABLE gold.dim_date
