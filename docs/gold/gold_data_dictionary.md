@@ -425,7 +425,7 @@ The following fact foreign-key columns are nullable in the deployed DDL: `custom
 3. If a populated source key does not resolve, treat it as a load validation failure or explicitly reported exception. Do not silently convert an unresolved key to NULL.
 4. Do not infer missing truck/driver IDs from a related trip when loading fuel purchases or safety incidents.
 
-All six fact date keys are NOT NULL. The load process must validate that each source date is populated and that the derived date key exists in `dim_date` before inserting the fact row.
+All fact date-key columns (seven columns across the six fact tables, because delivery events have scheduled and actual date roles) are NOT NULL. The load process must validate that each source date is populated and that the derived date key exists in `dim_date` before inserting the fact row.
 
 ### 5.5 Date-key role rules
 
