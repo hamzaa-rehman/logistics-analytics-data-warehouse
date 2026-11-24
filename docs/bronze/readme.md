@@ -22,7 +22,7 @@ The 14 source CSV files are stored in [`datasets/logistics_operations_database/`
 
 ## 2. Data Warehouse Architecture
 
-The project follows the Medallion Architecture, separating source ingestion, structural transformation, and business-focused analytical modelling into three layers. The architecture diagram shows the end-to-end flow from the 14 source CSV files through Bronze and Silver, with Gold and BI / Reporting shown as planned downstream stages.
+The project follows the Medallion Architecture, separating source ingestion, structural transformation, and business-focused analytical modelling into three layers. The architecture diagram shows the end-to-end flow from the 14 source CSV files through Bronze and Silver into Gold and BI / Reporting.
 
 ![Logistics Analytics Data Warehouse Architecture](../diagrams/Logistics_Data_Warehouse_Architecture%20(1).png)
 

@@ -29,61 +29,68 @@ logistics-analytics-data-warehouse/
 ├── docs/
 │   ├── bronze/
 │   │   ├── readme.md
-│   │   ├── numeric_profiling.md
-│   │   ├── date_datetime_profiling.md
 │   │   ├── category_profiling.md
+│   │   ├── date_datetime_profiling.md
 │   │   ├── identifier_profiling.md
+│   │   ├── numeric_profiling.md
 │   │   ├── text_profiling.md
 │   │   └── investigations/
-│   │       ├── geographic_consistency_investigation.md
 │   │       ├── detention_minutes_investigation.md
+│   │       ├── geographic_consistency_investigation.md
 │   │       ├── on_time_delivery_rate_investigation.md
 │   │       ├── on_time_flag_investigation.md
 │   │       ├── safety_incident_financials_investigation.md
 │   │       └── truck_utilization_maintenance_investigation.md
-│   ├── silver/
-│   │   └── readme.md
+│   ├── data_inventory/
+│   │   └── Logistics_Data_Inventory_Bronze.xlsx
+│   ├── diagrams/
+│   │   ├── Logistics_Data_Warehouse_Architecture (1).drawio
+│   │   ├── Logistics_Data_Warehouse_Architecture (1).png
+│   │   ├── silver_erd.drawio
+│   │   └── silver_erd.png
 │   ├── gold/
 │   │   ├── gold_data_dictionary.md
 │   │   ├── gold_kpi_investigations.md
 │   │   ├── gold_relationship_investigations.md
 │   │   └── gold_validation.md
-│   ├── data_inventory/
-│   │   └── Logistics_Data_Inventory_Bronze.xlsx
-│   └── diagrams/
-│       ├── silver_erd.drawio
-│       └── silver_erd.png
+│   └── silver/
+│       └── readme.md
 ├── scripts/
 │   ├── bronze/
 │   │   ├── ddl_bronze.sql
 │   │   ├── load_bronze.sql
 │   │   ├── profile_bronze.sql
 │   │   ├── profiling_config.sql
-│   │   ├── profile_numeric.sql
-│   │   ├── profile_date_datetime.sql
 │   │   ├── profile_category.sql
+│   │   ├── profile_date_datetime.sql
 │   │   ├── profile_identifier.sql
+│   │   ├── profile_numeric.sql
 │   │   ├── profile_text_columns.sql
 │   │   └── investigations/
 │   │       ├── investigate_detention_minutes.sql
+│   │       ├── investigate_geographic_consistency.sql
+│   │       ├── investigate_identifier_integrity.sql
+│   │       ├── investigate_january_2025_timestamps.sql
 │   │       ├── investigate_on_time_delivery_rate.sql
 │   │       ├── investigate_on_time_flag.sql
 │   │       ├── investigate_safety_incident_financials.sql
 │   │       ├── investigate_truck_utilization_maintenance.sql
-│   │       ├── investigate_utilization_rate.sql
-│   │       ├── investigate_january_2025_timestamps.sql
-│   │       ├── investigate_geographic_consistency.sql
-│   │       └── investigate_identifier_integrity.sql
-│   ├── silver/
-│   │   ├── ddl_silver.sql
-│   │   └── load_silver.sql
-│   └── gold/
-│       ├── ddl_gold.sql
-│       ├── reset_gold.sql
-│       ├── gold_kpi_investigations.sql
-│       └── gold_relationship_investigations.sql
+│   │       └── investigate_utilization_rate.sql
+│   ├── gold/
+│   │   ├── ddl_gold.sql
+│   │   ├── gold_kpi_investigations.sql
+│   │   ├── gold_relationship_investigations.sql
+│   │   ├── load_gold.sql
+│   │   ├── reset_gold.sql
+│   │   └── validate_gold.sql
+│   └── silver/
+│       ├── ddl_silver.sql
+│       ├── load_silver.sql
+│       └── reset_silver.sql
 ├── tests/
-│   └── validate_bronze.sql
+│   ├── inspect_silver_schema.sql
+│   ├── validate_bronze.sql
+│   └── validate_silver.sql
 ├── LICENSE
 └── README.md
 ```
@@ -95,17 +102,13 @@ logistics-analytics-data-warehouse/
 - [Bronze layer documentation](docs/bronze/readme.md)
 - [Silver layer documentation](docs/silver/readme.md)
 - [Warehouse architecture diagram (PNG)](docs/diagrams/Logistics_Data_Warehouse_Architecture%20(1).png) | [Editable Draw.io source](docs/diagrams/Logistics_Data_Warehouse_Architecture%20(1).drawio)
-- [Warehouse architecture diagram (PNG)](docs/diagrams/Logistics_Data_Warehouse_Architecture%20(1).png) | [Editable Draw.io source](docs/diagrams/Logistics_Data_Warehouse_Architecture%20(1).drawio)
 - [Silver layer ERD (PNG)](docs/diagrams/silver_erd.png) | [Editable Draw.io source](docs/diagrams/silver_erd.drawio)
 - [Gold dimensional model DDL](scripts/gold/ddl_gold.sql)
 - [Gold full-refresh loading procedure](scripts/gold/load_gold.sql)
-- [Gold structural and fact validation SQL](scripts/gold/validate_gold.sql)
-- [Gold validation results and remaining work](docs/gold/gold_validation.md)
-- [Gold full-refresh loading procedure](scripts/gold/load_gold.sql)
+- [Gold reset script](scripts/gold/reset_gold.sql) — use only for a full Gold rebuild
 - [Gold structural and fact validation SQL](scripts/gold/validate_gold.sql)
 - [Gold validation results and remaining work](docs/gold/gold_validation.md)
 - [Gold data dictionary and dimensional mapping](docs/gold/gold_data_dictionary.md)
-- [Gold reset script](scripts/gold/reset_gold.sql) — use only for a full Gold rebuild
 - [Gold KPI investigations and business rules](docs/gold/gold_kpi_investigations.md)
 - [Gold relationship investigations and modelling decisions](docs/gold/gold_relationship_investigations.md)
 - [Gold KPI investigation SQL](scripts/gold/gold_kpi_investigations.sql)

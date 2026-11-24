@@ -481,19 +481,18 @@ This checklist distinguishes schema deployment from data-load completion.
 | Measure-level source-to-Gold reconciliation | Pending. |
 | Reporting views and Power BI | Pending. |
 
-**Do not interpret successful DDL deployment as successful data loading.** Update the pending items only after the relevant load scripts have been executed and their validation results reviewed.
+DDL deployment and data-load validation are separate gates. Gold loading has been executed and the initial structural and fact row-count checks have passed; measure-level reconciliation remains pending before final Gold validation sign-off.
 
 ## 8. Related project artifacts
 
 - Gold schema: `scripts/gold/ddl_gold.sql`
+- Gold loading procedure: `scripts/gold/load_gold.sql`
+- Gold validation SQL: `scripts/gold/validate_gold.sql`
+- Gold validation results: `docs/gold/gold_validation.md`
 - Gold reset script (destructive; full rebuild only): `scripts/gold/reset_gold.sql`
 - Gold KPI investigations: `docs/gold/gold_kpi_investigations.md`
 - Gold relationship investigations: `docs/gold/gold_relationship_investigations.md`
 - Gold KPI investigation SQL: `scripts/gold/gold_kpi_investigations.sql`
 - Gold relationship investigation SQL: `scripts/gold/gold_relationship_investigations.sql`
-- Gold validation SQL: `scripts/gold/validate_gold.sql`
-- Gold validation results: `docs/gold/gold_validation.md`
-- Gold validation SQL: `scripts/gold/validate_gold.sql`
-- Gold validation results: `docs/gold/gold_validation.md`
 - Silver schema: `scripts/silver/ddl_silver.sql`
 - Silver documentation: `docs/silver/readme.md`
