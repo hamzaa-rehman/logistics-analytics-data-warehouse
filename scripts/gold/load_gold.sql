@@ -27,7 +27,7 @@ Target:   gold
 */
 
 USE LogisticsAnalytics;
-GO
+
 
 CREATE OR ALTER PROCEDURE gold.load_gold
 AS
@@ -568,8 +568,8 @@ BEGIN
         THROW;
     END CATCH;
 END;
-GO
+
 
 -- Execute the full-refresh Gold loading procedure.
 EXEC gold.load_gold;
-GO
+
