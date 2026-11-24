@@ -1,9 +1,9 @@
 # Logistics Analytics Data Warehouse
-A SQL Server data warehouse project using the Medallion Architecture (Bronze, Silver, Gold) to prepare logistics operations data for business analytics. Bronze ingestion and profiling, Silver transformation and validation, and Gold KPI and relationship investigations are complete. Gold dimensional-model implementation, reporting views, and Power BI reporting are the next development stages.
+A SQL Server data warehouse project using the Medallion Architecture (Bronze, Silver, Gold) to prepare logistics operations data for business analytics. Bronze ingestion and profiling, Silver transformation and validation, and Gold KPI and relationship investigations are complete. The Gold dimensional schema has been created and validated; Gold data loading, reporting views, and Power BI reporting remain in progress.
 
 ## Repository Structure
 
-The tree below reflects the current repository contents. Bronze ingestion and profiling, and the Silver schema, loading procedure, and validation work are complete. Gold KPI and relationship discovery are documented; Gold model implementation and Power BI reporting remain in progress.
+The tree below reflects the current repository contents. Bronze ingestion and profiling, and the Silver schema, loading procedure, and validation work are complete. Gold KPI and relationship discovery are documented, and the Gold dimensional tables are created and validated. Gold data loading and Power BI reporting remain in progress.
 
 ```text
 logistics-analytics-data-warehouse/
