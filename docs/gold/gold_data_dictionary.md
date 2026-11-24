@@ -173,7 +173,8 @@ The seven dimensions describe the entities and calendar dates used by the six fa
 | day_of_month | TINYINT | NOT NULL | Day number within the month. |
 | day_name | VARCHAR(10) | NOT NULL | Deterministic weekday name. |
 | day_of_week | TINYINT | NOT NULL | Monday = 1 through Sunday = 7. |
-| week_of_year | TINYINT | NOT NULL | ISO week number. |
+| week_of_year | TINYINT | NOT NULL | ISO week number (1–53). |
+| iso_week_year | SMALLINT | NOT NULL | ISO week-based year; may differ from the calendar year near New Year. |
 | month_number | TINYINT | NOT NULL | Month number, 1–12. |
 | month_name | VARCHAR(10) | NOT NULL | Deterministic month name. |
 | quarter_number | TINYINT | NOT NULL | Calendar quarter, 1–4. |
@@ -183,7 +184,7 @@ The seven dimensions describe the entities and calendar dates used by the six fa
 
 **Calendar range:** 2012-01-01 through 2025-12-31 inclusive (5,114 dates). This covers the observed source date ranges and provides complete calendar years around the operational data.
 
-**Generation rules:** Generate one row for every date in the range. Calculate the integer key from the date. Weekday numbering and names must be deterministic and must not depend on the SQL Server session's language or `DATEFIRST` setting. Use ISO week numbering for `week_of_year`.
+**Generation rules:** Generate one row for every date in the range. Calculate the integer key from the date. Weekday numbering and names must be deterministic and must not depend on the SQL Server session's language or `DATEFIRST` setting. Use `DATEPART(ISO_WEEK, full_date)` for `week_of_year`. Derive `iso_week_year` from the year containing the Thursday of the date's ISO week; this is calculated as `YEAR(DATEADD(DAY, 4 - day_of_week, full_date))`, where Monday = 1 and Sunday = 7. Do not combine `year_number` with `week_of_year` to create ISO week labels. Use `year_number` for calendar-year reporting and `iso_week_year` with `week_of_year` for ISO weekly reporting.
 
 ## 4. Gold fact tables — final column mapping
 
