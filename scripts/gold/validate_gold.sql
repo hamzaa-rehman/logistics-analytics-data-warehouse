@@ -17,6 +17,7 @@ Validation areas:
     5. Fact business-key completeness/uniqueness (fact grain check).
     6. Orphan checks across all 18 Gold fact-to-dimension relationships.
     7. Foreign-key enabled and trusted status.
+    8. Fact-table column inventory for source-to-target measure review (diagnostic).
 
 Important:
     - Run after gold.load_gold has completed successfully.
@@ -31,6 +32,9 @@ Important:
 
 The results recorded in docs/gold/gold_validation.md are based on outputs
 shared by the project owner.
+
+The fact-table column inventory at the end is diagnostic metadata output; it
+is not a PASS/FAIL test. Use it when reviewing source-to-target measure mappings.
 ===============================================================================
 */
 
@@ -619,3 +623,31 @@ WHERE OBJECT_SCHEMA_NAME(fk.parent_object_id) = 'gold'
 ORDER BY
     child_table,
     foreign_key_name;
+
+
+-- ============================================================================
+-- 8. FACT-TABLE COLUMN INVENTORY (DIAGNOSTIC)
+--    Display the deployed fact-table columns and SQL Server data types.
+--    This supports measure mapping and reconciliation planning; it does not
+--    produce a PASS/FAIL result.
+-- ============================================================================
+
+SELECT
+    t.name AS table_name,
+    c.column_id,
+    c.name AS column_name,
+    TYPE_NAME(c.user_type_id) AS data_type,
+    c.max_length,
+    c.precision,
+    c.scale,
+    c.is_nullable
+FROM sys.tables AS t
+INNER JOIN sys.schemas AS s
+    ON t.schema_id = s.schema_id
+INNER JOIN sys.columns AS c
+    ON t.object_id = c.object_id
+WHERE s.name = 'gold'
+  AND t.name LIKE 'fact[_]%'
+ORDER BY
+    t.name,
+    c.column_id;
