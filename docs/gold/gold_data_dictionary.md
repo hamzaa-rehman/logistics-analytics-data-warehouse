@@ -6,7 +6,7 @@ This document is the approved reference for the Gold dimensional schema in the L
 
 **Schema status:** The 13-table Gold schema has been deployed and its structure/constraints have been validated in SQL Server.
 
-**Data status:** Gold data loading has not yet been completed. The mappings below describe the deployed target schema and the approved load design; they are not evidence that the tables are populated or that source-to-Gold data reconciliation has passed.
+**Data status:** The Gold full-refresh load procedure has been implemented and executed. The six fact tables have been loaded, their source business identifiers are complete and unique, and their row counts match the corresponding Silver tables. All 18 Gold foreign-key relationships passed orphan checks and are enabled/trusted; all 13 Gold primary keys are present and enabled, with one key column per table. Measure-level source-to-Gold reconciliation remains pending, so final Gold validation sign-off has not yet been granted.
 
 **Source of truth:** `scripts/gold/ddl_gold.sql` defines the implemented Gold columns, data types, nullability, primary keys, unique constraints, and foreign keys. `scripts/silver/ddl_silver.sql` defines the Silver source columns. If this document and the deployed DDL ever disagree, the discrepancy must be investigated and resolved; do not silently change the load scripts to fit an outdated document.
 
@@ -485,6 +485,6 @@ This checklist distinguishes schema deployment from data-load completion.
 - Gold KPI investigations: `docs/gold/gold_kpi_investigations.md`
 - Gold relationship investigations: `docs/gold/gold_relationship_investigations.md`
 - Gold KPI investigation SQL: `scripts/gold/gold_kpi_investigations.sql`
-- Gold relationship investigation SQL: `scripts/gold/gold_relationship_investigations.sql`
+- Gold relationship investigation SQL: `scripts/gold/gold_relationship_investigations.sql`\n- Gold validation SQL: `scripts/gold/validate_gold.sql`\n- Gold validation results: `docs/gold/gold_validation.md`
 - Silver schema: `scripts/silver/ddl_silver.sql`
 - Silver documentation: `docs/silver/readme.md`

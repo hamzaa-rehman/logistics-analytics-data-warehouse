@@ -1,9 +1,9 @@
 # Logistics Analytics Data Warehouse
-A SQL Server data warehouse project using the Medallion Architecture (Bronze, Silver, Gold) to prepare logistics operations data for business analytics. Bronze ingestion and profiling, Silver transformation and validation, and Gold KPI and relationship investigations are complete. The Gold dimensional schema has been created and validated; Gold data loading, reporting views, and Power BI reporting remain in progress.
+A SQL Server data warehouse project using the Medallion Architecture (Bronze, Silver, Gold) to prepare logistics operations data for business analytics. Bronze ingestion and profiling, Silver transformation and validation, and Gold dimensional modelling and loading are implemented. Initial Gold structural, relationship, fact business-key, and fact row-count checks have passed; measure-level reconciliation, reporting views, and Power BI reporting remain in progress.
 
 ## Repository Structure
 
-The tree below reflects the current repository contents. Bronze ingestion and profiling, and the Silver schema, loading procedure, and validation work are complete. Gold KPI and relationship discovery are documented, and the Gold dimensional tables are created and validated. Gold data loading and Power BI reporting remain in progress.
+The tree below reflects the current repository contents. Bronze and Silver implementation and validation are complete. The Gold dimensional model and full-refresh loading procedure are implemented, and initial Gold structural and fact row-count validations have passed. Gold measure reconciliation, reporting views, and Power BI reporting remain in progress.
 
 ```text
 logistics-analytics-data-warehouse/
@@ -93,8 +93,8 @@ logistics-analytics-data-warehouse/
 - [Bronze data inventory and profiling workbook](docs/data_inventory/Logistics_Data_Inventory_Bronze.xlsx)
 - [Bronze layer documentation](docs/bronze/readme.md)
 - [Silver layer documentation](docs/silver/readme.md)
-- [Silver layer ERD (PNG)](docs/diagrams/silver_erd.png) | [Editable Draw.io source](docs/diagrams/silver_erd.drawio)
-- [Gold dimensional model DDL](scripts/gold/ddl_gold.sql)
+- [Warehouse architecture diagram (PNG)](docs/diagrams/Logistics_Data_Warehouse_Architecture%20(1).png) | [Editable Draw.io source](docs/diagrams/Logistics_Data_Warehouse_Architecture%20(1).drawio)\n- [Silver layer ERD (PNG)](docs/diagrams/silver_erd.png) | [Editable Draw.io source](docs/diagrams/silver_erd.drawio)
+- [Gold dimensional model DDL](scripts/gold/ddl_gold.sql)\n- [Gold full-refresh loading procedure](scripts/gold/load_gold.sql)\n- [Gold structural and fact validation SQL](scripts/gold/validate_gold.sql)\n- [Gold validation results and remaining work](docs/gold/gold_validation.md)
 - [Gold data dictionary and dimensional mapping](docs/gold/gold_data_dictionary.md)
 - [Gold reset script](scripts/gold/reset_gold.sql) — use only for a full Gold rebuild
 - [Gold KPI investigations and business rules](docs/gold/gold_kpi_investigations.md)

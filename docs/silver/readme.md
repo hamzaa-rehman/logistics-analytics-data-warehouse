@@ -32,9 +32,9 @@ The project separates raw ingestion, standardized data preparation, and analytic
 |---|---|---|
 | Bronze | Ingest and preserve source data in its raw VARCHAR representation | Implemented |
 | Silver | Convert, standardize, and relate source entities using typed relational tables | Implemented |
-| Gold | Prepare business-focused analytical models for reporting | Next stage |
+| Gold | Prepare business-focused analytical models for reporting | Implemented; measure reconciliation and reporting remain in progress |
 
-The Bronze layer preserves source values for traceability and investigation. Silver applies the approved structural and data-type decisions. Gold will build on the validated Silver entities to support analytical use cases.
+The Bronze layer preserves source values for traceability and investigation. Silver applies the approved structural and data-type decisions. Gold builds on the validated Silver entities through a dimensional model and full-refresh load procedure.
 
 See the [Bronze layer documentation](../bronze/readme.md) for the ingestion and profiling process.
 

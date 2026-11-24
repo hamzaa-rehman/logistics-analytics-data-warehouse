@@ -37,7 +37,7 @@ Each layer has a distinct responsibility:
 - **Gold:** The planned dimensional layer will organize validated Silver entities into business-focused fact and dimension tables and provide KPI-ready reporting structures.
 - **BI / Reporting:** The planned consumption layer will use Gold for analytical SQL and Power BI dashboards.
 
-Bronze and Silver have been implemented and validated within their documented scopes. Gold and BI / Reporting are not yet implemented. Separate validation gates are shown for Bronze profiling and Silver structural and relationship checks.
+Bronze and Silver have been implemented and validated within their documented scopes. The Gold dimensional model and loading procedure have also been implemented; initial Gold structural and fact row-count validations have passed. Measure-level reconciliation, reporting views, and BI / Reporting remain in progress. Separate validation gates are maintained for each layer.
 
 ## 3. Source Data Inventory
 
