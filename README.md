@@ -94,6 +94,7 @@ logistics-analytics-data-warehouse/
 - [Silver layer documentation](docs/silver/readme.md)
 - [Silver layer ERD (PNG)](docs/diagrams/silver_erd.png) | [Editable Draw.io source](docs/diagrams/silver_erd.drawio)
 - [Gold dimensional model DDL](scripts/gold/ddl_gold.sql)
+- [Gold data dictionary and dimensional mapping](docs/gold/gold_data_dictionary.md)
 - [Gold reset script](scripts/gold/reset_gold.sql) — use only for a full Gold rebuild
 - [Gold KPI investigations and business rules](docs/gold/gold_kpi_investigations.md)
 - [Gold relationship investigations and modelling decisions](docs/gold/gold_relationship_investigations.md)
