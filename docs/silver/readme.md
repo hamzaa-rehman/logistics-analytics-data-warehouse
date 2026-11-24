@@ -285,9 +285,11 @@ The Silver layer establishes typed, relationally consistent data. It does not by
 - The validation suite checks row counts, keys, foreign-key orphans, constraint state, key reconciliation, and selected transformations. It is not a full comparison of every non-key column between Bronze and Silver.
 - The Silver ERD is documented in Section 3.1. A separate transformation-flow diagram may be added after the end-to-end Gold loading design is finalized.
 
-## 10. Next Stage: Gold
+## 10. Gold Layer Handoff
 
-With the Silver structures, loading process, and selected validation checks implemented, the next stage is to design Gold analytical models. Gold development should use the validated Silver entities as its source and apply documented business definitions for reporting metrics and analytical dimensions.
+The Gold dimensional model has been deployed and populated from Silver using the full-refresh procedure. Initial validation has confirmed the 18 fact-to-dimension relationships, enabled/trusted foreign-key constraints, primary-key structure, fact business-key uniqueness, and fact row-count reconciliation. Measure-level reconciliation remains the next validation task before final Gold sign-off and reporting-view development.
+
+See the [Gold data dictionary](../gold/gold_data_dictionary.md), [Gold validation record](../gold/gold_validation.md), and [Gold loading procedure](../../scripts/gold/load_gold.sql).
 
 ---
 

@@ -44,9 +44,10 @@ logistics-analytics-data-warehouse/
 │   ├── silver/
 │   │   └── readme.md
 │   ├── gold/
-│   │   ├── gold_kpi_investigations.md
 │   │   ├── gold_data_dictionary.md
-│   │   └── gold_relationship_investigations.md
+│   │   ├── gold_kpi_investigations.md
+│   │   ├── gold_relationship_investigations.md
+│   │   └── gold_validation.md
 │   ├── data_inventory/
 │   │   └── Logistics_Data_Inventory_Bronze.xlsx
 │   └── diagrams/
@@ -93,8 +94,16 @@ logistics-analytics-data-warehouse/
 - [Bronze data inventory and profiling workbook](docs/data_inventory/Logistics_Data_Inventory_Bronze.xlsx)
 - [Bronze layer documentation](docs/bronze/readme.md)
 - [Silver layer documentation](docs/silver/readme.md)
-- [Warehouse architecture diagram (PNG)](docs/diagrams/Logistics_Data_Warehouse_Architecture%20(1).png) | [Editable Draw.io source](docs/diagrams/Logistics_Data_Warehouse_Architecture%20(1).drawio)\n- [Silver layer ERD (PNG)](docs/diagrams/silver_erd.png) | [Editable Draw.io source](docs/diagrams/silver_erd.drawio)
-- [Gold dimensional model DDL](scripts/gold/ddl_gold.sql)\n- [Gold full-refresh loading procedure](scripts/gold/load_gold.sql)\n- [Gold structural and fact validation SQL](scripts/gold/validate_gold.sql)\n- [Gold validation results and remaining work](docs/gold/gold_validation.md)
+- [Warehouse architecture diagram (PNG)](docs/diagrams/Logistics_Data_Warehouse_Architecture%20(1).png) | [Editable Draw.io source](docs/diagrams/Logistics_Data_Warehouse_Architecture%20(1).drawio)
+- [Warehouse architecture diagram (PNG)](docs/diagrams/Logistics_Data_Warehouse_Architecture%20(1).png) | [Editable Draw.io source](docs/diagrams/Logistics_Data_Warehouse_Architecture%20(1).drawio)
+- [Silver layer ERD (PNG)](docs/diagrams/silver_erd.png) | [Editable Draw.io source](docs/diagrams/silver_erd.drawio)
+- [Gold dimensional model DDL](scripts/gold/ddl_gold.sql)
+- [Gold full-refresh loading procedure](scripts/gold/load_gold.sql)
+- [Gold structural and fact validation SQL](scripts/gold/validate_gold.sql)
+- [Gold validation results and remaining work](docs/gold/gold_validation.md)
+- [Gold full-refresh loading procedure](scripts/gold/load_gold.sql)
+- [Gold structural and fact validation SQL](scripts/gold/validate_gold.sql)
+- [Gold validation results and remaining work](docs/gold/gold_validation.md)
 - [Gold data dictionary and dimensional mapping](docs/gold/gold_data_dictionary.md)
 - [Gold reset script](scripts/gold/reset_gold.sql) — use only for a full Gold rebuild
 - [Gold KPI investigations and business rules](docs/gold/gold_kpi_investigations.md)

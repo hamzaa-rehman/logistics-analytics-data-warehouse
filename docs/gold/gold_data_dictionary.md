@@ -472,8 +472,13 @@ This checklist distinguishes schema deployment from data-load completion.
 | Foreign keys | 18; deployment validation passed. |
 | Disabled or untrusted constraints | 0 reported at schema validation. |
 | Date dimension | 5,114 rows, 2012-01-01 through 2025-12-31; deployment validation passed. |
-| Gold data loading | Pending. |
-| Source-to-Gold row-count and measure reconciliation | Pending until data is loaded. |
+| Gold data loading | Full-refresh procedure implemented and executed. |
+| Fact business-key completeness and uniqueness | 6/6 fact tables passed; zero NULL or duplicate source keys. |
+| Fact row-count reconciliation | 6/6 fact tables match their Silver source row counts. |
+| Foreign-key orphan validation | 18/18 relationships passed; zero orphan rows. |
+| Foreign-key constraint status | 18/18 enabled and trusted. |
+| Primary-key validation | 13/13 present and enabled; each uses one key column. |
+| Measure-level source-to-Gold reconciliation | Pending. |
 | Reporting views and Power BI | Pending. |
 
 **Do not interpret successful DDL deployment as successful data loading.** Update the pending items only after the relevant load scripts have been executed and their validation results reviewed.
@@ -485,6 +490,10 @@ This checklist distinguishes schema deployment from data-load completion.
 - Gold KPI investigations: `docs/gold/gold_kpi_investigations.md`
 - Gold relationship investigations: `docs/gold/gold_relationship_investigations.md`
 - Gold KPI investigation SQL: `scripts/gold/gold_kpi_investigations.sql`
-- Gold relationship investigation SQL: `scripts/gold/gold_relationship_investigations.sql`\n- Gold validation SQL: `scripts/gold/validate_gold.sql`\n- Gold validation results: `docs/gold/gold_validation.md`
+- Gold relationship investigation SQL: `scripts/gold/gold_relationship_investigations.sql`
+- Gold validation SQL: `scripts/gold/validate_gold.sql`
+- Gold validation results: `docs/gold/gold_validation.md`
+- Gold validation SQL: `scripts/gold/validate_gold.sql`
+- Gold validation results: `docs/gold/gold_validation.md`
 - Silver schema: `scripts/silver/ddl_silver.sql`
 - Silver documentation: `docs/silver/readme.md`
