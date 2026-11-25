@@ -194,15 +194,15 @@ The event's `location_city` and `location_state` were compared with the associat
 - Preserve facility `city` and `state` in `dim_facility`.
 - Do not overwrite one location with the other.
 - Do not assume the mismatch is necessarily an error without source-system definitions explaining what the event location represents.
-- Record this limitation for dashboard interpretation; further investigation is not required before initial Gold implementation.
+- Retain this limitation for dashboard interpretation. No additional investigation is currently required unless the source system supplies a clearer definition of event location.
 
-## 12. Gold Model Implications
+## 12. Implemented Gold Model and Relationship Safeguards
 
-The relationship checks support the following initial dimensional-model candidates. Final physical keys, datatypes, constraints, and load logic must be confirmed against the Silver DDL during implementation.
+The relationship findings were incorporated into the deployed Gold dimensional model. The physical schema, keys, data types, constraints, and source-to-target mappings are defined in [the Gold DDL](../../scripts/gold/ddl_gold.sql) and [the Gold data dictionary](gold_data_dictionary.md). The implemented model contains the following seven dimensions and six facts.
 
 ### Dimensions
 
-| Dimension | Source | Expected coverage |
+| Dimension | Source | Source rows / generated coverage |
 |---|---|---:|
 | `dim_customer` | `silver.customers` | 200 |
 | `dim_driver` | `silver.drivers` | 150 |
@@ -210,11 +210,11 @@ The relationship checks support the following initial dimensional-model candidat
 | `dim_trailer` | `silver.trailers` | 180 |
 | `dim_route` | `silver.routes` | 58 |
 | `dim_facility` | `silver.facilities` | 50 |
-| `dim_date` | Generated calendar covering required analytical dates | To be defined |
+| `dim_date` | Generated calendar | 5,114 dates (2012-01-01 through 2025-12-31) |
 
 ### Facts
 
-| Fact candidate | Source | Grain (the level of detail represented by each row) |
+| Implemented fact table | Source | Implemented grain (the level of detail represented by each row) |
 |---|---|---|
 | `fact_loads` | `silver.loads` | One row per load |
 | `fact_trips` | `silver.trips` | One row per trip |
@@ -223,7 +223,7 @@ The relationship checks support the following initial dimensional-model candidat
 | `fact_maintenance_records` | `silver.maintenance_records` | One row per maintenance record |
 | `fact_safety_incidents` | `silver.safety_incidents` | One row per safety incident |
 
-These are the current model candidates, not a substitute for the detailed DDL review. The two monthly metric tables remain available in Silver; their inclusion in Gold should be decided only if a defined reporting requirement needs them.
+The six fact processes above are implemented at their documented grains. The two monthly metric tables remain in Silver and are outside the current Gold scope; they should be added only if a defined reporting requirement justifies a separate fact design.
 
 ### Relationship and aggregation safeguards
 
