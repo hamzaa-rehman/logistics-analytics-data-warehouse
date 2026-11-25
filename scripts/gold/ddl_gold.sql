@@ -26,7 +26,9 @@ Design:
       incident description are intentionally excluded from Gold reporting.
 
 Important:
-    - This script creates structures only. It does not load data.
+    - This script creates the Gold structures and populates the static date dimension.
+    - It does not load transactional dimension or fact data.
+    - The date dimension stores both calendar year and ISO week-year separately.
     - Run reset_gold.sql only when a full Gold rebuild is intended.
     - Validate source-to-target lookups and date keys in the Gold load process.
 
@@ -253,6 +255,47 @@ OPTION (MAXRECURSION 0);
 GO
 
 -- ============================================================================
+-- DATE DIMENSION VALIDATION
+-- Confirm the generated calendar range and ISO week attributes.
+-- ISO week-year is the calendar year containing the Thursday of the ISO week.
+-- ============================================================================
+IF
+(
+    SELECT COUNT(*)
+    FROM gold.dim_date
+) <> 5114
+    THROW 51001, 'dim_date must contain exactly 5,114 dates.', 1;
+
+IF EXISTS
+(
+    SELECT 1
+    FROM gold.dim_date
+    WHERE full_date < CONVERT(DATE, '20120101', 112)
+       OR full_date > CONVERT(DATE, '20251231', 112)
+       OR week_of_year <> DATEPART(ISO_WEEK, full_date)
+       OR iso_week_year <> YEAR(DATEADD(DAY, 4 - day_of_week, full_date))
+)
+    THROW 51002, 'dim_date contains an invalid date range or ISO week attribute.', 1;
+
+-- Boundary examples: calendar year and ISO week-year can differ.
+SELECT
+    full_date,
+    year_number AS calendar_year,
+    week_of_year AS iso_week_number,
+    iso_week_year
+FROM gold.dim_date
+WHERE full_date IN
+(
+    CONVERT(DATE, '20210101', 112),
+    CONVERT(DATE, '20210104', 112),
+    CONVERT(DATE, '20241230', 112),
+    CONVERT(DATE, '20241231', 112),
+    CONVERT(DATE, '20250101', 112)
+)
+ORDER BY full_date;
+GO
+
+-- ============================================================================
 -- 8. FACT: LOADS
 -- Grain: One row per load.
 -- Reported load revenue is revenue only; other charges remain separate.
@@ -446,18 +489,12 @@ CREATE TABLE gold.fact_safety_incidents
 GO
 
 /*
-POST-CREATION STRUCTURAL CHECKS (run after the script completes):
+POST-CREATION STRUCTURAL CHECK (run after the script completes):
 
+Confirm that all 13 Gold tables were created.
+*/
 SELECT s.name AS schema_name, t.name AS table_name
 FROM sys.tables AS t
 JOIN sys.schemas AS s ON s.schema_id = t.schema_id
 WHERE s.name = 'gold'
 ORDER BY t.name;
-
-SELECT COUNT(*) AS date_dimension_rows,
-       MIN(full_date) AS minimum_date,
-       MAX(full_date) AS maximum_date
-FROM gold.dim_date;
-
-Expected date dimension result: 5,114 rows, 2012-01-01 through 2025-12-31.
-*/
