@@ -1,9 +1,9 @@
 # Logistics Analytics Data Warehouse
-A SQL Server data warehouse project using the Medallion Architecture (Bronze, Silver, Gold) to prepare logistics operations data for business analytics. Bronze ingestion and profiling, Silver transformation and validation, and Gold dimensional modelling and loading are implemented. Initial Gold structural, relationship, fact business-key, and fact row-count checks have passed; measure-level reconciliation, reporting views, and Power BI reporting remain in progress.
+A SQL Server data warehouse project using the Medallion Architecture (Bronze, Silver, Gold) to prepare logistics operations data for business analytics. Bronze ingestion and profiling, Silver transformation and validation, and Gold dimensional modelling and full-refresh loading are implemented. Gold structural, relationship, fact-grain, row-count, and selected measure-preservation validations have passed across all six fact tables. Reporting views and Power BI reporting are the next development stage.
 
 ## Repository Structure
 
-The tree below reflects the current repository contents. Bronze and Silver implementation and validation are complete. The Gold dimensional model and full-refresh loading procedure are implemented, and initial Gold structural and fact row-count validations have passed. Gold measure reconciliation, reporting views, and Power BI reporting remain in progress.
+The tree below reflects the current repository contents. Bronze and Silver implementation and validation are complete. The Gold dimensional model and full-refresh loading procedure are implemented. Gold structural, relationship, fact business-key, row-count, and selected measure-reconciliation checks are complete; reporting views and Power BI reporting remain planned.
 
 ```text
 logistics-analytics-data-warehouse/
@@ -81,6 +81,7 @@ logistics-analytics-data-warehouse/
 │   │   ├── gold_kpi_investigations.sql
 │   │   ├── gold_relationship_investigations.sql
 │   │   ├── load_gold.sql
+│   │   ├── reconcile_gold_measures.sql
 │   │   ├── reset_gold.sql
 │   │   └── validate_gold.sql
 │   └── silver/
@@ -107,7 +108,8 @@ logistics-analytics-data-warehouse/
 - [Gold full-refresh loading procedure](scripts/gold/load_gold.sql)
 - [Gold reset script](scripts/gold/reset_gold.sql) — use only for a full Gold rebuild
 - [Gold structural and fact validation SQL](scripts/gold/validate_gold.sql)
-- [Gold validation results and remaining work](docs/gold/gold_validation.md)
+- [Gold Silver-to-Gold measure reconciliation SQL](scripts/gold/reconcile_gold_measures.sql)
+- [Gold validation record and sign-off evidence](docs/gold/gold_validation.md)
 - [Gold data dictionary and dimensional mapping](docs/gold/gold_data_dictionary.md)
 - [Gold KPI investigations and business rules](docs/gold/gold_kpi_investigations.md)
 - [Gold relationship investigations and modelling decisions](docs/gold/gold_relationship_investigations.md)
