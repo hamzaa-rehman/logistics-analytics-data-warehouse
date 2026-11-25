@@ -491,6 +491,7 @@ DDL deployment, data loading, and validation are separate gates. The deployed Go
 - Gold schema: `scripts/gold/ddl_gold.sql`
 - Gold loading procedure: `scripts/gold/load_gold.sql`
 - Gold validation SQL: `scripts/gold/validate_gold.sql`
+- Gold measure reconciliation SQL: `scripts/gold/reconcile_gold_measures.sql`
 - Gold validation results: `docs/gold/gold_validation.md`
 - Gold reset script (destructive; full rebuild only): `scripts/gold/reset_gold.sql`
 - Gold KPI investigations: `docs/gold/gold_kpi_investigations.md`
