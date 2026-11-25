@@ -1,6 +1,6 @@
 # Gold Layer — KPI Investigations & Business Rules
 
-**Status:** Working reference — updated through Safety Performance (KPI 8)  
+**Status:** Investigation reference — eight KPI areas investigated; findings and caveats carried into the implemented Gold model  
 **Purpose:** Preserve the evidence, KPI definitions, data limitations, and modelling decisions established during pre-Gold investigations. This document is the business-analysis reference for Gold design and should be updated as further investigations are completed.
 
 > **Important:** Figures below are based on SQL query outputs shared and reviewed during the investigation. This document records those results; it does not claim that every source column has undergone full reconciliation. Where an interpretation is provisional, it is explicitly labelled.
@@ -463,34 +463,57 @@ Inspection has the highest event count (432) and the lowest recorded cost (220,3
 - Do not assume the currency or infer causation from descriptive category patterns.
 - Avoid joining raw maintenance events directly to trip-level records and summing measures without controlling the relationship grain; one-to-many joins can duplicate measures.
 
-## 9. Candidate Gold model implications (not yet final)
+## 9. Implemented Gold model implications
 
-The following are modelling directions for design review, not approved DDL:
+The investigation findings were carried into the implemented Gold dimensional model. The approved schema and source-to-target mappings are documented in the [Gold data dictionary](gold_data_dictionary.md); the validation evidence is maintained in the [Gold validation record](gold_validation.md).
 
-- `fact_loads`: one row per load; customer and route relationships; load date; reported revenue, fuel surcharge, and accessorial charges kept as separate measures.
-- `fact_trips`: one row per trip; dispatch date; distance, duration, fuel gallons, recorded MPG, idle hours; nullable truck/driver/load relationships preserved.
-- `fact_delivery_events`: one row per event; event type, scheduled and actual timestamps, detention, on-time flag, load/trip/facility relationships.
-- `dim_customer`: customer attributes including customer type, account status, contract start date; customer key must be based on customer identity.
-- Shared dimensions such as date, truck, driver, route, and facility should be included only where they support defined analysis and can be related without creating ambiguous or fanout-prone joins.
-- Candidate `fact_fuel_purchases` and `fact_maintenance_records` have now been investigated; their grains and measures should be finalized in Gold design.
-- Candidate `fact_safety_incidents`: one row per incident, with recorded incident rates using validated trip exposure; driver/truck drill-downs remain descriptive until entity-level exposure is validated.
+The implemented model contains seven dimensions and six fact tables:
 
-Final fact/dimension selection, surrogate-key strategy, relationships, and DDL must be decided in the Gold model design stage after remaining cost and safety investigations.
+| Gold table | Implemented grain / role |
+|---|---|
+| `dim_customer` | One row per source customer |
+| `dim_date` | One row per calendar date; includes separate calendar year and ISO week-year attributes |
+| `dim_driver` | One row per source driver |
+| `dim_facility` | One row per source facility |
+| `dim_route` | One row per source route |
+| `dim_trailer` | One row per source trailer |
+| `dim_truck` | One row per source truck |
+| `fact_loads` | One row per load |
+| `fact_trips` | One row per trip |
+| `fact_delivery_events` | One row per delivery event |
+| `fact_fuel_purchases` | One row per fuel purchase |
+| `fact_maintenance_records` | One row per maintenance record |
+| `fact_safety_incidents` | One row per safety incident |
 
-## 10. Outstanding investigations
+The implementation preserves the analytical safeguards established during investigation:
 
-| Area | Status | Required next work |
+- Load revenue, fuel surcharge, and accessorial charges remain separate measures.
+- Delivery on-time performance uses Delivery events only; Pickup events are excluded from the denominator.
+- Fuel purchases and trip fuel consumption remain separate fact processes and measures.
+- Routes relate to loads, not directly to trips; facilities relate to delivery events, with event-location attributes kept distinct from facility master attributes.
+- Optional driver, truck, and trailer assignments remain nullable where the source does not provide an assignment.
+- Safety claim amount is not added again to its vehicle- and cargo-damage components.
+- Fact processes retain their distinct grains; raw fact tables must not be joined and aggregated without controlling join cardinality.
+- Calendar-year reporting uses `year_number`; ISO weekly grouping uses `iso_week_year` together with `week_of_year`.
+
+## 10. Investigation and implementation status
+
+| Area | Investigation / implementation status | Reporting implication |
 |---|---|---|
-| Reported load revenue | Investigated | Carry approved definition and accounting caveat into Gold |
-| Trip activity | Investigated | Carry trip grain and dispatch-date definition into Gold |
-| Fleet performance | Investigated | Carry weighted MPG, NULL truck handling, and utilization limitation into Gold |
-| Delivery performance | Investigated | Carry Delivery-only denominator, partial January caveat, and detention finding into Gold |
-| Customer performance | Investigated | Carry customer coverage, concentration, segmentation, and acquisition-proxy caveat into Gold |
-| Fuel purchases | Investigated | Carry source-cost validation, assignment coverage, separate purchase/consumption grains, partial January 2025 caveat, and attribution rules into Gold |
-| Maintenance | Investigated | Carry event grain, source-cost measure, truck attribution, maintenance categories, and downtime caveats into Gold design |
-| Safety | Investigated | Carry incident grain, claim reconciliation, annual rates, classification flags, NULL attribution, and descriptive driver/truck drill-down rules into Gold design |
-| Gold dimensional model | Pending | Define business processes, fact grains, dimensions, relationships, and measures before DDL |
-| Gold validation | Pending | Define source-to-Gold reconciliation and business-rule checks after implementation |
+| Reported load revenue | Investigated and implemented in `fact_loads` | Preserve reported revenue separately from fuel surcharge and accessorial charges; retain accounting caveats |
+| Trip activity and fleet performance | Investigated and implemented in `fact_trips` | Use dispatch date; use weighted MPG where appropriate; do not present recorded trips per day as a fleet-utilisation percentage |
+| Delivery performance | Investigated and implemented in `fact_delivery_events` | Delivery-only denominator; retain partial-period caveats and the observed detention/on-time association without claiming causation |
+| Customer performance | Investigated and implemented through customer dimension and load fact | Retain customer coverage, concentration, segmentation, and acquisition-proxy caveats |
+| Fuel purchases | Investigated and implemented in `fact_fuel_purchases` | Keep purchase and consumption grains separate; preserve assignment and partial-January-2025 caveats |
+| Maintenance | Investigated and implemented in `fact_maintenance_records` | Keep recorded cost and downtime distinct; avoid unsupported fleet-unavailability claims |
+| Safety | Investigated and implemented in `fact_safety_incidents` | Retain incident grain, claim reconciliation, exposure-based overall rates, NULL attribution, and descriptive-only entity drill-downs |
+| Gold dimensional model | Implemented | Seven dimensions and six fact tables; see the Gold data dictionary |
+| Gold structural and relationship validation | Passed | 18/18 foreign keys passed orphan checks and are enabled/trusted; 13/13 primary keys are enabled |
+| Gold fact business-key and row-count validation | Passed | Six fact grains are unique/non-NULL; 541,172 fact rows match Silver |
+| Selected Silver-to-Gold measure reconciliation | Passed | 541,172 matched fact records; zero missing records and zero selected-measure mismatches |
+| Date dimension ISO week-year validation | Passed | 5,114 dates; zero ISO week-year mismatches and zero NULL values |
+| Reporting views | Not yet implemented | Next development stage; KPI definitions and fact-grain safeguards in this document remain the business-rule reference |
+| Power BI reporting | Not yet implemented | Follows reporting-view implementation and validation |
 
 ## 11. Evidence and change-control notes
 
