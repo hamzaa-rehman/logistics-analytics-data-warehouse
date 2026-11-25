@@ -1,7 +1,7 @@
 # Gold Layer — KPI Investigations & Business Rules
 
 **Status:** Investigation reference — eight KPI areas investigated; findings and caveats carried into the implemented Gold model  
-**Purpose:** Preserve the evidence, KPI definitions, data limitations, and modelling decisions established during pre-Gold investigations. This document is the business-analysis reference for Gold design and should be updated as further investigations are completed.
+**Purpose:** Preserve the evidence, KPI definitions, data limitations, and modelling decisions established during pre-Gold investigations. These findings informed the implemented Gold dimensional model and remain the business-rules reference for reporting-view and dashboard development.
 
 > **Important:** Figures below are based on SQL query outputs shared and reviewed during the investigation. This document records those results; it does not claim that every source column has undergone full reconciliation. Where an interpretation is provisional, it is explicitly labelled.
 
@@ -454,7 +454,7 @@ Inspection has the highest event count (432) and the lowest recorded cost (220,3
 
 ### 8.4 Gold implications and approved analytical handling
 
-- Candidate `fact_maintenance_records` grain: **one row per maintenance event**.
+- Implemented `fact_maintenance_records` grain: **one row per maintenance event**.
 - Preserve `truck_id`, `maintenance_date`, and `maintenance_type` for truck, date, and category analysis.
 - Use source `total_cost` for recorded maintenance expenditure. Retain `labor_cost` and `parts_cost` as separate measures; their sum reconciles to source total within the tested 0.01 tolerance.
 - Retain `downtime_hours` as a separate measure. Do not label its sum as fleet unavailability without a validated availability definition.
@@ -518,7 +518,7 @@ The implementation preserves the analytical safeguards established during invest
 ## 11. Evidence and change-control notes
 
 - This document records the investigation results and decisions available at the time of writing.
-- The investigation SQL is maintained in `scripts/gold/gold_kpi_investigations.sql`. The exact Safety Performance queries 08A–08K supplied and executed during the investigation have been appended. For earlier Fuel checks 07A–07F, exact query text was not available in the reviewed source material and has not been reconstructed or presented as executed SQL.
+- The investigation SQL is maintained in `scripts/gold/gold_kpi_investigations.sql`. The exact Safety Performance queries 09A–09K supplied and executed during the investigation have been appended. For earlier Fuel checks 07A–07F, exact query text was not available in the reviewed source material and has not been reconstructed or presented as executed SQL.
 - Do not imply that a query is committed merely because its output is documented here.
 - When a new investigation is completed, add its query purpose, source tables and grain, result, interpretation, caveats, Gold implication, and status.
 - If a definition changes, update this document and the Gold model/data dictionary together.
@@ -590,7 +590,7 @@ The associated trip records were checked:
 
 The missing identifiers cannot be recovered from `silver.trips`. This is partial attribution (an incident can be linked to some operational entities but not all), not proof that the incident record itself is invalid.
 
-**Decision:** Preserve both incidents. Keep `truck_id` and `driver_id` nullable in the candidate safety fact. Do not infer or manufacture missing identifiers.
+**Decision:** Preserve both incidents. Keep `truck_id` and `driver_id` nullable in `fact_safety_incidents`. Do not infer or manufacture missing identifiers.
 
 ### 12.4 Incident frequency, classifications, and financial impact by type (09D)
 
@@ -723,7 +723,7 @@ Driver and truck incident counts can support descriptive drill-downs (moving fro
 
 ### 12.11 Gold definitions, modelling decisions, and caveats
 
-**Candidate fact grain:** `fact_safety_incidents`, one row per incident.
+**Implemented fact grain:** `fact_safety_incidents`, one row per incident.
 
 Recommended reporting scope:
 
@@ -744,5 +744,5 @@ Modelling and interpretation rules:
 8. Currency is unknown. Do not label claim or damage amounts with a currency symbol or currency name until confirmed.
 9. Do not infer causation for the 2024 increase or for differences among incident categories.
 
-**Gold decision:** Include a candidate `fact_safety_incidents` in dimensional model design, with overall, category, annual, driver, and truck reporting supported. Driver- and truck-level views are descriptive drill-downs, not performance leaderboards.
+**Gold implementation:** `fact_safety_incidents` is implemented at one row per incident. It supports overall, category, and annual safety reporting, plus descriptive driver and truck drill-downs. Driver- and truck-level views must not be presented as performance leaderboards without validated entity-level exposure denominators.
 
