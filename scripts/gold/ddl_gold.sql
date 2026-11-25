@@ -39,11 +39,11 @@ Tables:   13
 */
 
 USE LogisticsAnalytics;
-GO
+
 
 IF SCHEMA_ID(N'gold') IS NULL
     EXEC(N'CREATE SCHEMA gold');
-GO
+
 
 -- ============================================================================
 -- 1. DIMENSION: CUSTOMER
@@ -64,7 +64,7 @@ CREATE TABLE gold.dim_customer
     CONSTRAINT PK_dim_customer PRIMARY KEY (customer_key),
     CONSTRAINT UQ_dim_customer_customer_id UNIQUE (customer_id)
 );
-GO
+
 
 -- ============================================================================
 -- 2. DIMENSION: DRIVER
@@ -88,7 +88,7 @@ CREATE TABLE gold.dim_driver
     CONSTRAINT PK_dim_driver PRIMARY KEY (driver_key),
     CONSTRAINT UQ_dim_driver_driver_id UNIQUE (driver_id)
 );
-GO
+
 
 -- ============================================================================
 -- 3. DIMENSION: TRUCK
@@ -112,7 +112,7 @@ CREATE TABLE gold.dim_truck
     CONSTRAINT PK_dim_truck PRIMARY KEY (truck_key),
     CONSTRAINT UQ_dim_truck_truck_id UNIQUE (truck_id)
 );
-GO
+
 
 -- ============================================================================
 -- 4. DIMENSION: TRAILER
@@ -134,7 +134,7 @@ CREATE TABLE gold.dim_trailer
     CONSTRAINT PK_dim_trailer PRIMARY KEY (trailer_key),
     CONSTRAINT UQ_dim_trailer_trailer_id UNIQUE (trailer_id)
 );
-GO
+
 
 -- ============================================================================
 -- 5. DIMENSION: ROUTE
@@ -156,7 +156,7 @@ CREATE TABLE gold.dim_route
     CONSTRAINT PK_dim_route PRIMARY KEY (route_key),
     CONSTRAINT UQ_dim_route_route_id UNIQUE (route_id)
 );
-GO
+
 
 -- ============================================================================
 -- 6. DIMENSION: FACILITY
@@ -178,7 +178,7 @@ CREATE TABLE gold.dim_facility
     CONSTRAINT PK_dim_facility PRIMARY KEY (facility_key),
     CONSTRAINT UQ_dim_facility_facility_id UNIQUE (facility_id)
 );
-GO
+
 
 -- ============================================================================
 -- 7. DIMENSION: DATE
@@ -204,7 +204,7 @@ CREATE TABLE gold.dim_date
     CONSTRAINT PK_dim_date PRIMARY KEY (date_key),
     CONSTRAINT UQ_dim_date_full_date UNIQUE (full_date)
 );
-GO
+
 
 ;WITH calendar_dates AS
 (
@@ -252,7 +252,7 @@ SELECT
     CASE WHEN weekday_number IN (6, 7) THEN 1 ELSE 0 END
 FROM calendar_attributes
 OPTION (MAXRECURSION 0);
-GO
+
 
 -- ============================================================================
 -- DATE DIMENSION VALIDATION
@@ -293,7 +293,7 @@ WHERE full_date IN
     CONVERT(DATE, '20250101', 112)
 )
 ORDER BY full_date;
-GO
+
 
 -- ============================================================================
 -- 8. FACT: LOADS
@@ -325,7 +325,7 @@ CREATE TABLE gold.fact_loads
     CONSTRAINT FK_fact_loads_date FOREIGN KEY (load_date_key)
         REFERENCES gold.dim_date (date_key)
 );
-GO
+
 
 -- ============================================================================
 -- 9. FACT: TRIPS
@@ -358,7 +358,7 @@ CREATE TABLE gold.fact_trips
     CONSTRAINT FK_fact_trips_dispatch_date FOREIGN KEY (dispatch_date_key)
         REFERENCES gold.dim_date (date_key)
 );
-GO
+
 
 -- ============================================================================
 -- 10. FACT: DELIVERY EVENTS
@@ -391,7 +391,7 @@ CREATE TABLE gold.fact_delivery_events
     CONSTRAINT FK_fact_delivery_events_actual_date FOREIGN KEY (actual_date_key)
         REFERENCES gold.dim_date (date_key)
 );
-GO
+
 
 -- ============================================================================
 -- 11. FACT: FUEL PURCHASES
@@ -421,7 +421,7 @@ CREATE TABLE gold.fact_fuel_purchases
     CONSTRAINT FK_fact_fuel_purchases_date FOREIGN KEY (purchase_date_key)
         REFERENCES gold.dim_date (date_key)
 );
-GO
+
 
 -- ============================================================================
 -- 12. FACT: MAINTENANCE RECORDS
@@ -451,7 +451,7 @@ CREATE TABLE gold.fact_maintenance_records
     CONSTRAINT FK_fact_maintenance_records_date FOREIGN KEY (maintenance_date_key)
         REFERENCES gold.dim_date (date_key)
 );
-GO
+
 
 -- ============================================================================
 -- 13. FACT: SAFETY INCIDENTS
@@ -486,7 +486,7 @@ CREATE TABLE gold.fact_safety_incidents
     CONSTRAINT FK_fact_safety_incidents_date FOREIGN KEY (incident_date_key)
         REFERENCES gold.dim_date (date_key)
 );
-GO
+
 
 /*
 POST-CREATION STRUCTURAL CHECK (run after the script completes):
