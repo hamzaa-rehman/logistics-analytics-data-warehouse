@@ -32,9 +32,9 @@ The project separates raw ingestion, standardized data preparation, and analytic
 |---|---|---|
 | Bronze | Ingest and preserve source data in its raw VARCHAR representation | Implemented |
 | Silver | Convert, standardize, and relate source entities using typed relational tables | Implemented |
-| Gold | Prepare business-focused analytical models for reporting | Implemented; measure reconciliation and reporting remain in progress |
+| Gold | Prepare business-focused analytical models for reporting | Dimensional model and full-refresh load implemented; structural and selected measure-preservation validations passed; reporting views and Power BI are the next stage |
 
-The Bronze layer preserves source values for traceability and investigation. Silver applies the approved structural and data-type decisions. Gold builds on the validated Silver entities through a dimensional model and full-refresh load procedure.
+The Bronze layer preserves source values for traceability and investigation. Silver applies the approved structural and data-type decisions. Gold builds on the validated Silver entities through a seven-dimension, six-fact dimensional model and full-refresh load procedure. Its 541,172 fact rows have passed row-count reconciliation, and selected measures across all six fact tables have passed row-level Silver-to-Gold reconciliation. See the [Gold validation record](../gold/gold_validation.md) for the tested scope and evidence.
 
 See the [Bronze layer documentation](../bronze/readme.md) for the ingestion and profiling process.
 
