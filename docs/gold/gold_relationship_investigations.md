@@ -235,14 +235,10 @@ These are the current model candidates, not a substitute for the detailed DDL re
 6. Do not aggregate measures after joining multiple raw fact tables unless the join cardinality and resulting grain have been deliberately controlled. Aggregate each process at its intended grain first to avoid fanout and inflated totals.
 7. Keep the load/trip/event relationship chain in mind: one load ↔ one trip, and one trip → two delivery events.
 
-## 13. Investigation Closure
+## 13. Investigation and implementation closure
 
-The relationship investigations required for the initial Gold model are complete. The remaining work is implementation and validation:
+The relationship investigations required to design the Gold model are complete, and their decisions have been implemented in the deployed seven-dimension, six-fact schema. The completed model preserves the documented fact grains, nullable optional relationships, route-to-load relationship, facility-to-delivery-event relationship, and safeguards against cross-fact fanout.
 
-1. Finalize the dimensional model against the actual Silver DDL.
-2. Create Gold DDL and loading procedures.
-3. Load dimensions and facts while preserving the documented grains and nullable relationships.
-4. Validate row counts, key coverage, relationship integrity, and measure reconciliation against Silver.
-5. Build focused reporting views after the Gold model is stable.
+The project owner validated all 18 Gold foreign-key relationships: zero orphan rows, with every constraint enabled and trusted. All 13 Gold tables have enabled single-column primary keys. Fact business-key uniqueness, Silver-to-Gold fact row counts, and selected measure preservation across all six fact tables also passed. See the [Gold validation record](gold_validation.md) for the detailed results and scope.
 
-No additional relationship investigation is required before beginning the initial Gold implementation unless a schema or validation result reveals a specific unresolved dependency.
+No further relationship investigation is currently required for the implemented model. Reopen a specific relationship investigation only if a schema change, new reporting requirement, or validation result identifies a concrete issue. The next development stage is focused reporting views, with each view designed to respect the fact grains and relationship cardinalities documented here.
