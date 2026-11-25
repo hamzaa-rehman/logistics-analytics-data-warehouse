@@ -6,7 +6,7 @@ This document is the approved reference for the Gold dimensional schema in the L
 
 **Schema status:** The 13-table Gold schema has been deployed and its structure/constraints have been validated in SQL Server.
 
-**Data status:** The Gold full-refresh load procedure has been implemented and executed. The six fact tables have been loaded, their source business identifiers are complete and unique, and their row counts match the corresponding Silver tables. All 18 Gold foreign-key relationships passed orphan checks and are enabled/trusted; all 13 Gold primary keys are present and enabled, with one key column per table. Measure-level source-to-Gold reconciliation remains pending, so final Gold validation sign-off has not yet been granted.
+**Data and validation status:** The Gold full-refresh load procedure has been implemented and executed. All six fact tables have complete, unique source business identifiers, and their row counts match the corresponding Silver tables (541,172 fact rows in total). All 18 Gold foreign-key relationships passed orphan checks and are enabled/trusted; all 13 Gold primary keys are present and enabled, each with one key column. The six fact-table measure reconciliation checks also passed: 541,172 matched records, zero missing records on either side, and zero mismatches across the selected measures. The `dim_date` table contains 5,114 dates, and its ISO week-year validation returned zero mismatches and zero NULLs. The completed evidence and validation scope are recorded in [gold_validation.md](gold_validation.md). Reporting views and Power BI reporting are downstream work.
 
 **Source of truth:** `scripts/gold/ddl_gold.sql` defines the implemented Gold columns, data types, nullability, primary keys, unique constraints, and foreign keys. `scripts/silver/ddl_silver.sql` defines the Silver source columns. If this document and the deployed DDL ever disagree, the discrepancy must be investigated and resolved; do not silently change the load scripts to fit an outdated document.
 
@@ -479,10 +479,12 @@ This checklist distinguishes schema deployment from data-load completion.
 | Foreign-key orphan validation | 18/18 relationships passed; zero orphan rows. |
 | Foreign-key constraint status | 18/18 enabled and trusted. |
 | Primary-key validation | 13/13 present and enabled; each uses one key column. |
-| Measure-level source-to-Gold reconciliation | Pending. |
-| Reporting views and Power BI | Pending. |
+| Selected measure-level source-to-Gold reconciliation | Passed for all six fact tables; 541,172 matched records, zero missing records, and zero selected-measure mismatches. |
+| Date dimension ISO week-year validation | Passed; 5,114 dates, zero mismatches, and zero NULL ISO week-years. |
+| Reporting views | Not yet implemented; next development stage. |
+| Power BI reporting | Not yet implemented; follows reporting-view validation. |
 
-DDL deployment and data-load validation are separate gates. Gold loading has been executed and the initial structural and fact row-count checks have passed; measure-level reconciliation remains pending before final Gold validation sign-off.
+DDL deployment, data loading, and validation are separate gates. The deployed Gold schema and load have passed the structural, relationship, fact-grain, row-count, selected measure-preservation, and date-dimension checks documented in [gold_validation.md](gold_validation.md). Reporting views and Power BI remain downstream deliverables.
 
 ## 8. Related project artifacts
 
