@@ -192,7 +192,7 @@ SELECT
         / NULLIF(SUM(delivery_event_count), 0)
         AS DECIMAL(6,2)
     ) AS on_time_delivery_rate_pct,
-    AVG(delivery_detention_minutes) AS average_delivery_detention_minutes
+    AVG(CONVERT(DECIMAL(10,2), delivery_detention_minutes)) AS average_delivery_detention_minutes
 FROM gold.vw_delivery_performance;
 
 
@@ -206,7 +206,7 @@ SELECT
         / NULLIF(SUM(delivery_event_count), 0)
         AS DECIMAL(6,2)
     ) AS on_time_delivery_rate_pct,
-    AVG(delivery_detention_minutes) AS average_delivery_detention_minutes
+    AVG(CONVERT(DECIMAL(10,2), delivery_detention_minutes)) AS average_delivery_detention_minutes
 FROM gold.vw_delivery_performance
 WHERE event_type = 'Delivery'
 GROUP BY actual_calendar_year
