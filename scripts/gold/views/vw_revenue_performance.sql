@@ -98,6 +98,63 @@ LEFT JOIN gold.dim_route AS r
 
 
 -- ============================================================================
+-- VIEW VALIDATION
+-- Expected:
+--   - View row count equals fact_loads row count.
+--   - One view row per load_id.
+--   - Fact and view totals match for all three separately reported amounts.
+-- ============================================================================
+
+IF
+(
+    SELECT COUNT_BIG(*)
+    FROM gold.vw_revenue_performance
+) <>
+(
+    SELECT COUNT_BIG(*)
+    FROM gold.fact_loads
+)
+    THROW 51101, 'vw_revenue_performance row count does not match fact_loads.', 1;
+
+IF EXISTS
+(
+    SELECT load_id
+    FROM gold.vw_revenue_performance
+    GROUP BY load_id
+    HAVING COUNT_BIG(*) <> 1
+)
+    THROW 51102, 'vw_revenue_performance does not preserve one row per load.', 1;
+
+IF EXISTS
+(
+    SELECT
+        COUNT_BIG(*) AS row_count,
+        SUM(revenue) AS reported_load_revenue,
+        SUM(fuel_surcharge) AS fuel_surcharge_amount,
+        SUM(accessorial_charges) AS accessorial_charges_amount
+    FROM gold.fact_loads
+
+    EXCEPT
+
+    SELECT
+        COUNT_BIG(*) AS row_count,
+        SUM(reported_load_revenue) AS reported_load_revenue,
+        SUM(fuel_surcharge_amount) AS fuel_surcharge_amount,
+        SUM(accessorial_charges_amount) AS accessorial_charges_amount
+    FROM gold.vw_revenue_performance
+)
+    THROW 51103, 'vw_revenue_performance measure totals do not match fact_loads.', 1;
+
+SELECT
+    COUNT_BIG(*) AS view_rows,
+    COUNT(DISTINCT load_id) AS distinct_loads,
+    SUM(reported_load_revenue) AS total_reported_load_revenue,
+    SUM(fuel_surcharge_amount) AS total_fuel_surcharge,
+    SUM(accessorial_charges_amount) AS total_accessorial_charges
+FROM gold.vw_revenue_performance;
+
+
+
 -- REVENUE PERFORMANCE ANALYSIS
 -- All queries below use the one-row-per-load reporting view.
 -- Revenue, fuel surcharge and accessorial charges remain separate measures.
@@ -241,58 +298,3 @@ ORDER BY reported_revenue_per_typical_route_mile DESC;
 
 
 -- ============================================================================
--- VIEW VALIDATION
--- Expected:
---   - View row count equals fact_loads row count.
---   - One view row per load_id.
---   - Fact and view totals match for all three separately reported amounts.
--- ============================================================================
-
-IF
-(
-    SELECT COUNT_BIG(*)
-    FROM gold.vw_revenue_performance
-) <>
-(
-    SELECT COUNT_BIG(*)
-    FROM gold.fact_loads
-)
-    THROW 51101, 'vw_revenue_performance row count does not match fact_loads.', 1;
-
-IF EXISTS
-(
-    SELECT load_id
-    FROM gold.vw_revenue_performance
-    GROUP BY load_id
-    HAVING COUNT_BIG(*) <> 1
-)
-    THROW 51102, 'vw_revenue_performance does not preserve one row per load.', 1;
-
-IF EXISTS
-(
-    SELECT
-        COUNT_BIG(*) AS row_count,
-        SUM(revenue) AS reported_load_revenue,
-        SUM(fuel_surcharge) AS fuel_surcharge_amount,
-        SUM(accessorial_charges) AS accessorial_charges_amount
-    FROM gold.fact_loads
-
-    EXCEPT
-
-    SELECT
-        COUNT_BIG(*) AS row_count,
-        SUM(reported_load_revenue) AS reported_load_revenue,
-        SUM(fuel_surcharge_amount) AS fuel_surcharge_amount,
-        SUM(accessorial_charges_amount) AS accessorial_charges_amount
-    FROM gold.vw_revenue_performance
-)
-    THROW 51103, 'vw_revenue_performance measure totals do not match fact_loads.', 1;
-
-SELECT
-    COUNT_BIG(*) AS view_rows,
-    COUNT(DISTINCT load_id) AS distinct_loads,
-    SUM(reported_load_revenue) AS total_reported_load_revenue,
-    SUM(fuel_surcharge_amount) AS total_fuel_surcharge,
-    SUM(accessorial_charges_amount) AS total_accessorial_charges
-FROM gold.vw_revenue_performance;
-
