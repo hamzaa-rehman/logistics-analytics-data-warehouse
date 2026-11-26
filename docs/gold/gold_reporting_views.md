@@ -18,7 +18,6 @@ flowchart LR
         direction TB
         FACTS["6 fact tables"]
         DIMS["7 dimension tables"]
-        FACTS --- DIMS
     end
 
     subgraph REPORTING["Gold reporting layer"]
