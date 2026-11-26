@@ -35,7 +35,6 @@ Deployment:
 ===============================================================================
 */
 
-USE LogisticsAnalytics;
 
 
 CREATE OR ALTER VIEW gold.vw_revenue_performance
@@ -95,6 +94,150 @@ LEFT JOIN gold.dim_customer AS c
 LEFT JOIN gold.dim_route AS r
     ON f.route_key = r.route_key;
 
+
+
+
+-- ============================================================================
+-- REVENUE PERFORMANCE ANALYSIS
+-- All queries below use the one-row-per-load reporting view.
+-- Revenue, fuel surcharge and accessorial charges remain separate measures.
+-- ============================================================================
+
+-- ============================================================================
+-- 1. MONTHLY REPORTED LOAD REVENUE TREND
+-- Business question: How does reported load revenue change month by month?
+-- ============================================================================
+SELECT
+    calendar_year,
+    load_month_number,
+    load_month_name,
+    load_year_month,
+    COUNT_BIG(*) AS total_loads,
+    SUM(reported_load_revenue) AS reported_load_revenue,
+    AVG(reported_load_revenue) AS average_revenue_per_load,
+    SUM(fuel_surcharge_amount) AS total_fuel_surcharge,
+    SUM(accessorial_charges_amount) AS total_accessorial_charges
+FROM gold.vw_revenue_performance
+GROUP BY calendar_year, load_month_number, load_month_name, load_year_month
+ORDER BY calendar_year, load_month_number;
+
+
+-- ============================================================================
+-- 2. ROUTE PERFORMANCE
+-- Business question: Which routes generate the most reported load revenue?
+-- Loads without an assigned route remain visible as a NULL route group.
+-- ============================================================================
+SELECT
+    route_id,
+    origin_city,
+    origin_state,
+    destination_city,
+    destination_state,
+    COUNT_BIG(*) AS total_loads,
+    SUM(reported_load_revenue) AS reported_load_revenue,
+    AVG(reported_load_revenue) AS average_revenue_per_load,
+    SUM(fuel_surcharge_amount) AS total_fuel_surcharge,
+    SUM(accessorial_charges_amount) AS total_accessorial_charges,
+    AVG(typical_distance_miles) AS average_typical_distance_miles
+FROM gold.vw_revenue_performance
+GROUP BY route_id, origin_city, origin_state, destination_city, destination_state
+ORDER BY reported_load_revenue DESC;
+
+
+-- ============================================================================
+-- 3. BOOKING TYPE PERFORMANCE
+-- Business question: How do booking types compare in load volume and revenue?
+-- NULL booking types remain visible as their own group.
+-- ============================================================================
+SELECT
+    booking_type,
+    COUNT_BIG(*) AS total_loads,
+    SUM(reported_load_revenue) AS reported_load_revenue,
+    AVG(reported_load_revenue) AS average_revenue_per_load,
+    SUM(fuel_surcharge_amount) AS total_fuel_surcharge,
+    SUM(accessorial_charges_amount) AS total_accessorial_charges
+FROM gold.vw_revenue_performance
+GROUP BY booking_type
+ORDER BY reported_load_revenue DESC;
+
+
+-- ============================================================================
+-- 4. LOAD TYPE PERFORMANCE
+-- Business question: Which load types contribute most to reported revenue?
+-- NULL load types remain visible as their own group.
+-- ============================================================================
+SELECT
+    load_type,
+    COUNT_BIG(*) AS total_loads,
+    SUM(reported_load_revenue) AS reported_load_revenue,
+    AVG(reported_load_revenue) AS average_revenue_per_load,
+    SUM(weight_lbs) AS total_weight_lbs,
+    SUM(pieces) AS total_pieces
+FROM gold.vw_revenue_performance
+GROUP BY load_type
+ORDER BY reported_load_revenue DESC;
+
+
+-- ============================================================================
+-- 5. ROUTE REVENUE PER TYPICAL ROUTE MILE
+--
+-- Business question: Which routes generate the highest reported load revenue
+-- relative to their typical route distance?
+--
+-- This is a comparison proxy, NOT actual revenue per mile travelled.
+-- typical_distance_miles is a route-level reference distance, not the actual
+-- distance travelled by each individual load.
+--
+-- Loads without a valid positive typical distance are excluded from both
+-- the revenue numerator and distance denominator.
+-- ============================================================================
+SELECT
+    route_id,
+    origin_city,
+    origin_state,
+    destination_city,
+    destination_state,
+    COUNT_BIG(*) AS total_loads,
+    COUNT_BIG(
+        CASE
+            WHEN typical_distance_miles > 0 THEN 1
+        END
+    ) AS loads_with_valid_typical_distance,
+    SUM(
+        CASE
+            WHEN typical_distance_miles > 0
+            THEN reported_load_revenue
+        END
+    ) AS reported_load_revenue_with_valid_distance,
+    SUM(
+        CASE
+            WHEN typical_distance_miles > 0
+            THEN typical_distance_miles
+        END
+    ) AS total_typical_route_miles,
+    CAST(
+        SUM(
+            CASE
+                WHEN typical_distance_miles > 0
+                THEN reported_load_revenue
+            END
+        ) AS DECIMAL(19, 4)
+    )
+    /
+    NULLIF(
+        CAST(
+            SUM(
+                CASE
+                    WHEN typical_distance_miles > 0
+                    THEN typical_distance_miles
+                END
+            ) AS DECIMAL(19, 4)
+        ),
+        0
+    ) AS reported_revenue_per_typical_route_mile
+FROM gold.vw_revenue_performance
+GROUP BY route_id, origin_city, origin_state, destination_city, destination_state
+ORDER BY reported_revenue_per_typical_route_mile DESC;
 
 
 -- ============================================================================
