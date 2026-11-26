@@ -39,7 +39,7 @@ Join strategy:
 
 Deployment:
     - Connect DBeaver to the LogisticsAnalytics database before execution.
-    - This script intentionally contains no GO batch separators.
+    - This script intentionally contains no batch separators.
     - CREATE VIEW is the first statement in the script, as required by SQL
       Server. The remaining statements validate and query the created view.
     - This script creates or alters the view; it does not modify fact data.
