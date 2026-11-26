@@ -10,99 +10,52 @@ The eight views support analysis of revenue, delivery performance, fleet and dri
 
 ## 2. Gold reporting architecture
 
-The diagram below shows the actual Gold tables used by each reporting view. A connection indicates that the view reads from that table; it does not imply a direct relationship between every table in the diagram.
+The Gold reporting layer follows a simple progression: the dimensional model supplies governed facts and descriptive dimensions; the reporting views shape those tables into subject-specific datasets; Power BI and other analytical consumers use those datasets for reporting.
 
 ```mermaid
-flowchart TB
-    subgraph DIM["Gold dimensions"]
-        DD["dim_date"]
-        DC["dim_customer"]
-        DR["dim_route"]
-        DF["dim_facility"]
-        DT["dim_truck"]
-        DDR["dim_driver"]
-        DTR["dim_trailer"]
+flowchart LR
+    subgraph GOLD["Gold dimensional model"]
+        direction TB
+        FACTS["6 fact tables"]
+        DIMS["7 dimension tables"]
+        FACTS --- DIMS
     end
 
-    subgraph FACT["Gold facts"]
-        FL["fact_loads"]
-        FDE["fact_delivery_events"]
-        FT["fact_trips"]
-        FFP["fact_fuel_purchases"]
-        FMR["fact_maintenance_records"]
-        FSI["fact_safety_incidents"]
+    subgraph REPORTING["Gold reporting layer"]
+        direction TB
+        V1["Revenue performance"]
+        V2["Delivery performance"]
+        V3["Fleet performance"]
+        V4["Customer performance"]
+        V5["Fuel cost analysis"]
+        V6["Maintenance performance"]
+        V7["Safety performance"]
+        V8["Truck cost efficiency"]
     end
 
-    subgraph VIEWS["Gold reporting views"]
-        VR["vw_revenue_performance"]
-        VD["vw_delivery_performance"]
-        VF["vw_fleet_performance"]
-        VC["vw_customer_performance"]
-        VFuel["vw_fuel_cost_analysis"]
-        VM["vw_maintenance_performance"]
-        VS["vw_safety_performance"]
-        VTC["vw_truck_cost_efficiency"]
-    end
+    CONSUMERS["Power BI and downstream analytics"]
 
-    FL --> VR
-    DD --> VR
-    DC --> VR
-    DR --> VR
+    GOLD --> REPORTING
+    REPORTING --> CONSUMERS
 
-    FDE --> VD
-    DD --> VD
-    DF --> VD
-
-    FT --> VF
-    DD --> VF
-    DT --> VF
-    DDR --> VF
-    DTR --> VF
-
-    FL --> VC
-    DC --> VC
-    DD --> VC
-
-    FFP --> VFuel
-    DD --> VFuel
-    DT --> VFuel
-    DDR --> VFuel
-
-    FMR --> VM
-    DD --> VM
-    DT --> VM
-
-    FSI --> VS
-    DD --> VS
-    DT --> VS
-    DDR --> VS
-
-    FT --> VTC
-    FFP --> VTC
-    FMR --> VTC
-    DD --> VTC
-    DT --> VTC
-
-    classDef dimension fill:#e8f1fb,stroke:#4779a8,color:#17324d
-    classDef fact fill:#fff0d9,stroke:#b98232,color:#50340b
-    classDef view fill:#e7f4e9,stroke:#54865b,color:#1f4325
-    class DD,DC,DR,DF,DT,DDR,DTR dimension
-    class FL,FDE,FT,FFP,FMR,FSI fact
-    class VR,VD,VF,VC,VFuel,VM,VS,VTC view
+    classDef model fill:#e8f1fb,stroke:#4779a8,color:#17324d
+    classDef reporting fill:#e7f4e9,stroke:#54865b,color:#1f4325
+    classDef consumer fill:#f1eafa,stroke:#8064a2,color:#35234a
+    class FACTS,DIMS model
+    class V1,V2,V3,V4,V5,V6,V7,V8 reporting
+    class CONSUMERS consumer
 ```
 
-**How to read the diagram**
+*The diagram is a conceptual layer view, not a table-level relationship diagram.* It intentionally avoids drawing every fact-to-dimension join as a network of crossing arrows. The exact source tables, dimension joins, join types, and reporting grain for each view are documented in [Section 4](#4-reporting-views-overview) and the individual view specifications in Section 5.
 
-- Blue nodes represent Gold dimensions.
-- Amber nodes represent Gold facts.
-- Green nodes represent reporting views.
-- The arrows show which Gold tables each view reads.
-- `dim_date` can be used in multiple date roles within a view. For example, delivery performance uses separate scheduled-date and actual-date joins.
-- `vw_customer_performance` aggregates load facts by customer before joining customer attributes; its date joins provide contract-start and first-observed-load calendar attributes.
-- `vw_truck_cost_efficiency` independently aggregates three fact tables by truck before combining their results.
+### 2.1 How the reporting views are built
 
-The reporting views sit above, rather than replace, the Gold dimensional model. Power BI and downstream analytical queries can consume the views or, where appropriate, the underlying Gold tables.
+- **Fact-level views** retain the underlying fact grain and enrich each record with applicable dimension attributes. Examples include revenue, delivery, fleet, fuel, maintenance, and safety.
+- **Customer-level reporting** first aggregates load measures by customer, then joins the results to the customer dimension. This produces one row per customer rather than one row per load.
+- **Truck cost efficiency** independently aggregates trip, fuel purchase, and maintenance facts by truck before joining those summaries to the truck dimension. This prevents fact-to-fact fanout and preserves one row per truck.
+- **Date roles** are handled according to the business event. Delivery performance, for example, uses separate scheduled-date and actual-date joins to `dim_date`.
 
+The reporting views do not replace the Gold fact and dimension tables. They provide reusable, business-focused datasets for downstream analysis.
 ## 3. Gold model inventory
 
 ### 3.1 Dimension tables
