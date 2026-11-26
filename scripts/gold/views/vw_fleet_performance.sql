@@ -270,6 +270,62 @@ GROUP BY
 ORDER BY total_actual_distance_miles DESC;
 
 -- ============================================================================
+-- 4. DRIVER-LEVEL PRODUCTIVITY
+--
+-- Business question:
+-- How do drivers compare in trip activity, distance, fuel efficiency,
+-- and idle time?
+--
+-- Grain:
+-- One row per driver, including drivers with no recorded trips.
+--
+-- Trips without an assigned driver are excluded from driver-level results.
+-- They remain included in the overall fleet analysis above.
+--
+-- Weighted Driver MPG:
+-- Total distance / total fuel consumed.
+--
+-- Average Recorded Trip MPG is shown separately.
+-- ============================================================================
+
+WITH driver_trip_metrics AS
+(
+    SELECT
+        driver_key,
+        COUNT_BIG(*) AS total_trips,
+        SUM(actual_distance_miles) AS total_actual_distance_miles,
+        SUM(fuel_gallons_used) AS total_fuel_gallons_used,
+        CAST(
+            SUM(actual_distance_miles)
+            / NULLIF(SUM(fuel_gallons_used), 0)
+            AS DECIMAL(12,6)
+        ) AS weighted_driver_mpg,
+        AVG(average_mpg) AS average_recorded_trip_mpg,
+        AVG(idle_time_hours) AS average_idle_hours_per_trip
+    FROM gold.vw_fleet_performance
+    WHERE driver_key IS NOT NULL
+    GROUP BY driver_key
+)
+SELECT
+    dr.driver_id,
+    dr.first_name,
+    dr.last_name,
+    dr.employment_status,
+    dr.home_terminal,
+    COALESCE(m.total_trips, CONVERT(BIGINT, 0)) AS total_trips,
+    m.total_actual_distance_miles,
+    m.total_fuel_gallons_used,
+    m.weighted_driver_mpg,
+    m.average_recorded_trip_mpg,
+    m.average_idle_hours_per_trip
+FROM gold.dim_driver AS dr
+LEFT JOIN driver_trip_metrics AS m
+    ON dr.driver_key = m.driver_key
+ORDER BY
+    total_trips DESC,
+    dr.driver_id;
+
+-- ============================================================================
 -- 3. ANNUAL FLEET ACTIVITY TREND
 -- Includes all trips, including those without an assigned truck.
 -- ============================================================================
