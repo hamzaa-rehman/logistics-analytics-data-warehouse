@@ -269,6 +269,40 @@ GROUP BY
     truck_status
 ORDER BY total_actual_distance_miles DESC;
 
+
+-- ============================================================================
+-- 3. ANNUAL FLEET ACTIVITY TREND
+-- Includes all trips, including those without an assigned truck.
+-- ============================================================================
+
+SELECT
+    dispatch_calendar_year,
+    COUNT_BIG(*) AS total_trips,
+    COUNT(DISTINCT truck_id) AS trucks_with_recorded_trips,
+    SUM(actual_distance_miles) AS total_actual_distance_miles,
+    SUM(fuel_gallons_used) AS total_fuel_gallons_used,
+    CAST(
+        SUM(actual_distance_miles)
+        / NULLIF(SUM(fuel_gallons_used), 0)
+        AS DECIMAL(12,6)
+    ) AS weighted_fleet_mpg,
+    AVG(idle_time_hours) AS average_idle_hours_per_trip
+FROM gold.vw_fleet_performance
+GROUP BY dispatch_calendar_year
+ORDER BY dispatch_calendar_year;
+
+-- Independent annual check against the underlying fact table.
+SELECT
+    d.year_number,
+    COUNT_BIG(*) AS total_trips,
+    COUNT(DISTINCT f.truck_key) AS trucks_with_recorded_trips
+FROM gold.fact_trips AS f
+INNER JOIN gold.dim_date AS d
+    ON f.dispatch_date_key = d.date_key
+GROUP BY d.year_number
+ORDER BY d.year_number;
+
+
 -- ============================================================================
 -- 4. DRIVER-LEVEL PRODUCTIVITY
 --
@@ -324,35 +358,3 @@ LEFT JOIN driver_trip_metrics AS m
 ORDER BY
     total_trips DESC,
     dr.driver_id;
-
--- ============================================================================
--- 3. ANNUAL FLEET ACTIVITY TREND
--- Includes all trips, including those without an assigned truck.
--- ============================================================================
-
-SELECT
-    dispatch_calendar_year,
-    COUNT_BIG(*) AS total_trips,
-    COUNT(DISTINCT truck_id) AS trucks_with_recorded_trips,
-    SUM(actual_distance_miles) AS total_actual_distance_miles,
-    SUM(fuel_gallons_used) AS total_fuel_gallons_used,
-    CAST(
-        SUM(actual_distance_miles)
-        / NULLIF(SUM(fuel_gallons_used), 0)
-        AS DECIMAL(12,6)
-    ) AS weighted_fleet_mpg,
-    AVG(idle_time_hours) AS average_idle_hours_per_trip
-FROM gold.vw_fleet_performance
-GROUP BY dispatch_calendar_year
-ORDER BY dispatch_calendar_year;
-
--- Independent annual check against the underlying fact table.
-SELECT
-    d.year_number,
-    COUNT_BIG(*) AS total_trips,
-    COUNT(DISTINCT f.truck_key) AS trucks_with_recorded_trips
-FROM gold.fact_trips AS f
-INNER JOIN gold.dim_date AS d
-    ON f.dispatch_date_key = d.date_key
-GROUP BY d.year_number
-ORDER BY d.year_number;
