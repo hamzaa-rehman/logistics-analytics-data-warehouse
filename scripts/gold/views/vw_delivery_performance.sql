@@ -40,7 +40,7 @@ Deployment:
 */
 
 USE LogisticsAnalytics;
-GO
+
 
 CREATE OR ALTER VIEW gold.vw_delivery_performance
 AS
@@ -125,7 +125,7 @@ INNER JOIN gold.dim_date AS da
     ON f.actual_date_key = da.date_key
 LEFT JOIN gold.dim_facility AS fac
     ON f.facility_key = fac.facility_key;
-GO
+
 
 
 -- ============================================================================
@@ -211,4 +211,4 @@ FROM gold.vw_delivery_performance
 WHERE event_type = 'Delivery'
 GROUP BY actual_calendar_year
 ORDER BY actual_calendar_year;
-GO
+
