@@ -173,8 +173,10 @@ IF EXISTS
 )
     THROW 51122, 'vw_fleet_performance does not preserve one row per trip.', 1;
 
--- Check both directions. This catches a mismatch whether an aggregate
--- result exists only in fact_trips or only in the reporting view.
+-- Compare the fact-table aggregates against the reporting view.
+-- The view is sourced from fact_trips and joins dimensions on unique keys.
+-- Combined with the row-count and trip-grain checks above, this one-way
+-- EXCEPT detects a missing or altered aggregate result in the view.
 IF EXISTS
 (
     SELECT
@@ -208,40 +210,6 @@ IF EXISTS
         COUNT(idle_time_hours) AS nonnull_idle_time_count,
         SUM(idle_time_hours) AS total_idle_time_hours
     FROM gold.vw_fleet_performance
-)
-OR EXISTS
-(
-    SELECT
-        COUNT_BIG(*) AS trip_rows,
-        SUM(assigned_truck_trip_count) AS assigned_truck_trips,
-        SUM(unassigned_truck_trip_count) AS unassigned_truck_trips,
-        SUM(actual_distance_miles) AS total_actual_distance_miles,
-        SUM(fuel_gallons_used) AS total_fuel_gallons_used,
-        COUNT(average_mpg) AS nonnull_trip_mpg_count,
-        SUM(average_mpg) AS sum_trip_mpg,
-        COUNT(idle_time_hours) AS nonnull_idle_time_count,
-        SUM(idle_time_hours) AS total_idle_time_hours
-    FROM gold.vw_fleet_performance
-
-    EXCEPT
-
-    SELECT
-        COUNT_BIG(*) AS trip_rows,
-        SUM(CASE
-            WHEN truck_key IS NOT NULL THEN CONVERT(BIGINT, 1)
-            ELSE CONVERT(BIGINT, 0)
-        END) AS assigned_truck_trips,
-        SUM(CASE
-            WHEN truck_key IS NULL THEN CONVERT(BIGINT, 1)
-            ELSE CONVERT(BIGINT, 0)
-        END) AS unassigned_truck_trips,
-        SUM(actual_distance_miles) AS total_actual_distance_miles,
-        SUM(fuel_gallons_used) AS total_fuel_gallons_used,
-        COUNT(average_mpg) AS nonnull_trip_mpg_count,
-        SUM(average_mpg) AS sum_trip_mpg,
-        COUNT(idle_time_hours) AS nonnull_idle_time_count,
-        SUM(idle_time_hours) AS total_idle_time_hours
-    FROM gold.fact_trips
 )
     THROW 51123, 'vw_fleet_performance measures or assignment counts do not reconcile to fact_trips.', 1;
 
