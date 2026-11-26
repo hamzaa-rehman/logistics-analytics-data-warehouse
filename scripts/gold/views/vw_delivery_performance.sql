@@ -39,9 +39,6 @@ Deployment:
 ===============================================================================
 */
 
-USE LogisticsAnalytics;
-
-
 CREATE OR ALTER VIEW gold.vw_delivery_performance
 AS
 SELECT
@@ -211,4 +208,44 @@ FROM gold.vw_delivery_performance
 WHERE event_type = 'Delivery'
 GROUP BY actual_calendar_year
 ORDER BY actual_calendar_year;
+
+-- ============================================================================
+-- MONTHLY ON-TIME DELIVERY TREND
+--
+-- Uses actual event month, not scheduled month.
+-- Only Delivery events are included; Pickup events are excluded.
+-- January 2025 is a partial-period month in this dataset.
+--
+-- The monthly event and flag counts should reconcile to the overall
+-- Delivery-event totals reported above:
+--   Delivery events: 85,410
+--   On-time deliveries: 38,102
+--   Late deliveries: 47,308
+--   Missing on-time flags: 0
+-- ============================================================================
+
+SELECT
+    actual_year_month,
+    actual_calendar_year,
+    actual_month_number,
+    actual_month_name,
+    COUNT_BIG(*) AS delivery_events,
+    SUM(on_time_delivery_count) AS on_time_deliveries,
+    SUM(late_delivery_count) AS late_deliveries,
+    SUM(delivery_event_missing_on_time_flag_count) AS missing_delivery_flags,
+    CAST(
+        100.0 * SUM(on_time_delivery_count)
+        / NULLIF(SUM(delivery_event_count), 0)
+        AS DECIMAL(6,2)
+    ) AS on_time_delivery_rate_pct,
+    AVG(CONVERT(DECIMAL(10,2), delivery_detention_minutes))
+        AS average_delivery_detention_minutes
+FROM gold.vw_delivery_performance
+WHERE event_type = 'Delivery'
+GROUP BY
+    actual_year_month,
+    actual_calendar_year,
+    actual_month_number,
+    actual_month_name
+ORDER BY actual_year_month;
 
