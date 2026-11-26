@@ -36,7 +36,7 @@ Deployment:
 */
 
 USE LogisticsAnalytics;
-GO
+
 
 CREATE OR ALTER VIEW gold.vw_revenue_performance
 AS
@@ -94,7 +94,7 @@ LEFT JOIN gold.dim_customer AS c
     ON f.customer_key = c.customer_key
 LEFT JOIN gold.dim_route AS r
     ON f.route_key = r.route_key;
-GO
+
 
 
 -- ============================================================================
@@ -152,4 +152,4 @@ SELECT
     SUM(fuel_surcharge_amount) AS total_fuel_surcharge,
     SUM(accessorial_charges_amount) AS total_accessorial_charges
 FROM gold.vw_revenue_performance;
-GO
+
