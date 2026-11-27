@@ -45,7 +45,7 @@ The project addresses these problems by separating raw ingestion, standardized r
 
 The warehouse follows a three-layer Medallion Architecture.
 
-![Logistics Analytics Data Warehouse architecture](docs/diagrams/Logistics_Data_Warehouse_Architecture%20(1).png)
+![Logistics Analytics Data Warehouse architecture](docs/diagrams/Logistics_Data_Warehouse_Architecture%20%281%29.png)
 
 | Layer | Responsibility | Implementation |
 |---|---|---|
