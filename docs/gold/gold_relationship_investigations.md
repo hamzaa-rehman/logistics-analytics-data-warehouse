@@ -235,6 +235,12 @@ The six fact processes above are implemented at their documented grains. The two
 6. Do not aggregate measures after joining multiple raw fact tables unless the join cardinality and resulting grain have been deliberately controlled. Aggregate each process at its intended grain first to avoid fanout and inflated totals.
 7. Keep the load/trip/event relationship chain in mind: one load ↔ one trip, and one trip → two delivery events.
 
+The same principle is applied in `vw_truck_cost_efficiency`: trip, fuel purchase, and maintenance facts are independently aggregated by `truck_key` before the summaries are joined to `dim_truck`.
+
+![Fact-to-fact fanout prevention: direct joins multiply rows, while independent truck-level aggregations preserve one row per truck](../diagrams/fact_fanout_prevention.png)
+
+The row counts shown in the illustration are hypothetical and demonstrate join multiplication; they are not observed project counts.
+
 ## 13. Investigation and implementation closure
 
 The relationship investigations required to design the Gold model are complete, and their decisions have been implemented in the deployed seven-dimension, six-fact schema. The completed model preserves the documented fact grains, nullable optional relationships, route-to-load relationship, facility-to-delivery-event relationship, and safeguards against cross-fact fanout.
