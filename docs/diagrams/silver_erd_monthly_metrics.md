@@ -23,7 +23,7 @@ erDiagram
         SMALLINT years_experience
     }
     driver_monthly_metrics {
-        VARCHAR_50_ driver_id FK
+        VARCHAR_50_ driver_id PK FK
         DATE month PK
         SMALLINT trips_completed
         DECIMAL_8_2_ total_miles
@@ -47,7 +47,7 @@ erDiagram
         VARCHAR_100_ home_terminal
     }
     truck_utilization_metrics {
-        VARCHAR_50_ truck_id FK
+        VARCHAR_50_ truck_id PK FK
         DATE month PK
         SMALLINT trips_completed
         DECIMAL_9_2_ total_miles
