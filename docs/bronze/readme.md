@@ -34,10 +34,10 @@ Each layer has a distinct responsibility:
 
 - **Bronze:** Ingests and preserves the source data in its raw VARCHAR representation. It does not apply cleaning, typing, or business rules.
 - **Silver:** Converts source values to approved data types, applies targeted trimming and blank-to-NULL handling, implements approved column mappings, and enforces relational integrity while preserving source grain.
-- **Gold:** The implemented dimensional layer organizes validated Silver entities into seven dimensions and six fact tables. The full-refresh load procedure is in place; measure-level reconciliation remains in progress.
-- **BI / Reporting:** The consumption layer will use Gold reporting views and Power BI dashboards; these remain in progress.
+- **Gold:** The implemented dimensional layer organizes validated Silver entities into seven dimensions and six fact tables. The full-refresh load procedure and eight Gold reporting views are implemented and validated.
+- **BI / Reporting:** The consumption layer uses the Gold reporting views. The Power BI semantic model and dashboards remain in progress.
 
-Bronze and Silver have been implemented and validated within their documented scopes. The Gold dimensional model and loading procedure have also been implemented; initial Gold structural and fact row-count validations have passed. Measure-level reconciliation, reporting views, and BI / Reporting remain in progress. Separate validation gates are maintained for each layer.
+Bronze and Silver have been implemented and validated within their documented scopes. The Gold dimensional model, full-refresh loading procedure, and eight reporting views have also been implemented and validated. Gold structural, relationship, fact business-key, fact row-count, and selected measure-level reconciliation checks have passed. Power BI reporting remains in progress. Separate validation gates are maintained for each layer.
 
 ## 3. Source Data Inventory
 
@@ -406,6 +406,6 @@ Before running the Bronze ingestion process, ensure that:
 
 ## 10. Downstream Layer Handoff
 
-Bronze ingestion, validation, and profiling provide the raw-data foundation for the downstream warehouse. The Silver layer has since been implemented with typed tables, a transactional loading procedure, and structural and relationship validation. The Gold dimensional model and full-refresh loading procedure have also been implemented. Initial Gold structural, relationship, fact business-key, and fact row-count checks have passed; measure-level reconciliation remains in progress.
+Bronze ingestion, validation, and profiling provide the raw-data foundation for the downstream warehouse. The Silver layer has since been implemented with typed tables, a transactional loading procedure, and structural and relationship validation. The Gold dimensional model and full-refresh loading procedure have been implemented and validated. Gold structural, relationship, fact business-key, fact row-count, and selected measure-level reconciliation checks have passed across all six fact tables. The eight Gold reporting views have also been implemented and validated; the next stage is the Power BI semantic model and report development.
 
-The raw Bronze data remains available as the reference point for downstream transformations and data-quality investigations. See the [Silver layer documentation](../silver/readme.md) and [Gold layer validation record](../gold/gold_validation.md) for the current downstream implementation status.
+The raw Bronze data remains available as the reference point for downstream transformations and data-quality investigations. See the [Silver layer documentation](../silver/readme.md), [Gold layer validation record](../gold/gold_validation.md), and [Gold Reporting Views documentation](../gold/gold_reporting_views.md) for the current downstream implementation status.
