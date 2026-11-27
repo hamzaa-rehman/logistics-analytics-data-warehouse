@@ -12,40 +12,9 @@ The eight views support analysis of revenue, delivery performance, fleet and dri
 
 The Gold reporting layer follows a simple progression: the dimensional model supplies governed facts and descriptive dimensions; the reporting views shape those tables into subject-specific datasets; Power BI and other analytical consumers use those datasets for reporting.
 
-```mermaid
-flowchart LR
-    subgraph GOLD["Gold dimensional model"]
-        direction TB
-        FACTS["6 fact tables"]
-        DIMS["7 dimension tables"]
-    end
+![Gold reporting architecture: six fact tables and seven dimensions feed eight subject-specific reporting views for Power BI and downstream analytics](../diagrams/gold_reporting_architecture.png)
 
-    subgraph REPORTING["Gold reporting layer"]
-        direction TB
-        V1["Revenue performance"]
-        V2["Delivery performance"]
-        V3["Fleet performance"]
-        V4["Customer performance"]
-        V5["Fuel cost analysis"]
-        V6["Maintenance performance"]
-        V7["Safety performance"]
-        V8["Truck cost efficiency"]
-    end
-
-    CONSUMERS["Power BI and downstream analytics"]
-
-    GOLD --> REPORTING
-    REPORTING --> CONSUMERS
-
-    classDef model fill:#e8f1fb,stroke:#4779a8,color:#17324d
-    classDef reporting fill:#e7f4e9,stroke:#54865b,color:#1f4325
-    classDef consumer fill:#f1eafa,stroke:#8064a2,color:#35234a
-    class FACTS,DIMS model
-    class V1,V2,V3,V4,V5,V6,V7,V8 reporting
-    class CONSUMERS consumer
-```
-
-*The diagram is a conceptual layer view, not a table-level relationship diagram.* It intentionally avoids drawing every fact-to-dimension join as a network of crossing arrows. The exact source tables, dimension joins, join types, and reporting grain for each view are documented in [Section 4](#4-reporting-views-overview) and the individual view specifications in Section 5.
+*The diagram shows the implemented reporting architecture and view-specific source relationships. It is a reporting-layer architecture, not a replacement for the physical Gold ERD.* It intentionally avoids drawing every fact-to-dimension join as a network of crossing arrows. The exact source tables, dimension joins, join types, and reporting grain for each view are documented in [Section 4](#4-reporting-views-overview) and the individual view specifications in Section 5.
 
 ### 2.1 How the reporting views are built
 
@@ -55,6 +24,15 @@ flowchart LR
 - **Date roles** are handled according to the business event. Delivery performance, for example, uses separate scheduled-date and actual-date joins to `dim_date`.
 
 The reporting views do not replace the Gold fact and dimension tables. They provide reusable, business-focused datasets for downstream analysis.
+
+### 2.2 Preventing fact-to-fact fanout
+
+The truck cost efficiency view combines measures from trips, fuel purchases, and maintenance. These are separate fact processes with different transaction grains. Joining their raw rows directly by `truck_key` would multiply records and inflate additive measures. The implemented view avoids this by aggregating each fact independently by `truck_key` using its own date filter, then joining the three summaries to `dim_truck`.
+
+![Fact-to-fact fanout prevention: raw fact joins multiply rows, while independent truck-level aggregations preserve one row per truck](../diagrams/fact_fanout_prevention.png)
+
+The row counts shown in the illustration (2 trips, 3 fuel purchases, and 2 maintenance records) are hypothetical and explain join cardinality; they are not project data.
+
 ## 3. Gold model inventory
 
 ### 3.1 Dimension tables
@@ -96,6 +74,24 @@ The eight views serve different analytical purposes and do not share one common 
 | `vw_truck_cost_efficiency` | Trips, fuel purchases, and maintenance facts independently aggregated | One row per truck | Truck-level activity, recorded spend and descriptive efficiency comparisons |
 
 **Grain matters:** a load, trip, delivery event, purchase, maintenance record, incident, customer, and truck represent different business entities and levels of detail. Measures from different grains must not be combined without a deliberate aggregation strategy.
+
+### 4.1 Visual overview of the eight reporting views
+
+![Eight Gold reporting views overview showing purpose, source facts, reporting grain, and analytical focus](../diagrams/gold_reporting_views_overview.png)
+
+### 4.2 Reporting view grain
+
+Each view has a distinct grain. Use the grain key shown below when validating uniqueness and when deciding whether measures can be safely aggregated or combined.
+
+![Reporting view grain reference showing the one-row-per-business-entity grain and key for each of the eight views](../diagrams/gold_reporting_view_grain.png)
+
+### 4.3 Reporting data coverage
+
+The views do not all cover identical reporting periods. Most activity views cover January 2022 through December 2024. Delivery and fuel purchase views also contain partial January 2025 activity; those records must not be interpreted as a complete month. Customer contract start dates can extend to 2020, while observed load activity begins in January 2022. The truck cost efficiency view explicitly filters to calendar years 2022–2024.
+
+![Reporting data coverage timeline showing complete and partial periods for all eight Gold reporting views](../diagrams/gold_reporting_coverage_timeline.png)
+
+**Partial-period counts:** January 2025 contains 86 Delivery events and 201 fuel purchases. Compare those values with full months only when the partial-period limitation is clearly disclosed.
 
 ## 5. Individual reporting views
 
