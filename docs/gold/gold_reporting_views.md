@@ -14,7 +14,7 @@ The Gold reporting layer follows a simple progression: the dimensional model sup
 
 ![Gold reporting architecture: six fact tables and seven dimensions feed eight subject-specific reporting views for Power BI and downstream analytics](../diagrams/gold_reporting_architecture.png)
 
-*The diagram shows the implemented reporting architecture and view-specific source relationships. It is a reporting-layer architecture, not a replacement for the physical Gold ERD.* It intentionally avoids drawing every fact-to-dimension join as a network of crossing arrows. The exact source tables, dimension joins, join types, and reporting grain for each view are documented in [Section 4](#4-reporting-views-overview) and the individual view specifications in Section 5.
+*The diagram shows the implemented reporting architecture and view-specific source relationships; it complements rather than replaces the physical Gold ERD.* The exact source tables, join types, and reporting grains are also documented in the overview and individual view specifications below.
 
 ### 2.1 How the reporting views are built
 
