@@ -149,7 +149,7 @@ Event-reported city and state are retained separately from facility master locat
 **Included analyses:**
 1. Overall delivery KPI
 2. Annual delivery trend
-3. Monthly on-time delivery trend
+3. Monthly on-time delivery trend, grouped by actual event date (not scheduled date)
 
 **Approved KPI definition:**
 
@@ -184,11 +184,14 @@ Optional assignments are retained without dropping trips.
 1. Overall fleet performance
 2. Truck-level performance
 3. Annual fleet activity trend
-4. Driver-level productivity
+4. Driver-level activity and efficiency summary
 
-**Approved business definitions:**
-- Weighted Fleet MPG = total actual distance / total trip fuel consumed.
-- Average Trip MPG is the simple average of recorded trip-level MPG values. It is different from weighted fleet MPG.
+**Derived analysis metrics:**
+
+The accompanying analysis queries calculate these metrics from the trip-level view; they are not pre-calculated columns in `vw_fleet_performance`.
+
+- **Weighted Fleet MPG** = total actual distance / total trip fuel consumed.
+- **Average Trip MPG** = the simple average of recorded trip-level MPG values. It differs from weighted fleet MPG.
 
 **Business findings and limitations:**
 - The dataset contains 85,410 trips.
@@ -244,7 +247,7 @@ Aggregating the load fact before joining to the customer dimension preserves cus
 
 Missing truck or driver assignments do not remove purchases from the view.
 
-**Measures and attributes:** purchase count, gallons purchased, recorded fuel cost, recorded price per gallon, weighted recorded purchase cost per gallon, truck and driver attributes, assignment indicators, and purchase date/location attributes.
+**Measures and attributes exposed by the view:** purchase count, gallons purchased, recorded fuel cost, recorded price per gallon, truck and driver attributes, assignment indicators, and purchase date/location attributes.
 
 **Included analyses:**
 1. Overall fuel purchase performance
@@ -253,11 +256,13 @@ Missing truck or driver assignments do not remove purchases from the view.
 4. Driver-level fuel purchase summary
 5. Truck/driver assignment breakdown
 
-**Approved business definition:**
+**Derived analysis metric:**
 
-Weighted Average Recorded Cost per Gallon = sum of recorded fuel cost / sum of gallons purchased.
+The accompanying analysis queries calculate **Weighted Average Recorded Cost per Gallon** as:
 
-This differs from the simple average of individual purchase prices.
+`sum of recorded fuel cost / sum of gallons purchased`
+
+This is an aggregate calculation, not a pre-calculated column in `vw_fuel_cost_analysis`. It differs from the simple average of individual purchase prices.
 
 **Business findings and limitations:**
 - Use recorded `total_cost` rather than recalculating it from gallons and price per gallon. An earlier investigation identified 2,478 records with a one-cent difference after recalculation and rounding.
@@ -347,11 +352,11 @@ The view uses three independent fact aggregations:
 - `fact_fuel_purchases`, grouped by `truck_key`
 - `fact_maintenance_records`, grouped by `truck_key`
 
-Each fact is filtered to the reporting period and independently aggregated before its results are joined to `dim_truck`.
+Each fact is filtered using its own business date before aggregation: `dispatch_date_key` for trips, `purchase_date_key` for fuel purchases, and `maintenance_date_key` for maintenance records. Each fact is then independently aggregated before its results are joined to `dim_truck`.
 
 All trucks are retained, including trucks without activity in one or more fact tables. Unassigned fact records are excluded from truck-level attribution and must be reconciled separately.
 
-**Measures and attributes:** trip count, actual distance, trip fuel consumed, weighted truck MPG, average recorded trip MPG, average idle hours per trip, fuel purchase count, gallons purchased, recorded fuel cost, weighted recorded purchase cost per gallon, maintenance record count, recorded maintenance cost, labor and parts cost, downtime, combined recorded fuel and maintenance cost, and combined recorded spend per actual mile proxy.
+**Measures and attributes:** trip count, actual distance, trip fuel consumed, weighted truck MPG, average recorded trip MPG, average idle hours per trip, fuel purchase count, gallons purchased, recorded fuel cost, weighted recorded purchase cost per gallon, maintenance record count, recorded maintenance cost, labor and parts cost, downtime, average downtime hours per record, combined recorded fuel and maintenance cost, and combined recorded spend per actual mile proxy.
 
 **Included analyses:**
 1. Overall truck-level summary
@@ -380,9 +385,9 @@ The implemented design prevents this by:
 
 ## 6. Reporting period and data coverage
 
-The reporting periods below reflect the observed data and implemented SQL filters. The views do not all have identical coverage.
+The periods below summarize the observed dates represented in each dataset. Most views expose the available fact history without a view-level date filter. `vw_truck_cost_efficiency` is the exception: it explicitly filters its three fact aggregations to calendar years 2022–2024.
 
-| Reporting view | Observed reporting coverage | Qualification |
+| Reporting view | Observed date coverage | Qualification |
 |---|---|---|
 | Revenue Performance | Jan 2022 – Dec 2024 | 36 complete calendar months |
 | Delivery Performance | Jan 2022 – Jan 2025 | January 2025 is partial |
@@ -407,7 +412,7 @@ Each reporting view script contains validation checks executed against the creat
 | Customer Performance | Row count against customer dimension, one row per customer, reconciliation of load counts, customer assignments, and financial measures |
 | Fuel Cost Analysis | Fact-to-view row count, one row per purchase, reconciliation of purchase measures and assignment indicators |
 | Maintenance Performance | Fact-to-view row count, one row per maintenance record, reconciliation of recorded maintenance measures |
-| Safety Performance | Fact-to-view row count, one row per incident, reconciliation of incident classifications and financial measures |
+| Safety Performance | Fact-to-view row count, one row per incident, reconciliation of known and positive safety-flag counts, truck/driver assignment indicators, and financial measures |
 | Truck Cost Efficiency | Row count against truck dimension, one row per truck, independent reconciliation of trip, fuel purchase, and maintenance measures by truck |
 
 These checks establish that the reporting views preserve their intended row grain and selected source measures. They do not independently prove that every source value or business definition is intrinsically correct.
