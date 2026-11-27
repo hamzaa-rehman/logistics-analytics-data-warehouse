@@ -9,7 +9,7 @@ The repeatable SQL is maintained in:
 - [Gold structural and fact validation SQL](../../scripts/gold/validate_gold.sql)
 - [Gold measure reconciliation SQL](../../scripts/gold/reconcile_gold_measures.sql)
 
-**Overall status:** The completed Gold structural, relationship, fact business-key, row-count, and selected measure-reconciliation checks all passed based on the SQL results executed and shared by the project owner. This is a completed validation milestone for the checks listed here. Reporting views and Power BI reporting are separate downstream deliverables and are not represented as completed.
+**Overall status:** The Gold structural, relationship, fact business-key, fact row-count, selected measure-reconciliation, and date-dimension checks documented here have passed based on SQL results executed and shared by the project owner. The eight Gold reporting views have since been implemented, validated, and documented in [Gold Reporting Views](gold_reporting_views.md). The Power BI semantic model and reports remain downstream work and are not represented as completed here.
 
 **Database:** `LogisticsAnalytics`  
 **Source layer:** `silver`  
@@ -141,15 +141,16 @@ The evidence above supports the following conclusions:
 5. The selected measures in the reconciliation script were preserved row by row across all 541,172 fact records.
 6. The date dimension's ISO week-year values are correct across the tested full date range, including the supplied year-boundary cases.
 
-The checks do **not** establish that every source business rule is correct, that all descriptive attributes have been exhaustively reconciled, or that future reporting calculations are automatically correct. KPI definitions, aggregation grain, NULL treatment, and fanout prevention must still be applied in reporting views and dashboards.
+The checks do **not** establish that every source business rule is correct, that all descriptive attributes have been exhaustively reconciled, or that future reporting calculations are automatically correct. The eight Gold reporting views apply the approved KPI definitions, aggregation grains, NULL treatment, and fanout-prevention strategies documented in [Gold Reporting Views](gold_reporting_views.md). Those principles must continue to be preserved in the Power BI semantic model and reports, which require their own validation.
 
 ## 9. Downstream work
 
-The Gold structural and selected measure-preservation validation milestone is complete. The next development stage is reporting:
+The Gold structural and selected measure-preservation validation milestone is complete. The eight subject-specific Gold reporting views have also been implemented, validated, and documented. The next development stage is Power BI:
 
-- Implement focused reporting views for revenue, delivery, fleet, fuel cost, maintenance, safety, and customer performance.
-- Validate each view's KPI definitions, aggregation grain, date handling, NULL treatment, and relationship cardinality.
-- Build and test the Power BI semantic model and reports against the approved Gold model and business rules.
+- Build the semantic model using the approved Gold reporting views and dimensional model.
+- Define and validate report measures against the approved KPI definitions and aggregation grains.
+- Design the report pages and visuals for the revenue, delivery, fleet, customer, fuel, maintenance, safety, and truck cost subjects.
+- Test relationships, filter behaviour, totals, NULL handling, and the treatment of partial January 2025 data.
 
 These are downstream reporting deliverables, not outstanding Gold structural or measure-reconciliation checks.
 
@@ -162,3 +163,4 @@ These are downstream reporting deliverables, not outstanding Gold structural or 
 - [Gold data dictionary and mapping specification](gold_data_dictionary.md)
 - [Gold KPI investigations and business rules](gold_kpi_investigations.md)
 - [Gold relationship investigations and modelling decisions](gold_relationship_investigations.md)
+- [Gold Reporting Views](gold_reporting_views.md)
