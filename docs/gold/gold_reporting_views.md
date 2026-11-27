@@ -65,6 +65,12 @@ The eight views serve different analytical purposes and do not share one common 
 | `vw_safety_performance` | `fact_safety_incidents` | One row per incident | Incident classifications, injuries, preventability, recorded damage and claims |
 | `vw_truck_cost_efficiency` | Trips, fuel purchases, and maintenance facts independently aggregated | One row per truck | Truck-level activity, recorded spend and descriptive efficiency comparisons |
 
+### 4.1 Reporting view grain at a glance
+
+The visual below provides a compact reference to the business key and row-level detail represented by each view. The table above remains the precise text reference for the documented grains.
+
+![Reporting view grain reference showing the one-row-per-business-entity grain and key for each of the eight views](../diagrams/gold_reporting_view_grain.png)
+
 **Grain matters:** a load, trip, delivery event, purchase, maintenance record, incident, customer, and truck represent different business entities and levels of detail. Measures from different grains must not be combined without a deliberate aggregation strategy.
 
 ### 4.1 Reporting data coverage
