@@ -9,7 +9,7 @@ This focused view is separated from the full 14-table ERD to make table definiti
 ```mermaid
 erDiagram
     drivers {
-        VARCHAR_50_ driver_id
+        VARCHAR_50_ driver_id PK
         VARCHAR_100_ first_name
         VARCHAR_100_ last_name
         DATE hire_date
@@ -23,8 +23,8 @@ erDiagram
         SMALLINT years_experience
     }
     driver_monthly_metrics {
-        VARCHAR_50_ driver_id
-        DATE month
+        VARCHAR_50_ driver_id FK
+        DATE month PK
         SMALLINT trips_completed
         DECIMAL_8_2_ total_miles
         DECIMAL_12_2_ total_revenue
@@ -34,7 +34,7 @@ erDiagram
         DECIMAL_3_1_ average_idle_hours
     }
     trucks {
-        VARCHAR_50_ truck_id
+        VARCHAR_50_ truck_id PK
         VARCHAR_50_ unit_number
         VARCHAR_80_ make
         SMALLINT model_year
@@ -47,8 +47,8 @@ erDiagram
         VARCHAR_100_ home_terminal
     }
     truck_utilization_metrics {
-        VARCHAR_50_ truck_id
-        DATE month
+        VARCHAR_50_ truck_id FK
+        DATE month PK
         SMALLINT trips_completed
         DECIMAL_9_2_ total_miles
         DECIMAL_12_2_ total_revenue
@@ -62,4 +62,4 @@ erDiagram
     trucks ||--o{ truck_utilization_metrics : "truck_id"
 ```
 
-**Relationship note:** The diagram uses one-to-many notation for declared foreign-key relationships. Nullable foreign keys remain optional on the child side; consult the DDL for exact nullability and constraint definitions.
+**Key notation:** `PK` = primary key; `FK` = foreign key. Composite primary-key columns are each marked `PK`. Relationship lines represent the declared foreign-key constraints; consult the DDL for exact nullability and constraint definitions.
