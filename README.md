@@ -1,6 +1,12 @@
 # Logistics Analytics Data Warehouse
 A SQL Server data warehouse project using the Medallion Architecture (Bronze, Silver, Gold) to prepare logistics operations data for business analytics. Bronze ingestion and profiling, Silver transformation and validation, and Gold dimensional modelling and full-refresh loading are implemented. Gold structural, relationship, fact-grain, row-count, and selected measure-preservation validations have passed across all six fact tables. Eight Gold reporting views have also been implemented and validated; Power BI reporting is the next development stage.
 
+## Gold Reporting Capabilities
+
+The Gold layer exposes eight subject-specific reporting views for revenue, delivery, fleet, customer, fuel, maintenance, safety, and truck-level cost analysis. The overview below summarises each view's purpose, source, grain, and analytical focus. For exact relationships, business definitions, limitations, and validation guidance, see the [Gold reporting views documentation](docs/gold/gold_reporting_views.md).
+
+![Overview of the eight Gold reporting views, their source facts, reporting grains, and analytical focus](docs/diagrams/gold_reporting_views_overview.png)
+
 ## Repository Structure
 
 The tree below reflects the current repository contents. Bronze and Silver implementation and validation are complete. The Gold dimensional model, full-refresh loading procedure, and eight reporting views are implemented. Gold structural, relationship, fact business-key, row-count, and selected measure-reconciliation checks are complete; Power BI reporting remains planned.
@@ -119,11 +125,6 @@ logistics-analytics-data-warehouse/
 - [Silver layer documentation](docs/silver/readme.md)
 - [Warehouse architecture diagram (PNG)](docs/diagrams/Logistics_Data_Warehouse_Architecture%20(1).png) | [Editable Draw.io source](docs/diagrams/Logistics_Data_Warehouse_Architecture%20(1).drawio)
 - [Silver layer ERD (PNG)](docs/diagrams/silver_erd.png) | [Editable Draw.io source](docs/diagrams/silver_erd.drawio)
-- [Gold reporting architecture (PNG)](docs/diagrams/gold_reporting_architecture.png)
-- [Eight Gold reporting views overview (PNG)](docs/diagrams/gold_reporting_views_overview.png)
-- [Fact-to-fact fanout prevention (PNG)](docs/diagrams/fact_fanout_prevention.png)
-- [Gold reporting data coverage timeline (PNG)](docs/diagrams/gold_reporting_coverage_timeline.png)
-- [Gold reporting view grain reference (PNG)](docs/diagrams/gold_reporting_view_grain.png)
 - [Gold dimensional model DDL](scripts/gold/ddl_gold.sql)
 - [Gold full-refresh loading procedure](scripts/gold/load_gold.sql)
 - [Gold reset script](scripts/gold/reset_gold.sql) — use only for a full Gold rebuild
