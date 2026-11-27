@@ -9,7 +9,7 @@ The repeatable SQL is maintained in:
 - [Gold structural and fact validation SQL](../../scripts/gold/validate_gold.sql)
 - [Gold measure reconciliation SQL](../../scripts/gold/reconcile_gold_measures.sql)
 
-**Overall status:** The Gold structural, relationship, fact business-key, fact row-count, selected measure-reconciliation, and date-dimension checks documented here have passed based on SQL results executed and shared by the project owner. The eight Gold reporting views have since been implemented, validated, and documented in [Gold Reporting Views](gold_reporting_views.md). The Power BI semantic model and reports remain downstream work and are not represented as completed here.
+**Overall status:** The Gold structural, relationship, dimension and fact business-key, dimension and fact row-count, selected measure-reconciliation, and date-dimension checks documented here have passed based on SQL results executed and shared by the project owner. The eight Gold reporting views have since been implemented, validated, and documented in [Gold Reporting Views](gold_reporting_views.md). The Power BI semantic model and reports remain downstream work and are not represented as completed here.
 
 **Database:** `LogisticsAnalytics`  
 **Source layer:** `silver`  
@@ -43,7 +43,42 @@ NULL values in optional foreign-key columns are preserved by design and are not 
 
 **Result: PASS.** All seven dimensions and six fact tables have an enabled, single-column primary key.
 
-## 4. Fact business-key and grain validation
+## 4. Dimension row-count and key-integrity validation
+
+The six source-backed Gold dimensions were compared with their corresponding Silver source tables. The generated date dimension was validated separately through its key-integrity checks.
+
+### Source-to-dimension row-count reconciliation
+
+| Silver source | Gold dimension | Silver rows | Gold rows | Difference | Result |
+|---|---|---:|---:|---:|---|
+| `silver.customers` | `gold.dim_customer` | 200 | 200 | 0 | PASS |
+| `silver.drivers` | `gold.dim_driver` | 150 | 150 | 0 | PASS |
+| `silver.facilities` | `gold.dim_facility` | 50 | 50 | 0 | PASS |
+| `silver.routes` | `gold.dim_route` | 58 | 58 | 0 | PASS |
+| `silver.trailers` | `gold.dim_trailer` | 180 | 180 | 0 | PASS |
+| `silver.trucks` | `gold.dim_truck` | 120 | 120 | 0 | PASS |
+
+**Result: PASS.** All six source-backed dimensions contain exactly the same number of rows as their corresponding Silver source tables.
+
+### Business-key and surrogate-key integrity
+
+Each dimension was checked for NULL and duplicate values in both its business key and surrogate key.
+
+| Gold dimension | Business key | Rows | NULL business keys | Duplicate business-key rows | NULL surrogate keys | Duplicate surrogate-key rows | Result |
+|---|---|---:|---:|---:|---:|---:|---|
+| `dim_customer` | `customer_id` | 200 | 0 | 0 | 0 | 0 | PASS |
+| `dim_date` | `full_date` | 5,114 | 0 | 0 | 0 | 0 | PASS |
+| `dim_driver` | `driver_id` | 150 | 0 | 0 | 0 | 0 | PASS |
+| `dim_facility` | `facility_id` | 50 | 0 | 0 | 0 | 0 | PASS |
+| `dim_route` | `route_id` | 58 | 0 | 0 | 0 | 0 | PASS |
+| `dim_trailer` | `trailer_id` | 180 | 0 | 0 | 0 | 0 | PASS |
+| `dim_truck` | `truck_id` | 120 | 0 | 0 | 0 | 0 | PASS |
+
+**Result: PASS.** All seven dimensions have complete and unique business and surrogate keys. The date dimension contains 5,114 unique dates and corresponding unique surrogate keys.
+
+These checks establish row-count preservation and key integrity. They do not, by themselves, prove that every descriptive attribute was mapped correctly from Silver to Gold.
+
+## 5. Fact business-key and grain validation
 
 Each fact table was checked for NULL business identifiers and duplicate business identifiers.
 
@@ -59,7 +94,7 @@ Each fact table was checked for NULL business identifiers and duplicate business
 
 **Result: PASS.** Every fact table contains one row per distinct, non-NULL source business identifier, consistent with its documented grain.
 
-## 5. Silver-to-Gold fact row-count reconciliation
+## 6. Silver-to-Gold fact row-count reconciliation
 
 Gold fact-table row counts were compared with their corresponding Silver source tables.
 
@@ -77,7 +112,7 @@ Gold fact-table row counts were compared with their corresponding Silver source 
 
 The date dimension is generated in Gold and is not expected to have a one-to-one Silver source-table row-count comparison.
 
-## 6. Selected measure-level reconciliation
+## 7. Selected measure-level reconciliation
 
 The script [`reconcile_gold_measures.sql`](../../scripts/gold/reconcile_gold_measures.sql) compares source and target records using their source business identifiers. It uses a full outer join to expose missing records on either side and an `EXCEPT` comparison to detect differences in the selected measures for matched records. The row-level comparison also handles NULL-to-NULL values as equal.
 
@@ -105,7 +140,7 @@ This is a preservation test: it demonstrates that the selected Silver values wer
 - No cross-fact joins are used in the reconciliation script.
 - The validation checks preservation, not the economic correctness of source calculations such as `total_cost`.
 
-## 7. Date dimension and ISO week-year validation
+## 8. Date dimension and ISO week-year validation
 
 The Gold date dimension covers **2012-01-01 through 2025-12-31**, inclusive, and contains **5,114 dates**.
 
@@ -130,7 +165,7 @@ Full-dimension validation returned **5,114 total dates, 0 ISO week-year mismatch
 
 **Result: PASS.** The existing database's `dim_date` ISO week-year values were verified. The canonical [Gold DDL](../../scripts/gold/ddl_gold.sql) now creates, populates, and validates `iso_week_year` directly for future Gold builds.
 
-## 8. Validation interpretation and limits
+## 9. Validation interpretation and limits
 
 The evidence above supports the following conclusions:
 
@@ -143,7 +178,7 @@ The evidence above supports the following conclusions:
 
 The checks do **not** establish that every source business rule is correct, that all descriptive attributes have been exhaustively reconciled, or that future reporting calculations are automatically correct. The eight Gold reporting views apply the approved KPI definitions, aggregation grains, NULL treatment, and fanout-prevention strategies documented in [Gold Reporting Views](gold_reporting_views.md). Those principles must continue to be preserved in the Power BI semantic model and reports, which require their own validation.
 
-## 9. Downstream work
+## 10. Downstream work
 
 The Gold structural and selected measure-preservation validation milestone is complete. The eight subject-specific Gold reporting views have also been implemented, validated, and documented. The next development stage is Power BI:
 
@@ -154,7 +189,7 @@ The Gold structural and selected measure-preservation validation milestone is co
 
 These are downstream reporting deliverables, not outstanding Gold structural or measure-reconciliation checks.
 
-## 10. Related artifacts
+## 11. Related artifacts
 
 - [Gold DDL](../../scripts/gold/ddl_gold.sql)
 - [Gold loading procedure](../../scripts/gold/load_gold.sql)
