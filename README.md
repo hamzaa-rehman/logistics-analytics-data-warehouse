@@ -1,9 +1,9 @@
 # Logistics Analytics Data Warehouse
-A SQL Server data warehouse project using the Medallion Architecture (Bronze, Silver, Gold) to prepare logistics operations data for business analytics. Bronze ingestion and profiling, Silver transformation and validation, and Gold dimensional modelling and full-refresh loading are implemented. Gold structural, relationship, fact-grain, row-count, and selected measure-preservation validations have passed across all six fact tables. Reporting views and Power BI reporting are the next development stage.
+A SQL Server data warehouse project using the Medallion Architecture (Bronze, Silver, Gold) to prepare logistics operations data for business analytics. Bronze ingestion and profiling, Silver transformation and validation, and Gold dimensional modelling and full-refresh loading are implemented. Gold structural, relationship, fact-grain, row-count, and selected measure-preservation validations have passed across all six fact tables. Eight Gold reporting views have also been implemented and validated; Power BI reporting is the next development stage.
 
 ## Repository Structure
 
-The tree below reflects the current repository contents. Bronze and Silver implementation and validation are complete. The Gold dimensional model and full-refresh loading procedure are implemented. Gold structural, relationship, fact business-key, row-count, and selected measure-reconciliation checks are complete; reporting views and Power BI reporting remain planned.
+The tree below reflects the current repository contents. Bronze and Silver implementation and validation are complete. The Gold dimensional model, full-refresh loading procedure, and eight reporting views are implemented. Gold structural, relationship, fact business-key, row-count, and selected measure-reconciliation checks are complete; Power BI reporting remains planned.
 
 ```text
 logistics-analytics-data-warehouse/
@@ -52,6 +52,7 @@ logistics-analytics-data-warehouse/
 │   │   ├── gold_data_dictionary.md
 │   │   ├── gold_kpi_investigations.md
 │   │   ├── gold_relationship_investigations.md
+│   │   ├── gold_reporting_views.md
 │   │   └── gold_validation.md
 │   └── silver/
 │       └── readme.md
@@ -83,7 +84,16 @@ logistics-analytics-data-warehouse/
 │   │   ├── load_gold.sql
 │   │   ├── reconcile_gold_measures.sql
 │   │   ├── reset_gold.sql
-│   │   └── validate_gold.sql
+│   │   ├── validate_gold.sql
+│   │   └── views/
+│   │       ├── vw_customer_performance.sql
+│   │       ├── vw_delivery_performance.sql
+│   │       ├── vw_fleet_performance.sql
+│   │       ├── vw_fuel_cost_analysis.sql
+│   │       ├── vw_maintenance_performance.sql
+│   │       ├── vw_revenue_performance.sql
+│   │       ├── vw_safety_performance.sql
+│   │       └── vw_truck_cost_efficiency.sql
 │   └── silver/
 │       ├── ddl_silver.sql
 │       ├── load_silver.sql
@@ -110,6 +120,8 @@ logistics-analytics-data-warehouse/
 - [Gold structural and fact validation SQL](scripts/gold/validate_gold.sql)
 - [Gold Silver-to-Gold measure reconciliation SQL](scripts/gold/reconcile_gold_measures.sql)
 - [Gold validation record and sign-off evidence](docs/gold/gold_validation.md)
+- [Gold reporting views documentation](docs/gold/gold_reporting_views.md)
+- [Gold reporting view SQL scripts](scripts/gold/views/)
 - [Gold data dictionary and dimensional mapping](docs/gold/gold_data_dictionary.md)
 - [Gold KPI investigations and business rules](docs/gold/gold_kpi_investigations.md)
 - [Gold relationship investigations and modelling decisions](docs/gold/gold_relationship_investigations.md)
