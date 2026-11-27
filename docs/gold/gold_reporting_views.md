@@ -25,14 +25,6 @@ The Gold reporting layer follows a simple progression: the dimensional model sup
 
 The reporting views do not replace the Gold fact and dimension tables. They provide reusable, business-focused datasets for downstream analysis.
 
-### 2.2 Preventing fact-to-fact fanout
-
-The truck cost efficiency view combines measures from trips, fuel purchases, and maintenance. These are separate fact processes with different transaction grains. Joining their raw rows directly by `truck_key` would multiply records and inflate additive measures. The implemented view avoids this by aggregating each fact independently by `truck_key` using its own date filter, then joining the three summaries to `dim_truck`.
-
-![Fact-to-fact fanout prevention: raw fact joins multiply rows, while independent truck-level aggregations preserve one row per truck](../diagrams/fact_fanout_prevention.png)
-
-The row counts shown in the illustration (2 trips, 3 fuel purchases, and 2 maintenance records) are hypothetical and explain join cardinality; they are not project data.
-
 ## 3. Gold model inventory
 
 ### 3.1 Dimension tables
@@ -75,17 +67,7 @@ The eight views serve different analytical purposes and do not share one common 
 
 **Grain matters:** a load, trip, delivery event, purchase, maintenance record, incident, customer, and truck represent different business entities and levels of detail. Measures from different grains must not be combined without a deliberate aggregation strategy.
 
-### 4.1 Visual overview of the eight reporting views
-
-![Eight Gold reporting views overview showing purpose, source facts, reporting grain, and analytical focus](../diagrams/gold_reporting_views_overview.png)
-
-### 4.2 Reporting view grain
-
-Each view has a distinct grain. Use the grain key shown below when validating uniqueness and when deciding whether measures can be safely aggregated or combined.
-
-![Reporting view grain reference showing the one-row-per-business-entity grain and key for each of the eight views](../diagrams/gold_reporting_view_grain.png)
-
-### 4.3 Reporting data coverage
+### 4.1 Reporting data coverage
 
 The views do not all cover identical reporting periods. Most activity views cover January 2022 through December 2024. Delivery and fuel purchase views also contain partial January 2025 activity; those records must not be interpreted as a complete month. Customer contract start dates can extend to 2020, while observed load activity begins in January 2022. The truck cost efficiency view explicitly filters to calendar years 2022–2024.
 
