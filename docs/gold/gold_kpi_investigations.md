@@ -512,8 +512,8 @@ The implementation preserves the analytical safeguards established during invest
 | Gold fact business-key and row-count validation | Passed | Six fact grains are unique/non-NULL; 541,172 fact rows match Silver |
 | Selected Silver-to-Gold measure reconciliation | Passed | 541,172 matched fact records; zero missing records and zero selected-measure mismatches |
 | Date dimension ISO week-year validation | Passed | 5,114 dates; zero ISO week-year mismatches and zero NULL values |
-| Reporting views | Not yet implemented | Next development stage; KPI definitions and fact-grain safeguards in this document remain the business-rule reference |
-| Power BI reporting | Not yet implemented | Follows reporting-view implementation and validation |
+| Reporting views | Implemented and validated | Eight subject-specific views apply the KPI definitions and fact-grain safeguards in this document; see [Gold Reporting Views](gold_reporting_views.md) |
+| Power BI reporting | Not yet implemented | Next stage; build and validate the semantic model and reports against the approved views and business rules |
 
 ## 11. Evidence and change-control notes
 
