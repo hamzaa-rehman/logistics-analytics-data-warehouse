@@ -199,7 +199,57 @@ The Silver layer contains **549,706 rows across 14 tables**. Twelve tables have 
 - Composite keys enforce one record per driver/month and one record per truck/month.
 - Nullable foreign keys preserve optional source relationships.
 
-![Silver relational entity relationship diagram](docs/diagrams/silver_erd.png)
+**The complete ERD is intentionally not embedded at full size here:** all 14 tables and 150 columns make it difficult to read at README width. Use the focused diagrams below for table-level inspection, or open the [full-resolution ERD](docs/diagrams/silver_erd.png) when you need the complete schema on one canvas.
+
+```mermaid
+flowchart LR
+    subgraph Master["Master data"]
+        C[customers]
+        R[routes]
+        D[drivers]
+        T[trucks]
+        TR[trailers]
+        F[facilities]
+    end
+    subgraph Operations["Core operations"]
+        L[loads]
+        TP[trips]
+        DE[delivery_events]
+    end
+    subgraph Activity["Operational activity"]
+        FP[fuel_purchases]
+        MR[maintenance_records]
+        SI[safety_incidents]
+    end
+    subgraph Metrics["Monthly metrics"]
+        DMM[driver_monthly_metrics]
+        TUM[truck_utilization_metrics]
+    end
+    C --> L
+    R --> L
+    L --> TP
+    D --> TP
+    T --> TP
+    TR --> TP
+    L --> DE
+    TP --> DE
+    F --> DE
+    TP --> FP
+    T --> FP
+    D --> FP
+    T --> MR
+    TP --> SI
+    T --> SI
+    D --> SI
+    D --> DMM
+    T --> TUM
+```
+
+**Focused Silver ERDs**
+- [Operational flow — customers, routes, loads, trips, delivery events, and facilities](docs/diagrams/silver_erd_operational_flow.md)
+- [Fleet, cost, and safety — drivers, trucks, trailers, trips, fuel, maintenance, and incidents](docs/diagrams/silver_erd_fleet_cost_safety.md)
+- [Monthly metrics — driver and truck monthly measures](docs/diagrams/silver_erd_monthly_metrics.md)
+- [Full-resolution ERD image](docs/diagrams/silver_erd.png) · [Editable Draw.io source](docs/diagrams/silver_erd.drawio)
 
 ### Silver validation results
 
