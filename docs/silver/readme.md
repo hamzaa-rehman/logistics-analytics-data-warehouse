@@ -32,9 +32,9 @@ The project separates raw ingestion, standardized data preparation, and analytic
 |---|---|---|
 | Bronze | Ingest and preserve source data in its raw VARCHAR representation | Implemented |
 | Silver | Convert, standardize, and relate source entities using typed relational tables | Implemented |
-| Gold | Prepare business-focused analytical models for reporting | Dimensional model and full-refresh load implemented; structural and selected measure-preservation validations passed; reporting views and Power BI are the next stage |
+| Gold | Prepare business-focused analytical models for reporting | Dimensional model, full-refresh load, and eight reporting views implemented and validated; Power BI is the next stage |
 
-The Bronze layer preserves source values for traceability and investigation. Silver applies the approved structural and data-type decisions. Gold builds on the validated Silver entities through a seven-dimension, six-fact dimensional model and full-refresh load procedure. Its 541,172 fact rows have passed row-count reconciliation, and selected measures across all six fact tables have passed row-level Silver-to-Gold reconciliation. See the [Gold validation record](../gold/gold_validation.md) for the tested scope and evidence.
+The Bronze layer preserves source values for traceability and investigation. Silver applies the approved structural and data-type decisions. Gold builds on the validated Silver entities through a seven-dimension, six-fact dimensional model and full-refresh load procedure. Its 541,172 fact rows have passed row-count reconciliation, and selected measures across all six fact tables have passed row-level Silver-to-Gold reconciliation. Eight Gold reporting views have since been implemented and validated. See the [Gold validation record](../gold/gold_validation.md) and [Gold Reporting Views documentation](../gold/gold_reporting_views.md) for the tested scope and evidence.
 
 See the [Bronze layer documentation](../bronze/readme.md) for the ingestion and profiling process.
 
@@ -287,9 +287,9 @@ The Silver layer establishes typed, relationally consistent data. It does not by
 
 ## 10. Gold Layer Handoff
 
-The Gold dimensional model has been deployed and populated from Silver using the full-refresh procedure. Initial validation has confirmed the 18 fact-to-dimension relationships, enabled/trusted foreign-key constraints, primary-key structure, fact business-key uniqueness, and fact row-count reconciliation. Measure-level reconciliation remains the next validation task before final Gold sign-off and reporting-view development.
+The Gold dimensional model has been deployed and populated from Silver using the full-refresh procedure. Gold validation has confirmed the 18 fact-to-dimension relationships, enabled/trusted foreign-key constraints, primary-key structure, fact business-key uniqueness, and fact row-count reconciliation. Selected measure-level reconciliation has also been completed across all six fact tables: 541,172 matched records, zero missing records, and zero selected-measure mismatches. Eight Gold reporting views have since been implemented and validated. The next stage is Power BI semantic modelling and report development.
 
-See the [Gold data dictionary](../gold/gold_data_dictionary.md), [Gold validation record](../gold/gold_validation.md), and [Gold loading procedure](../../scripts/gold/load_gold.sql).
+See the [Gold data dictionary](../gold/gold_data_dictionary.md), [Gold validation record](../gold/gold_validation.md), [Gold Reporting Views documentation](../gold/gold_reporting_views.md), and [Gold loading procedure](../../scripts/gold/load_gold.sql).
 
 ---
 
