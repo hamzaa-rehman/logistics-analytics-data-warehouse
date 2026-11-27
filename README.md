@@ -47,7 +47,12 @@ logistics-analytics-data-warehouse/
 │   │   ├── Logistics_Data_Warehouse_Architecture (1).drawio
 │   │   ├── Logistics_Data_Warehouse_Architecture (1).png
 │   │   ├── silver_erd.drawio
-│   │   └── silver_erd.png
+│   │   ├── silver_erd.png
+│   │   ├── gold_reporting_architecture.png
+│   │   ├── gold_reporting_views_overview.png
+│   │   ├── fact_fanout_prevention.png
+│   │   ├── gold_reporting_coverage_timeline.png
+│   │   └── gold_reporting_view_grain.png
 │   ├── gold/
 │   │   ├── gold_data_dictionary.md
 │   │   ├── gold_kpi_investigations.md
@@ -114,6 +119,11 @@ logistics-analytics-data-warehouse/
 - [Silver layer documentation](docs/silver/readme.md)
 - [Warehouse architecture diagram (PNG)](docs/diagrams/Logistics_Data_Warehouse_Architecture%20(1).png) | [Editable Draw.io source](docs/diagrams/Logistics_Data_Warehouse_Architecture%20(1).drawio)
 - [Silver layer ERD (PNG)](docs/diagrams/silver_erd.png) | [Editable Draw.io source](docs/diagrams/silver_erd.drawio)
+- [Gold reporting architecture (PNG)](docs/diagrams/gold_reporting_architecture.png)
+- [Eight Gold reporting views overview (PNG)](docs/diagrams/gold_reporting_views_overview.png)
+- [Fact-to-fact fanout prevention (PNG)](docs/diagrams/fact_fanout_prevention.png)
+- [Gold reporting data coverage timeline (PNG)](docs/diagrams/gold_reporting_coverage_timeline.png)
+- [Gold reporting view grain reference (PNG)](docs/diagrams/gold_reporting_view_grain.png)
 - [Gold dimensional model DDL](scripts/gold/ddl_gold.sql)
 - [Gold full-refresh loading procedure](scripts/gold/load_gold.sql)
 - [Gold reset script](scripts/gold/reset_gold.sql) — use only for a full Gold rebuild
