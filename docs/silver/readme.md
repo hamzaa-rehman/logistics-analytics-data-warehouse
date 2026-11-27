@@ -46,11 +46,18 @@ Silver contains 14 tables. The table structures preserve the source entity grain
 
 The diagram below documents the implemented Silver relational schema. It includes all 14 tables and 150 columns, with SQL data types, nullability, primary-key and foreign-key markers, and the 18 declared foreign-key relationships. The two monthly metric tables show their composite primary keys.
 
-![Silver Layer Entity Relationship Diagram](../diagrams/silver_erd.png)
+The complete 14-table ERD is retained as a full-resolution reference, but it is too dense to read comfortably when embedded at normal documentation width. The model is therefore also presented as three focused diagrams. These views preserve the implemented table definitions and declared foreign-key relationships; they do not represent a change to the schema.
 
+#### Focused ERD views
+
+1. [Operational flow](../diagrams/silver_erd_operational_flow.md) — customers, routes, loads, trips, delivery events, and facilities.
+2. [Fleet, cost, and safety](../diagrams/silver_erd_fleet_cost_safety.md) — drivers, trucks, trailers, trips, fuel purchases, maintenance records, and safety incidents.
+3. [Monthly metrics](../diagrams/silver_erd_monthly_metrics.md) — driver and truck monthly metric tables.
+
+- [Open the full-resolution ERD image](../diagrams/silver_erd.png)
 - [Open the editable Draw.io source](../diagrams/silver_erd.drawio)
 
-The ERD is generated from and should be maintained against [ddl_silver.sql](../../scripts/silver/ddl_silver.sql). The DDL remains the authoritative implementation; the diagram is its visual documentation.
+The diagrams are generated from and must be maintained against [ddl_silver.sql](../../scripts/silver/ddl_silver.sql). The DDL remains the authoritative implementation; the diagrams are its visual documentation.
 
 ### 3.2 Table inventory
 
