@@ -9,7 +9,7 @@ This focused view is separated from the full 14-table ERD to make table definiti
 ```mermaid
 erDiagram
     drivers {
-        VARCHAR_50_ driver_id
+        VARCHAR_50_ driver_id PK
         VARCHAR_100_ first_name
         VARCHAR_100_ last_name
         DATE hire_date
@@ -23,7 +23,7 @@ erDiagram
         SMALLINT years_experience
     }
     trucks {
-        VARCHAR_50_ truck_id
+        VARCHAR_50_ truck_id PK
         VARCHAR_50_ unit_number
         VARCHAR_80_ make
         SMALLINT model_year
@@ -36,7 +36,7 @@ erDiagram
         VARCHAR_100_ home_terminal
     }
     trailers {
-        VARCHAR_50_ trailer_id
+        VARCHAR_50_ trailer_id PK
         VARCHAR_50_ trailer_number
         VARCHAR_100_ trailer_type
         SMALLINT length_feet
@@ -47,11 +47,11 @@ erDiagram
         VARCHAR_100_ current_location
     }
     trips {
-        VARCHAR_50_ trip_id
-        VARCHAR_50_ load_id
-        VARCHAR_50_ driver_id
-        VARCHAR_50_ truck_id
-        VARCHAR_50_ trailer_id
+        VARCHAR_50_ trip_id PK
+        VARCHAR_50_ load_id FK
+        VARCHAR_50_ driver_id FK
+        VARCHAR_50_ truck_id FK
+        VARCHAR_50_ trailer_id FK
         DATE dispatch_date
         DECIMAL_6_2_ actual_distance_miles
         DECIMAL_5_1_ actual_duration_hours
@@ -61,10 +61,10 @@ erDiagram
         VARCHAR_50_ trip_status
     }
     fuel_purchases {
-        VARCHAR_50_ fuel_purchase_id
-        VARCHAR_50_ trip_id
-        VARCHAR_50_ truck_id
-        VARCHAR_50_ driver_id
+        VARCHAR_50_ fuel_purchase_id PK
+        VARCHAR_50_ trip_id FK
+        VARCHAR_50_ truck_id FK
+        VARCHAR_50_ driver_id FK
         DATETIME2 purchase_date
         VARCHAR_100_ location_city
         VARCHAR_10_ location_state
@@ -74,8 +74,8 @@ erDiagram
         VARCHAR_50_ fuel_card_number
     }
     maintenance_records {
-        VARCHAR_50_ maintenance_id
-        VARCHAR_50_ truck_id
+        VARCHAR_50_ maintenance_id PK
+        VARCHAR_50_ truck_id FK
         DATE maintenance_date
         VARCHAR_100_ maintenance_type
         INT odometer_reading
@@ -88,10 +88,10 @@ erDiagram
         VARCHAR_200_ service_description
     }
     safety_incidents {
-        VARCHAR_50_ incident_id
-        VARCHAR_50_ trip_id
-        VARCHAR_50_ truck_id
-        VARCHAR_50_ driver_id
+        VARCHAR_50_ incident_id PK
+        VARCHAR_50_ trip_id FK
+        VARCHAR_50_ truck_id FK
+        VARCHAR_50_ driver_id FK
         DATETIME2 incident_date
         VARCHAR_100_ incident_type
         VARCHAR_100_ location_city
@@ -116,4 +116,4 @@ erDiagram
     drivers ||--o{ safety_incidents : "driver_id"
 ```
 
-**Relationship note:** The diagram uses one-to-many notation for declared foreign-key relationships. Nullable foreign keys remain optional on the child side; consult the DDL for exact nullability and constraint definitions.
+**Key notation:** `PK` = primary key; `FK` = foreign key. Composite primary-key columns are each marked `PK`. Relationship lines represent the declared foreign-key constraints; consult the DDL for exact nullability and constraint definitions.
